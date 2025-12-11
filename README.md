@@ -1,12 +1,24 @@
-# @marcohefti/request-network-api-client
+# Request Network API Client (TypeScript)
 
-TypeScript API client for the Request Network hosted API. The goal is
+TypeScript client for the Request Network hosted REST API. The goal is
 to provide typed, ergonomic helpers for the API domains showcased in the Request
 Easy Invoice app (invoices, payouts, compliance, client IDs, and currency
 conversion) while offering a polished developer experience for future
 WordPress/WooCommerce integrations.
 
 Note: This package targets the REST API (hosted service), not the official protocol SDK.
+
+## Installation
+
+Install via npm or pnpm:
+
+```bash
+# npm
+npm install @marcohefti/request-network-api-client
+
+# pnpm
+pnpm add @marcohefti/request-network-api-client
+```
 
 ## Scope & Positioning
 
