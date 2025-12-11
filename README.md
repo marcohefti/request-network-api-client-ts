@@ -25,12 +25,7 @@ See the docs site:
 
 ## Current Status
 
-- **Scope:** Private to the `request-suite` monorepo while we shape the surface
-  area. The package will eventually be published publicly under the same name.
-  Once the API surface stabilizes, the client will be extracted into its own
-  repository and released on npm. Every feature should be evaluated for
-  public-readiness and tracked in [`docs/PUBLISHING.md`](docs/PUBLISHING.md)
-  until that transition happens.
+- **Scope:** 
 - **Implementation:** Domain facades now cover requests (v2 + legacy v1), payer/compliance (v2 + legacy v1), payouts, client IDs, currencies (v2 + legacy v1), legacy pay execution, and payments search.  
   Vitest suites with MSW fixtures exercise success, validation, and 429 retry scenarios, and the OpenAPI parity guard asserts that no operation IDs are left uncovered.
 - **Documentation:** Architectural research is in progress. The package will
