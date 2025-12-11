@@ -25,7 +25,7 @@ Use this checklist when preparing public releases of
 - [x] Confirm the bundled OpenAPI spec comes from `@marcohefti/request-network-api-contracts/specs/openapi/request-network-openapi.json` and matches the production Request API.
 
 ### Build, Lint, and Tests (0.5.x)
-- [ ] From the repo root, run and pass:
+- [x] From the repo root, run and pass:
   - `pnpm lint`
   - `pnpm tsc`
   - `pnpm test`
