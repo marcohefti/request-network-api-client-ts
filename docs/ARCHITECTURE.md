@@ -1,4 +1,4 @@
-# @request/request-network-api-client Architecture
+# @marcohefti/request-network-api-client Architecture
 
 ## 1. Goals & Non-Goals
 
@@ -67,7 +67,7 @@ packages/request-api-client/
 │   └── utils/                         # Sandbox gating + helpers
 └── tsconfig*.json                     # TypeScript configs (build, vitest, etc.)
 
-> Contracts (OpenAPI spec, metadata, webhook fixtures) live in `@request/request-network-api-contracts` and are consumed via package imports during build/test steps.
+> Contracts (OpenAPI spec, metadata, webhook fixtures) live in `@marcohefti/request-network-api-contracts` and are consumed via package imports during build/test steps.
 ```
 
 ## 4. HTTP Pipeline & Request Client
@@ -164,18 +164,18 @@ The package publishes tree‑shakeable subpaths that line up with domain facades
 
 | Subpath | Purpose |
 | --- | --- |
-| `@request/request-network-api-client/requests` | Requests & invoices facade helpers |
-| `@request/request-network-api-client/payouts` | Payout creation and execution helpers |
-| `@request/request-network-api-client/payer` | Compliance and payer onboarding helpers |
-| `@request/request-network-api-client/currencies` | Currency listing and conversion routes |
-| `@request/request-network-api-client/client-ids` | Client ID lifecycle management |
-| `@request/request-network-api-client/payments` | Payment search facade with pagination helpers |
-| `@request/request-network-api-client/pay` | Legacy pay execution facade (mirrors `/v1/pay`) and exposes `.legacy` |
-| `@request/request-network-api-client/v1/requests` | Legacy request endpoints and status helpers |
-| `@request/request-network-api-client/v1/payer` | Legacy payer/compliance endpoints |
-| `@request/request-network-api-client/v2/payer` | Explicit v2 payer barrel for tree-shaking |
-| `@request/request-network-api-client/v1/currencies` | Legacy currency list and conversion routes |
-| `@request/request-network-api-client/v1/pay` | Versioned legacy pay facade factory |
+| `@marcohefti/request-network-api-client/requests` | Requests & invoices facade helpers |
+| `@marcohefti/request-network-api-client/payouts` | Payout creation and execution helpers |
+| `@marcohefti/request-network-api-client/payer` | Compliance and payer onboarding helpers |
+| `@marcohefti/request-network-api-client/currencies` | Currency listing and conversion routes |
+| `@marcohefti/request-network-api-client/client-ids` | Client ID lifecycle management |
+| `@marcohefti/request-network-api-client/payments` | Payment search facade with pagination helpers |
+| `@marcohefti/request-network-api-client/pay` | Legacy pay execution facade (mirrors `/v1/pay`) and exposes `.legacy` |
+| `@marcohefti/request-network-api-client/v1/requests` | Legacy request endpoints and status helpers |
+| `@marcohefti/request-network-api-client/v1/payer` | Legacy payer/compliance endpoints |
+| `@marcohefti/request-network-api-client/v2/payer` | Explicit v2 payer barrel for tree-shaking |
+| `@marcohefti/request-network-api-client/v1/currencies` | Legacy currency list and conversion routes |
+| `@marcohefti/request-network-api-client/v1/pay` | Versioned legacy pay facade factory |
 
 Each subpath re-exports its typed factory (`create<Domain>Api`) and related types. Additional domains must follow the same naming convention to keep imports ergonomic and avoid breaking tree-shaking.
 
@@ -224,10 +224,10 @@ See also - docs site: [Quick Start](/guide/quick-start)
 
 - **Default target** - All root exports and domain facades call the Request API v2 endpoints. Keep v2 as the pinned default until a successor is production-ready.
 - **No global toggle** - Do not add an `apiVersion` flag to `createRequestClient`. Mixing versions at runtime leads to hard-to-debug behaviour. Instead, surface version-specific entrypoints.
-- **Legacy barrels** - When backwards compatibility is required, publish explicit subpath barrels such as `@request/request-network-api-client/v1/requests`. The barrel re-exports the same facade factory wired to v1 paths. Default exports must remain v2-only so new integrations land on the latest API automatically.
+- **Legacy barrels** - When backwards compatibility is required, publish explicit subpath barrels such as `@marcohefti/request-network-api-client/v1/requests`. The barrel re-exports the same facade factory wired to v1 paths. Default exports must remain v2-only so new integrations land on the latest API automatically.
 - **Naming rule** - Method names stay version-agnostic (`client.requests.create`) and never include suffixes. Versioning is strictly a transport concern owned by the facade implementation.
 - **Upgrade flow** - When Request releases v3+ endpoints, add a new barrel (`/v3/...`) and keep root exports pointing at the latest stable version. Document migration notes in the README and release notes. Bump the package major version if behaviour changes.
-- **Spec alignment** - Ensure `@request/request-network-api-contracts/specs/openapi/request-network-openapi.json` and generated types match the version each barrel targets. Regenerate and diff specs when adopting new versions.
+- **Spec alignment** - Ensure `@marcohefti/request-network-api-contracts/specs/openapi/request-network-openapi.json` and generated types match the version each barrel targets. Regenerate and diff specs when adopting new versions.
 
 ## 9. Error Handling & Telemetry
 
@@ -252,8 +252,8 @@ See also - docs site: [Quick Start](/guide/quick-start)
 
 ## 11. API Specification Workflow
 
-- The authoritative contract comes from `https://api.request.network/open-api/openapi.json`. The spec is stored in the shared contracts package at `@request/request-network-api-contracts/specs/openapi/request-network-openapi.json` with metadata (`request-network-openapi.meta.json`) noting fetch time and headers for traceability.
-- Webhook coverage is currently community-maintained. We mirrored the webhook sections of the public docs into `@request/request-network-api-contracts/specs/webhooks/request-network-webhooks.json` so generators/tests have something to lean on while we wait for an official schema. The file only includes events with published identifiers and payload details today (`payment.confirmed`, `payment.failed`, `payment.processing`, `payment.partial`, `payment.refunded`, `payment_detail.updated`, `request.recurring`, `compliance.updated`) and models the documented signature header (`x-request-network-signature`). Leave comments in PRs when Request adds official coverage so we can replace this file rather than diverge.
+- The authoritative contract comes from `https://api.request.network/open-api/openapi.json`. The spec is stored in the shared contracts package at `@marcohefti/request-network-api-contracts/specs/openapi/request-network-openapi.json` with metadata (`request-network-openapi.meta.json`) noting fetch time and headers for traceability.
+- Webhook coverage is currently community-maintained. We mirrored the webhook sections of the public docs into `@marcohefti/request-network-api-contracts/specs/webhooks/request-network-webhooks.json` so generators/tests have something to lean on while we wait for an official schema. The file only includes events with published identifiers and payload details today (`payment.confirmed`, `payment.failed`, `payment.processing`, `payment.partial`, `payment.refunded`, `payment_detail.updated`, `request.recurring`, `compliance.updated`) and models the documented signature header (`x-request-network-signature`). Leave comments in PRs when Request adds official coverage so we can replace this file rather than diverge.
 - `pnpm run generate:types` (via `openapi-typescript`) materializes `src/generated/openapi-types.ts`. Developers must never edit this file manually. Rerun `pnpm run prepare:spec` to refresh it.
 - `pnpm run generate:zod` generates Zod parsers keyed by `operationId` and registers them in the schema registry. Parsers are emitted per group (by tag/controller) to allow lazy registration from domain barrels. The root aggregator is also generated for debugging.
 - When the upstream spec changes, review the diff in the raw JSON and generated types/schemas, then update domain mappers accordingly.
@@ -269,7 +269,7 @@ Outstanding webhook schema gaps (track in issue backlog until Request publishes 
 - `createWebhookMiddleware` sits on top of the verifier, short-circuiting invalid signatures with 401 responses, attaching typed payloads to `req.webhook`, and dispatching to registered handlers. The middleware respects a `skipVerification` callback and the global bypass toggle exposed by `webhooks.testing` (or the `REQUEST_WEBHOOK_DISABLE_VERIFICATION` environment variable).
 - `WebhookDispatcher` fans out events to handlers registered via the typed helpers under `webhooks.events.*`. Registration order is preserved, and helper predicates (`isBouncedFailure`, `isProcessingTerminalStatus`, `isPaymentDetailApproved`, `isKycComplete`, etc.) narrow payloads for ergonomics.
 - Testing utilities live under `webhooks.testing`: `generateTestWebhookSignature`, `createMockWebhookRequest/Response`, `withWebhookVerificationDisabled`, and setters for the bypass flag. Unit suites in `tests/webhooks/**` consume these helpers so downstream packages can mirror the pattern.
-- A parity guard (`tests/webhooks/event-parity.test.ts`) keeps `WEBHOOK_EVENT_NAMES` aligned with `@request/request-network-api-contracts/specs/webhooks/request-network-webhooks.json`. Update the spec first when introducing new events.
+- A parity guard (`tests/webhooks/event-parity.test.ts`) keeps `WEBHOOK_EVENT_NAMES` aligned with `@marcohefti/request-network-api-contracts/specs/webhooks/request-network-webhooks.json`. Update the spec first when introducing new events.
 - `examples/webhooks/local-listener.ts` spins up an Express server that wires the middleware and dispatcher together. Run it (plus Cloudflare Tunnel) with `pnpm --filter "./packages/request-api-client" webhook:dev:all`. The `tunnel:webhook` script shells out to `pnpm dlx cloudflared tunnel --url http://localhost:8787` by default, honours `REQUEST_WEBHOOK_TUNNEL_HOSTNAME`, and switches to `pnpm dlx cloudflared tunnel run <name>` when `REQUEST_WEBHOOK_TUNNEL_NAME` is present. `REQUEST_WEBHOOK_PUBLIC_URL` (optional) stores the public tunnel URL alongside `REQUEST_WEBHOOK_SECRET` for operator handoffs.
   - Detailed operator checklist lives in `docs/WEBHOOKS.md`.
 

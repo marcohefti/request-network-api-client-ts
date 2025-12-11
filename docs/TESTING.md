@@ -1,4 +1,4 @@
-# @request/request-network-api-client - Testing Guide
+# @marcohefti/request-network-api-client - Testing Guide
 
 The Vitest + MSW suites back every facade and enforce OpenAPI parity so future contributors can extend the client without guessing. Tests run in Node 20.x-24.x (matching the runtime support window).
 
@@ -39,7 +39,7 @@ When new scripts are introduced, update `package.json`, `docs/TESTING.md`, and t
   pnpm --filter "./packages/request-api-client" test -- --run tests/webhooks/*.test.ts
   ```
 
-- Fixtures live in `@request/request-network-api-contracts/fixtures/webhooks/**` and mirror the payloads defined in `@request/request-network-api-contracts/specs/webhooks/request-network-webhooks.json`. Update the shared contracts package first when new events or fields land, then refresh client helpers as needed.
+- Fixtures live in `@marcohefti/request-network-api-contracts/fixtures/webhooks/**` and mirror the payloads defined in `@marcohefti/request-network-api-contracts/specs/webhooks/request-network-webhooks.json`. Update the shared contracts package first when new events or fields land, then refresh client helpers as needed.
 
 ## Environment Variables
 

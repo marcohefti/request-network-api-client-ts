@@ -2,7 +2,7 @@ import { z } from "zod";
 
 import { schemaRegistry } from "../validation/schema.registry";
 
-type WebhookSpec = typeof import("@request/request-network-api-contracts/specs/webhooks/request-network-webhooks.json");
+type WebhookSpec = typeof import("@marcohefti/request-network-api-contracts/specs/webhooks/request-network-webhooks.json");
 
 export type WebhookEventName = Extract<keyof WebhookSpec["webhooks"], string>;
 

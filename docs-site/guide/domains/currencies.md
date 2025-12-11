@@ -7,7 +7,7 @@ const tokens = await client.currencies.list({ network: 'sepolia' });
 const routes = await client.currencies.getConversionRoutes('USDC', { networks: 'sepolia,mainnet' });
 ```
 
-- Legacy v1 endpoints remain available via `client.currencies.legacy` or the `@request/request-network-api-client/v1/currencies` barrel:
+- Legacy v1 endpoints remain available via `client.currencies.legacy` or the `@marcohefti/request-network-api-client/v1/currencies` barrel:
 
   ```ts
   const [token] = await client.currencies.legacy.list({ firstOnly: 'true', symbol: 'USDC', network: 'mainnet' });

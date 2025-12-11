@@ -9,7 +9,7 @@ const require = createRequire(import.meta.url);
 describe("webhooks event parity", () => {
   it("matches the event identifiers defined in the webhook spec", () => {
     const specPath = require.resolve(
-      "@request/request-network-api-contracts/specs/webhooks/request-network-webhooks.json"
+      "@marcohefti/request-network-api-contracts/specs/webhooks/request-network-webhooks.json"
     );
     const raw = readFileSync(specPath, "utf8");
     const spec = JSON.parse(raw) as { webhooks: Record<string, unknown> };

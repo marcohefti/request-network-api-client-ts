@@ -5,7 +5,7 @@ import { describe, expect, it } from "vitest";
 
 const require = createRequire(import.meta.url);
 const SPEC_PATH = require.resolve(
-  "@request/request-network-api-contracts/specs/openapi/request-network-openapi.json"
+  "@marcohefti/request-network-api-contracts/specs/openapi/request-network-openapi.json"
 );
 const ROOT = join(__dirname, "..", "..");
 const DOMAINS_PATH = join(ROOT, "src", "domains");

@@ -216,7 +216,7 @@ async function issueHealthRequest(publicUrl: string): Promise<void> {
       },
     );
 
-    req.setHeader("user-agent", "request-suite/webhook-harness");
+    req.setHeader("user-agent", "request-network-api-client/webhook-harness");
     req.on("error", (error) => {
       settle(() => {
         reject(error instanceof Error ? error : new Error(String(error)));

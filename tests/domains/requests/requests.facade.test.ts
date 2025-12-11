@@ -84,7 +84,7 @@ describe("Requests facade", () => {
     const clientId: ClientIdResponse = {
       id: "1",
       clientId: "client-1",
-      label: "RelayCamel",
+      label: "ExampleStore",
       allowedDomains: ["https://example.com"],
       status: "active",
       createdAt: "2025-01-01T00:00:00.000Z",

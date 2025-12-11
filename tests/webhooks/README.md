@@ -7,9 +7,9 @@ Planned coverage:
 - Express middleware: valid requests (200), missing raw body (400), invalid signature (401), dispatcher invocation ordering, skip-verification toggle.
 - Dispatcher: handler registration/unregistration, once-handlers, error bubbling, contextual data propagation.
 - Event helpers (per phase): happy path fixtures for each event, predicate helpers/type narrowing, middleware integration (typed payload attached to request).
-- Parity guard: ensure `WEBHOOK_EVENT_NAMES` matches `@request-suite/request-client-contracts/specs/webhooks/request-network-webhooks.json` and fails when an event is missing helpers.
+- Parity guard: ensure `WEBHOOK_EVENT_NAMES` matches `@marcohefti/request-network-api-contracts/specs/webhooks/request-network-webhooks.json` and fails when an event is missing helpers.
 
-Fixtures live under `@request-suite/request-client-contracts/fixtures/webhooks/<event>.json`, signed with the shared helper introduced in Phase 7. Keep the fixture set aligned with `@request-suite/request-client-contracts/specs/webhooks/request-network-webhooks.json` and commit updates in the contracts package first, then adjust tests if payloads change.
+Fixtures live under `@marcohefti/request-network-api-contracts/fixtures/webhooks/<event>.json`, signed with the shared helper introduced in Phase 7. Keep the fixture set aligned with `@marcohefti/request-network-api-contracts/specs/webhooks/request-network-webhooks.json` and commit updates in the contracts package first, then adjust tests if payloads change.
 
 ## Implemented so far
 

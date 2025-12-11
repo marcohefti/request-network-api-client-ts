@@ -7,10 +7,10 @@
       "@/*": [
         "./src/*"
       ],
-      "@request-suite/request-api-client": [
+      "@marcohefti/request-network-api-client": [
         "./src/index.ts"
       ],
-      "@request-suite/request-api-client/*": [
+      "@marcohefti/request-network-api-client/*": [
         "./src/*"
       ]
     },

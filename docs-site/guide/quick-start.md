@@ -5,7 +5,7 @@
 > Supported runtimes: Node 20.x through 24.x (the client relies on the built-in `fetch`).
 
 ```ts
-import { createRequestClient, RequestEnvironment, isRequestApiError } from '@request/request-network-api-client';
+import { createRequestClient, RequestEnvironment, isRequestApiError } from '@marcohefti/request-network-api-client';
 
 const client = createRequestClient({
   baseUrl: RequestEnvironment.production,
@@ -43,7 +43,7 @@ Or disable per-call validation via `client.http.get(path, { meta: { validation: 
 ## From env
 
 ```ts
-import { createRequestClientFromEnv } from '@request/request-network-api-client';
+import { createRequestClientFromEnv } from '@marcohefti/request-network-api-client';
 
 const client = createRequestClientFromEnv();
 // Looks for REQUEST_API_URL / REQUEST_API_KEY / REQUEST_CLIENT_ID first,
@@ -57,7 +57,7 @@ import {
   createRequestClient,
   RequestEnvironment,
   type RequestClient,
-} from '@request/request-network-api-client';
+} from '@marcohefti/request-network-api-client';
 
 type RequestClientFactoryOptions = {
   clientId?: string;
@@ -91,15 +91,15 @@ export function createRequestApiClient(
 ## Subpath imports
 
 ```ts
-import { createRequestClient } from '@request/request-network-api-client';
-import { createClientIdsApi } from '@request/request-network-api-client/client-ids';
+import { createRequestClient } from '@marcohefti/request-network-api-client';
+import { createClientIdsApi } from '@marcohefti/request-network-api-client/client-ids';
 
 const client = createRequestClient({ apiKey: process.env.REQUEST_API_KEY! });
 const clientIds = createClientIdsApi(client.http);
 const all = await clientIds.list();
 ```
 
-Root exports point at the REST v2 endpoints. Reach for versioned barrels like `@request/request-network-api-client/v1/requests` only when you deliberately need legacy behaviour.
+Root exports point at the REST v2 endpoints. Reach for versioned barrels like `@marcohefti/request-network-api-client/v1/requests` only when you deliberately need legacy behaviour.
 
 ## Payments search & legacy pay
 

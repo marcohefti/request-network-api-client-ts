@@ -367,7 +367,7 @@
 &nbsp;
 import { schemaRegistry } from "../validation/schema.registry";
 &nbsp;
-type WebhookSpec = typeof import("@request-suite/request-client-contracts/specs/webhooks/request-network-webhooks.json");
+type WebhookSpec = typeof import("@request/request-network-api-contracts/specs/webhooks/request-network-webhooks.json");
 &nbsp;
 export type WebhookEventName = Extract&lt;keyof WebhookSpec["webhooks"], string&gt;;
 &nbsp;

@@ -2,7 +2,7 @@ import { Buffer } from "node:buffer";
 
 import express, { type NextFunction, type Request, type Response } from "express";
 
-import { webhooks } from "@request-suite/request-api-client";
+import { webhooks } from "@marcohefti/request-network-api-client";
 
 import { loadRequestClientEnv } from "../../scripts/env-loader";
 

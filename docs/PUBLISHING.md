@@ -1,7 +1,7 @@
-# @request/request-network-api-client - Public Release Checklist
+# @marcohefti/request-network-api-client - Public Release Checklist
 
 Use this document as the running checklist for everything that must be ready before
-we spin the client into its own repository and publish `@request/request-network-api-client` on npm.
+we spin the client into its own repository and publish `@marcohefti/request-network-api-client` on npm.
 Update it as plans evolve. When the list is satisfied, the package should be
 ready for a 1.0.0 public launch.
 
@@ -9,10 +9,10 @@ ready for a 1.0.0 public launch.
 - [ ] Create dedicated repository (or split from monorepo) with LICENSE, code of conduct, contributing guide, and changelog.
 - [ ] Set `"private": false`, add `"publishConfig": { "access": "public" }`, and update description/keywords in `package.json`.
 - [x] Wire in Changesets (CLI + config) and document the tagging strategy.
-  - Current config ignores the other monorepo packages so only `@request/request-network-api-client` requires changesets. Remove the ignore list once this package lives in its own repository.
+  - Current config ignores the other monorepo packages so only `@marcohefti/request-network-api-client` requires changesets. Remove the ignore list once this package lives in its own repository.
 
 ## Spec & Generated Types
-- [ ] Confirm `@request/request-network-api-contracts/specs/openapi/request-network-openapi.json` is current. Re-run `pnpm run prepare:spec` and commit regenerated outputs (spec lives in the shared contracts package).
+- [ ] Confirm `@marcohefti/request-network-api-contracts/specs/openapi/request-network-openapi.json` is current. Re-run `pnpm run prepare:spec` and commit regenerated outputs (spec lives in the shared contracts package).
 - [ ] Add CI guard that runs `pnpm run prepare:spec` and fails on dirty git status to catch spec drift.
 - [ ] Document required spec refresh cadence (e.g., monthly or on upstream release notes).
 

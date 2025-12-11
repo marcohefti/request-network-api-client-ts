@@ -1,4 +1,4 @@
-# @request/request-network-api-client
+# @marcohefti/request-network-api-client
 
 TypeScript API client for the Request Network hosted REST API (not the protocol SDK).
 

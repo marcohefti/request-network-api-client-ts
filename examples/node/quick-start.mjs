@@ -1,5 +1,5 @@
 // Minimal Node example: list currencies
-import { createRequestClientFromEnv, isRequestApiError } from '@request-suite/request-api-client';
+import { createRequestClientFromEnv, isRequestApiError } from '@marcohefti/request-network-api-client';
 
 async function main() {
   const client = createRequestClientFromEnv();

@@ -13,7 +13,7 @@ const OUTPUT_PATH = path.join(ROOT, "src/generated/openapi-types.ts");
 
 async function main() {
   const specPath = require.resolve(
-    "@request/request-network-api-contracts/specs/openapi/request-network-openapi.json"
+    "@marcohefti/request-network-api-contracts/specs/openapi/request-network-openapi.json"
   );
   const specUrl = pathToFileURL(specPath).href;
   const ast = await openapiTS(specUrl, {

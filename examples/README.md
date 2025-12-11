@@ -1,6 +1,6 @@
 # Examples
 
-This folder contains minimal, copy‑pasteable examples for @request-suite/request-api-client.
+This folder contains minimal, copy‑pasteable examples for @marcohefti/request-network-api-client.
 
 ## Prerequisites
 
@@ -27,7 +27,7 @@ This folder contains minimal, copy‑pasteable examples for @request-suite/reque
 
 ## Browser - Quick Start
 
-The browser example expects a bundler (Vite, Webpack, etc.) or an import map that points `@request-suite/request-api-client` to the built ESM bundle.
+The browser example expects a bundler (Vite, Webpack, etc.) or an import map that points `@marcohefti/request-network-api-client` to the built ESM bundle.
 
 1. Build the client:
 
@@ -45,7 +45,7 @@ The browser example expects a bundler (Vite, Webpack, etc.) or an import map tha
        <script type="importmap">
          {
            "imports": {
-             "@request-suite/request-api-client": "/packages/request-api-client/dist/esm/index.js"
+             "@marcohefti/request-network-api-client": "/dist/esm/index.js"
            }
          }
        </script>
@@ -61,5 +61,5 @@ The browser example expects a bundler (Vite, Webpack, etc.) or an import map tha
 ### Notes
 
 - Browser/Edge requires a Client ID. Browsers set the `Origin` header automatically.
-- For advanced setups, prefer a bundler and import the package normally: `import { createRequestClient } from '@request-suite/request-api-client'`.
+- For advanced setups, prefer a bundler and import the package normally: `import { createRequestClient } from '@marcohefti/request-network-api-client'`.
 - If you change code, rebuild with `pnpm --filter "./packages/request-api-client" build` before reloading examples.

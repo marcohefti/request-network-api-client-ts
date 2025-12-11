@@ -38,4 +38,4 @@ await client.payer.createPaymentDetails('user-1', {
 - Methods accept typed payloads derived from OpenAPI schemas and validate them at runtime.
 - Responses map directly to the REST envelope, exposing IDs, URLs, and status flags.
 - Supply `{ signal, timeoutMs, validation }` in the optional options bag for transport overrides.
-- Legacy endpoints remain available via `client.payer.legacy` or the `@request/request-network-api-client/v1/payer` barrel when older storefronts still target `/v1/payer`.
+- Legacy endpoints remain available via `client.payer.legacy` or the `@marcohefti/request-network-api-client/v1/payer` barrel when older storefronts still target `/v1/payer`.

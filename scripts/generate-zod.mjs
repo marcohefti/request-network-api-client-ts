@@ -7,7 +7,7 @@ import { fileURLToPath } from 'node:url';
 const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(SCRIPT_DIR, '..');
 const require = createRequire(import.meta.url);
-const SPEC_PATH = require.resolve('@request/request-network-api-contracts/specs/openapi/request-network-openapi.json');
+const SPEC_PATH = require.resolve('@marcohefti/request-network-api-contracts/specs/openapi/request-network-openapi.json');
 const OUT_DIR = path.join(ROOT, 'src/validation/generated');
 const OUT_FILE = path.join(OUT_DIR, 'openapi.schemas.generated.ts');
 const GROUP_DIR = path.join(OUT_DIR, 'groups');

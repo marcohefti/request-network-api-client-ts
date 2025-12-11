@@ -26,7 +26,7 @@ export function createTunnelConfig(options: TunnelConfigOptions): string {
 
   lines.push("  - service: http_status:404");
 
-  const cacheDir = join(workspaceCacheDir, ".request-suite");
+  const cacheDir = join(workspaceCacheDir, ".request-network-api-client");
   if (!existsSync(cacheDir)) {
     mkdirSync(cacheDir, { recursive: true });
   }
