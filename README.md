@@ -1,6 +1,6 @@
 # @request/request-network-api-client
 
-Work-in-progress TypeScript API client for the Request Network hosted API. The goal is
+TypeScript API client for the Request Network hosted API. The goal is
 to provide typed, ergonomic helpers for the API domains showcased in the Request
 Easy Invoice app (invoices, payouts, compliance, client IDs, and currency
 conversion) while offering a polished developer experience for future
