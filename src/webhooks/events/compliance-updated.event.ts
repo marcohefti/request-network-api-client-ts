@@ -33,8 +33,6 @@ export const COMPLIANCE_AGREEMENT_STATUSES = Object.freeze([
   "signed",
 ] as const satisfies readonly ComplianceAgreementStatus[]);
 
-const AGREEMENT_REJECTED_STATES = new Set<ComplianceAgreementStatus>(["rejected", "failed"]);
-
 export const isComplianceUpdatedEvent = createEventPredicate<ComplianceUpdatedEventName>(COMPLIANCE_UPDATED_EVENT);
 
 export function onComplianceUpdated(dispatcher: WebhookDispatcher, handler: ComplianceUpdatedHandler): () => void {
@@ -52,22 +50,17 @@ export function isKycComplete(payload: ComplianceUpdatedPayload): boolean {
 }
 
 export function isAgreementRejected(payload: ComplianceUpdatedPayload): boolean {
-  const status = payload.agreementStatus;
-  if (!status) return false;
-  return AGREEMENT_REJECTED_STATES.has(status);
+  return payload.agreementStatus === "rejected" || payload.agreementStatus === "failed";
 }
 
 export function complianceStatusSummary(payload: ComplianceUpdatedPayload): string {
   const parts: string[] = [];
-  const kyc = payload.kycStatus ? payload.kycStatus.replace(/_/g, " ") : "unknown";
-  const agreement = payload.agreementStatus ? payload.agreementStatus.replace(/_/g, " ") : "unknown";
+  const kyc = payload.kycStatus ? String(payload.kycStatus).replace(/_/g, " ") : "unknown";
+  const agreement = payload.agreementStatus ? String(payload.agreementStatus).replace(/_/g, " ") : "unknown";
   parts.push(`KYC: ${kyc}`);
   parts.push(`Agreement: ${agreement}`);
   if (payload.clientUserId) {
-    const clientUserId =
-      typeof payload.clientUserId === "string"
-        ? payload.clientUserId
-        : JSON.stringify(payload.clientUserId);
+    const clientUserId = JSON.stringify(payload.clientUserId);
     parts.push(`Client user: ${clientUserId}`);
   }
   return parts.join(" | ");

@@ -3731,880 +3731,6 @@ interface VerifyWebhookSignatureResult {
 }
 declare function verifyWebhookSignature(options: VerifyWebhookSignatureOptions): VerifyWebhookSignatureResult;
 
-var openapi = "3.1.0";
-var info = {
-	title: "Request Network Webhooks",
-	version: "0.1.0",
-	description: "Webhook events sent by the Request Network API to subscribed endpoints. Each request is signed with an HMAC-SHA256 hex digest in the `x-request-network-signature` header (computed over the raw JSON body using your webhook secret). This community-maintained spec currently models the documented events (`payment.confirmed`, `payment.failed`, `payment.processing`, `payment_detail.updated`, `compliance.updated`). Additional payment lifecycle events such as \"Payment Partial\" or \"Payment Refunded\" are not yet included because the official docs do not publish canonical identifiers or payload schemas for them."
-};
-var webhooks = {
-	"payment.confirmed": {
-		post: {
-			summary: "Payment fully settled",
-			description: "Sent when a payment is fully settled. In crypto-to-fiat flows, this follows a final `payment.processing` with `subStatus: fiat_sent`.",
-			parameters: [
-				{
-					$ref: "#/components/parameters/XRequestNetworkSignature"
-				}
-			],
-			requestBody: {
-				required: true,
-				content: {
-					"application/json": {
-						schema: {
-							$ref: "#/components/schemas/PaymentConfirmedEvent"
-						},
-						examples: {
-							paymentConfirmed: {
-								$ref: "#/components/examples/payment_confirmed"
-							}
-						}
-					}
-				}
-			},
-			responses: {
-				"200": {
-					description: "Acknowledged"
-				},
-				"401": {
-					description: "Signature verification failed"
-				}
-			},
-			security: [
-				{
-					RequestSignatureHMAC: [
-					]
-				}
-			]
-		}
-	},
-	"payment.failed": {
-		post: {
-			summary: "Payment or offramp failed",
-			description: "Sent when a payment or crypto-to-fiat offramp fails.",
-			parameters: [
-				{
-					$ref: "#/components/parameters/XRequestNetworkSignature"
-				}
-			],
-			requestBody: {
-				required: true,
-				content: {
-					"application/json": {
-						schema: {
-							$ref: "#/components/schemas/PaymentFailedEvent"
-						},
-						examples: {
-							paymentFailed: {
-								$ref: "#/components/examples/payment_failed"
-							}
-						}
-					}
-				}
-			},
-			responses: {
-				"200": {
-					description: "Acknowledged"
-				},
-				"401": {
-					description: "Signature verification failed"
-				}
-			},
-			security: [
-				{
-					RequestSignatureHMAC: [
-					]
-				}
-			]
-		}
-	},
-	"payment.processing": {
-		post: {
-			summary: "Offramp in progress",
-			description: "Sent as the crypto-to-fiat offramp progresses. The `subStatus` field indicates the current stage.",
-			parameters: [
-				{
-					$ref: "#/components/parameters/XRequestNetworkSignature"
-				}
-			],
-			requestBody: {
-				required: true,
-				content: {
-					"application/json": {
-						schema: {
-							$ref: "#/components/schemas/PaymentProcessingEvent"
-						},
-						examples: {
-							paymentProcessing: {
-								$ref: "#/components/examples/payment_processing"
-							}
-						}
-					}
-				}
-			},
-			responses: {
-				"200": {
-					description: "Acknowledged"
-				},
-				"401": {
-					description: "Signature verification failed"
-				}
-			},
-			security: [
-				{
-					RequestSignatureHMAC: [
-					]
-				}
-			]
-		}
-	},
-	"payment_detail.updated": {
-		post: {
-			summary: "Payment detail (bank account) status update",
-			description: "Sent when payee payment details used for crypto-to-fiat are updated (approved/failed/pending).",
-			parameters: [
-				{
-					$ref: "#/components/parameters/XRequestNetworkSignature"
-				}
-			],
-			requestBody: {
-				required: true,
-				content: {
-					"application/json": {
-						schema: {
-							$ref: "#/components/schemas/PaymentDetailUpdatedEvent"
-						},
-						examples: {
-							paymentDetailUpdated: {
-								$ref: "#/components/examples/payment_detail_updated"
-							}
-						}
-					}
-				}
-			},
-			responses: {
-				"200": {
-					description: "Acknowledged"
-				},
-				"401": {
-					description: "Signature verification failed"
-				}
-			},
-			security: [
-				{
-					RequestSignatureHMAC: [
-					]
-				}
-			]
-		}
-	},
-	"compliance.updated": {
-		post: {
-			summary: "KYC/Agreement status update",
-			description: "Sent when payer compliance statuses change (KYC or agreement).",
-			parameters: [
-				{
-					$ref: "#/components/parameters/XRequestNetworkSignature"
-				}
-			],
-			requestBody: {
-				required: true,
-				content: {
-					"application/json": {
-						schema: {
-							$ref: "#/components/schemas/ComplianceUpdatedEvent"
-						},
-						examples: {
-							complianceUpdated: {
-								$ref: "#/components/examples/compliance_updated"
-							}
-						}
-					}
-				}
-			},
-			responses: {
-				"200": {
-					description: "Acknowledged"
-				},
-				"401": {
-					description: "Signature verification failed"
-				}
-			},
-			security: [
-				{
-					RequestSignatureHMAC: [
-					]
-				}
-			]
-		}
-	},
-	"payment.partial": {
-		post: {
-			summary: "Partial payment applied",
-			description: "Sent when a request receives a partial payment.",
-			parameters: [
-				{
-					$ref: "#/components/parameters/XRequestNetworkSignature"
-				}
-			],
-			requestBody: {
-				required: true,
-				content: {
-					"application/json": {
-						schema: {
-							$ref: "#/components/schemas/PaymentPartialEvent"
-						},
-						examples: {
-							payment_partial: {
-								$ref: "#/components/examples/payment_partial"
-							}
-						}
-					}
-				}
-			},
-			responses: {
-				"200": {
-					description: "Acknowledged"
-				},
-				"401": {
-					description: "Signature verification failed"
-				}
-			},
-			security: [
-				{
-					RequestSignatureHMAC: [
-					]
-				}
-			]
-		}
-	},
-	"payment.refunded": {
-		post: {
-			summary: "Payment refunded",
-			description: "Sent when Request issues a refund for a payment.",
-			parameters: [
-				{
-					$ref: "#/components/parameters/XRequestNetworkSignature"
-				}
-			],
-			requestBody: {
-				required: true,
-				content: {
-					"application/json": {
-						schema: {
-							$ref: "#/components/schemas/PaymentRefundedEvent"
-						},
-						examples: {
-							payment_refunded: {
-								$ref: "#/components/examples/payment_refunded"
-							}
-						}
-					}
-				}
-			},
-			responses: {
-				"200": {
-					description: "Acknowledged"
-				},
-				"401": {
-					description: "Signature verification failed"
-				}
-			},
-			security: [
-				{
-					RequestSignatureHMAC: [
-					]
-				}
-			]
-		}
-	},
-	"request.recurring": {
-		post: {
-			summary: "Recurring request created",
-			description: "Sent when a new recurring request is generated from an existing request.",
-			parameters: [
-				{
-					$ref: "#/components/parameters/XRequestNetworkSignature"
-				}
-			],
-			requestBody: {
-				required: true,
-				content: {
-					"application/json": {
-						schema: {
-							$ref: "#/components/schemas/RequestRecurringEvent"
-						},
-						examples: {
-							request_recurring: {
-								$ref: "#/components/examples/request_recurring"
-							}
-						}
-					}
-				}
-			},
-			responses: {
-				"200": {
-					description: "Acknowledged"
-				},
-				"401": {
-					description: "Signature verification failed"
-				}
-			},
-			security: [
-				{
-					RequestSignatureHMAC: [
-					]
-				}
-			]
-		}
-	}
-};
-var components = {
-	securitySchemes: {
-		RequestSignatureHMAC: {
-			type: "apiKey",
-			"in": "header",
-			name: "x-request-network-signature",
-			description: "HMAC-SHA256 hex digest of the raw request body, generated with your webhook secret. Verify by recomputing the digest over the exact raw body and comparing in constant time."
-		}
-	},
-	parameters: {
-		XRequestNetworkSignature: {
-			name: "x-request-network-signature",
-			"in": "header",
-			required: true,
-			description: "HMAC-SHA256 signature of the raw JSON request body using your webhook secret. Hex-encoded.",
-			schema: {
-				type: "string"
-			}
-		}
-	},
-	schemas: {
-		WebhookFeeItem: {
-			type: "object",
-			additionalProperties: false,
-			properties: {
-				type: {
-					type: "string",
-					description: "Fee type as provided in the webhook (example: \"network\")."
-				},
-				amount: {
-					type: "string",
-					description: "Human-readable amount as a string."
-				},
-				currency: {
-					type: "string",
-					description: "Currency code/symbol as provided (e.g., \"ETH\")."
-				}
-			},
-			required: [
-				"type",
-				"amount",
-				"currency"
-			]
-		},
-		WebhookBase: {
-			type: "object",
-			additionalProperties: true,
-			description: "Common fields observed in webhook payloads. Presence may vary by event.",
-			properties: {
-				event: {
-					type: "string",
-					description: "Event identifier string."
-				},
-				requestId: {
-					type: "string",
-					description: "Request identifier when applicable."
-				},
-				requestID: {
-					type: "string",
-					description: "Alias of requestId that may appear in some payloads."
-				},
-				paymentReference: {
-					type: "string",
-					description: "Opaque reference used to link blockchain transactions."
-				},
-				explorer: {
-					type: "string",
-					format: "uri",
-					description: "Explorer URL for the request."
-				},
-				amount: {
-					type: "string",
-					description: "Paid amount (human-readable string)."
-				},
-				totalAmountPaid: {
-					type: "string",
-					description: "Total amount paid to date (human-readable string)."
-				},
-				expectedAmount: {
-					type: "string",
-					description: "Expected amount for the request (human-readable string)."
-				},
-				timestamp: {
-					type: "string",
-					format: "date-time",
-					description: "RFC 3339 timestamp of the event."
-				},
-				txHash: {
-					type: "string",
-					description: "Blockchain transaction hash (if applicable)."
-				},
-				network: {
-					type: "string",
-					description: "Blockchain/network name (e.g., \"ethereum\")."
-				},
-				currency: {
-					type: "string",
-					description: "Invoice/request currency code."
-				},
-				paymentCurrency: {
-					type: "string",
-					description: "Currency actually used for payment."
-				},
-				isCryptoToFiat: {
-					type: "boolean",
-					description: "True if the payment used the crypto-to-fiat flow."
-				},
-				subStatus: {
-					type: "string",
-					description: "Additional state qualifier for some events."
-				},
-				paymentProcessor: {
-					type: "string",
-					description: "Payment processor identifier (example: \"request-network\")."
-				},
-				fees: {
-					type: "array",
-					items: {
-						$ref: "#/components/schemas/WebhookFeeItem"
-					}
-				},
-				rawPayload: {
-					type: "object",
-					description: "Raw provider payload forwarded by Request (structure varies per provider).",
-					additionalProperties: true
-				},
-				clientUserId: {
-					type: "string",
-					description: "Client user identifier associated with the webhook when available."
-				}
-			},
-			required: [
-				"event"
-			]
-		},
-		PaymentConfirmedEvent: {
-			allOf: [
-				{
-					$ref: "#/components/schemas/WebhookBase"
-				},
-				{
-					type: "object",
-					additionalProperties: true,
-					properties: {
-						event: {
-							"const": "payment.confirmed"
-						}
-					},
-					required: [
-						"event"
-					]
-				}
-			],
-			description: "Payment fully settled (fiat delivered for crypto-to-fiat)."
-		},
-		PaymentFailedEvent: {
-			allOf: [
-				{
-					$ref: "#/components/schemas/WebhookBase"
-				},
-				{
-					type: "object",
-					additionalProperties: true,
-					properties: {
-						event: {
-							"const": "payment.failed"
-						},
-						subStatus: {
-							type: "string",
-							"enum": [
-								"failed",
-								"bounced",
-								"insufficient_funds"
-							],
-							description: "Additional failure detail when provided."
-						},
-						failureReason: {
-							type: "string",
-							description: "Human-readable reason explaining why the payment failed when provided."
-						},
-						retryAfter: {
-							type: "string",
-							description: "Suggested retry window (ISO timestamp or duration hint) when the failure is recoverable."
-						}
-					},
-					required: [
-						"event"
-					]
-				}
-			],
-			description: "Payment or offramp failed."
-		},
-		PaymentProcessingEvent: {
-			allOf: [
-				{
-					$ref: "#/components/schemas/WebhookBase"
-				},
-				{
-					type: "object",
-					additionalProperties: true,
-					properties: {
-						event: {
-							"const": "payment.processing"
-						},
-						subStatus: {
-							type: "string",
-							"enum": [
-								"initiated",
-								"pending_internal_assessment",
-								"ongoing_checks",
-								"sending_fiat",
-								"fiat_sent",
-								"bounced",
-								"retry_required",
-								"processing"
-							],
-							description: "Offramp processing stage."
-						},
-						rawPayload: {
-							type: "object",
-							additionalProperties: true,
-							description: "Provider-specific payload describing the processing state."
-						}
-					},
-					required: [
-						"event"
-					]
-				}
-			],
-			description: "Offramp in progress; see subStatus for stage."
-		},
-		PaymentDetailUpdatedEvent: {
-			type: "object",
-			additionalProperties: true,
-			allOf: [
-				{
-					$ref: "#/components/schemas/WebhookBase"
-				},
-				{
-					type: "object",
-					properties: {
-						event: {
-							"const": "payment_detail.updated"
-						},
-						status: {
-							type: "string",
-							"enum": [
-								"approved",
-								"failed",
-								"pending",
-								"verified"
-							],
-							description: "Status of the payment details (bank account) used for off-ramp."
-						},
-						paymentAccountId: {
-							type: "string",
-							description: "Identifier of the payment account whose status changed."
-						},
-						rejectionMessage: {
-							type: "string",
-							description: "Optional rejection message supplied when status is failed."
-						},
-						paymentDetailsId: {
-							type: "string",
-							description: "Identifier of the payment details record whose status changed."
-						},
-						rawPayload: {
-							type: "object",
-							additionalProperties: true,
-							description: "Provider-specific payload attached to the event."
-						}
-					},
-					required: [
-						"event",
-						"status"
-					]
-				}
-			],
-			description: "Payment detail (bank account) approval state change."
-		},
-		ComplianceUpdatedEvent: {
-			type: "object",
-			additionalProperties: true,
-			allOf: [
-				{
-					$ref: "#/components/schemas/WebhookBase"
-				},
-				{
-					type: "object",
-					properties: {
-						event: {
-							"const": "compliance.updated"
-						},
-						kycStatus: {
-							type: "string",
-							"enum": [
-								"initiated",
-								"pending",
-								"approved",
-								"rejected",
-								"failed"
-							],
-							description: "KYC review status (when applicable)."
-						},
-						agreementStatus: {
-							type: "string",
-							"enum": [
-								"not_started",
-								"pending",
-								"completed",
-								"rejected",
-								"failed",
-								"signed"
-							],
-							description: "Compliance agreement status (when applicable)."
-						},
-						clientUserId: {
-							type: "string",
-							description: "Platform-defined payer identifier referenced by `/payer` endpoints."
-						},
-						isCompliant: {
-							type: "boolean",
-							description: "True when the user currently satisfies compliance requirements."
-						},
-						rawPayload: {
-							type: "object",
-							additionalProperties: true,
-							description: "Provider-specific compliance payload when forwarded by Request."
-						}
-					},
-					required: [
-						"event"
-					]
-				}
-			],
-			description: "Compliance (KYC/Agreement) update for a payer."
-		},
-		PaymentPartialEvent: {
-			allOf: [
-				{
-					$ref: "#/components/schemas/WebhookBase"
-				},
-				{
-					type: "object",
-					additionalProperties: true,
-					properties: {
-						event: {
-							"const": "payment.partial"
-						}
-					},
-					required: [
-						"event"
-					]
-				}
-			],
-			description: "Partial payment recorded for the request."
-		},
-		PaymentRefundedEvent: {
-			allOf: [
-				{
-					$ref: "#/components/schemas/WebhookBase"
-				},
-				{
-					type: "object",
-					additionalProperties: true,
-					properties: {
-						event: {
-							"const": "payment.refunded"
-						},
-						refundedTo: {
-							type: "string",
-							description: "Destination account or address that received the refund."
-						},
-						refundAmount: {
-							type: "string",
-							description: "Amount refunded (human-readable string)."
-						}
-					},
-					required: [
-						"event"
-					]
-				}
-			],
-			description: "Refund issued back to a sender or alternate destination."
-		},
-		RequestRecurringEvent: {
-			allOf: [
-				{
-					$ref: "#/components/schemas/WebhookBase"
-				},
-				{
-					type: "object",
-					additionalProperties: true,
-					properties: {
-						event: {
-							"const": "request.recurring"
-						},
-						originalRequestId: {
-							type: "string",
-							description: "Identifier of the original request that triggered the recurring event."
-						},
-						originalRequestPaymentReference: {
-							type: "string",
-							description: "Payment reference from the original request."
-						}
-					},
-					required: [
-						"event"
-					]
-				}
-			],
-			description: "Recurring request generated from an existing request."
-		}
-	},
-	examples: {
-		payment_confirmed: {
-			summary: "Example from docs",
-			value: {
-				event: "payment.confirmed",
-				requestId: "req_test123456789abcdef",
-				requestID: "req_test123456789abcdef",
-				paymentReference: "0x1234567890abcdef1234567890abcdef12345678",
-				explorer: "https://scan.request.network/request/req_test123456789abcdef",
-				amount: "100.0",
-				totalAmountPaid: "100.0",
-				expectedAmount: "100.0",
-				timestamp: "2025-08-28T12:25:45.995Z",
-				txHash: "0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890",
-				network: "ethereum",
-				currency: "USDC",
-				paymentCurrency: "USDC",
-				isCryptoToFiat: false,
-				paymentProcessor: "request-network",
-				fees: [
-					{
-						type: "network",
-						amount: "0.02",
-						currency: "ETH"
-					}
-				]
-			}
-		},
-		payment_failed: {
-			summary: "Minimal failure example (fields vary by flow)",
-			value: {
-				event: "payment.failed",
-				requestId: "01e273ecc29d4b526df3a0f1f05ffc59372af8752c2b678096e49ac270416a7cdb",
-				subStatus: "failed",
-				timestamp: "2025-10-10T12:34:56Z"
-			}
-		},
-		payment_processing: {
-			summary: "Offramp stage example",
-			value: {
-				event: "payment.processing",
-				requestId: "01e273ecc29d4b526df3a0f1f05ffc59372af8752c2b678096e49ac270416a7cdb",
-				subStatus: "processing",
-				timestamp: "2025-10-10T12:35:10Z",
-				isCryptoToFiat: true,
-				rawPayload: {
-					status: "processing"
-				}
-			}
-		},
-		payment_detail_updated: {
-			summary: "Payment details approved",
-			value: {
-				event: "payment_detail.updated",
-				status: "verified",
-				timestamp: "2025-10-10T12:00:00Z",
-				clientUserId: "user-123",
-				paymentDetailsId: "pd_example",
-				rawPayload: {
-					bankAccount: "verified"
-				}
-			}
-		},
-		compliance_updated: {
-			summary: "KYC and agreement status update",
-			value: {
-				event: "compliance.updated",
-				clientUserId: "user-123",
-				kycStatus: "approved",
-				agreementStatus: "signed",
-				timestamp: "2025-10-10T12:00:00Z",
-				isCompliant: true
-			}
-		},
-		payment_partial: {
-			summary: "Partial payment received",
-			value: {
-				event: "payment.partial",
-				requestId: "req_test123456789abcdef",
-				paymentReference: "0x1234567890abcdef1234567890abcdef12345678",
-				amount: "50.0",
-				totalAmountPaid: "50.0",
-				expectedAmount: "100.0",
-				timestamp: "2025-11-04T05:19:59.380Z",
-				paymentProcessor: "request-network",
-				fees: [
-				]
-			}
-		},
-		payment_refunded: {
-			summary: "Payment refunded",
-			value: {
-				event: "payment.refunded",
-				requestId: "req_test123456789abcdef",
-				paymentReference: "0x1234567890abcdef1234567890abcdef12345678",
-				refundedTo: "0x742d35Cc6634C0532925a3b8D78Ecf23Ee6d63D4",
-				refundAmount: "100.0",
-				currency: "USDC",
-				paymentProcessor: "request-network"
-			}
-		},
-		request_recurring: {
-			summary: "Recurring request created",
-			value: {
-				event: "request.recurring",
-				requestId: "req_new123456789abcdef",
-				paymentReference: "0x9876543210fedcba9876543210fedcba98765432",
-				originalRequestId: "req_test123456789abcdef",
-				originalRequestPaymentReference: "0x1234567890abcdef1234567890abcdef12345678",
-				timestamp: "2025-11-04T05:21:22.149Z",
-				paymentProcessor: "request-network"
-			}
-		}
-	}
-};
-var requestNetworkWebhooks = {
-	openapi: openapi,
-	info: info,
-	webhooks: webhooks,
-	components: components
-};
-
-declare const _request_suite_request_client_contracts_specs_webhooks_request_network_webhooks_json_components: typeof components;
-declare const _request_suite_request_client_contracts_specs_webhooks_request_network_webhooks_json_info: typeof info;
-declare const _request_suite_request_client_contracts_specs_webhooks_request_network_webhooks_json_openapi: typeof openapi;
-declare const _request_suite_request_client_contracts_specs_webhooks_request_network_webhooks_json_webhooks: typeof webhooks;
-declare namespace _request_suite_request_client_contracts_specs_webhooks_request_network_webhooks_json {
-  export { _request_suite_request_client_contracts_specs_webhooks_request_network_webhooks_json_components as components, requestNetworkWebhooks as default, _request_suite_request_client_contracts_specs_webhooks_request_network_webhooks_json_info as info, _request_suite_request_client_contracts_specs_webhooks_request_network_webhooks_json_openapi as openapi, _request_suite_request_client_contracts_specs_webhooks_request_network_webhooks_json_webhooks as webhooks };
-}
-
-type WebhookSpec = typeof _request_suite_request_client_contracts_specs_webhooks_request_network_webhooks_json;
-type WebhookEventName = Extract<keyof WebhookSpec["webhooks"], string>;
 declare const webhookEventSchemas: {
     readonly "payment.confirmed": z.ZodObject<{} & {
         event: z.ZodLiteral<"payment.confirmed">;
@@ -4615,63 +3741,63 @@ declare const webhookEventSchemas: {
     }, z.ZodTypeAny, "passthrough">>;
     readonly "payment.failed": z.ZodObject<{} & {
         event: z.ZodLiteral<"payment.failed">;
-        subStatus: z.ZodOptional<z.ZodEnum<[string, ...string[]]>>;
+        subStatus: z.ZodOptional<z.ZodEnum<["failed" | "bounced" | "insufficient_funds", ...("failed" | "bounced" | "insufficient_funds")[]]>>;
         failureReason: z.ZodOptional<z.ZodString>;
         retryAfter: z.ZodOptional<z.ZodString>;
     }, "passthrough", z.ZodTypeAny, z.objectOutputType<{} & {
         event: z.ZodLiteral<"payment.failed">;
-        subStatus: z.ZodOptional<z.ZodEnum<[string, ...string[]]>>;
+        subStatus: z.ZodOptional<z.ZodEnum<["failed" | "bounced" | "insufficient_funds", ...("failed" | "bounced" | "insufficient_funds")[]]>>;
         failureReason: z.ZodOptional<z.ZodString>;
         retryAfter: z.ZodOptional<z.ZodString>;
     }, z.ZodTypeAny, "passthrough">, z.objectInputType<{} & {
         event: z.ZodLiteral<"payment.failed">;
-        subStatus: z.ZodOptional<z.ZodEnum<[string, ...string[]]>>;
+        subStatus: z.ZodOptional<z.ZodEnum<["failed" | "bounced" | "insufficient_funds", ...("failed" | "bounced" | "insufficient_funds")[]]>>;
         failureReason: z.ZodOptional<z.ZodString>;
         retryAfter: z.ZodOptional<z.ZodString>;
     }, z.ZodTypeAny, "passthrough">>;
     readonly "payment.processing": z.ZodObject<{} & {
         event: z.ZodLiteral<"payment.processing">;
-        subStatus: z.ZodEnum<[string, ...string[]]>;
+        subStatus: z.ZodEnum<["initiated" | "processing" | "bounced" | "pending_internal_assessment" | "ongoing_checks" | "sending_fiat" | "fiat_sent" | "retry_required", ...("initiated" | "processing" | "bounced" | "pending_internal_assessment" | "ongoing_checks" | "sending_fiat" | "fiat_sent" | "retry_required")[]]>;
     }, "passthrough", z.ZodTypeAny, z.objectOutputType<{} & {
         event: z.ZodLiteral<"payment.processing">;
-        subStatus: z.ZodEnum<[string, ...string[]]>;
+        subStatus: z.ZodEnum<["initiated" | "processing" | "bounced" | "pending_internal_assessment" | "ongoing_checks" | "sending_fiat" | "fiat_sent" | "retry_required", ...("initiated" | "processing" | "bounced" | "pending_internal_assessment" | "ongoing_checks" | "sending_fiat" | "fiat_sent" | "retry_required")[]]>;
     }, z.ZodTypeAny, "passthrough">, z.objectInputType<{} & {
         event: z.ZodLiteral<"payment.processing">;
-        subStatus: z.ZodEnum<[string, ...string[]]>;
+        subStatus: z.ZodEnum<["initiated" | "processing" | "bounced" | "pending_internal_assessment" | "ongoing_checks" | "sending_fiat" | "fiat_sent" | "retry_required", ...("initiated" | "processing" | "bounced" | "pending_internal_assessment" | "ongoing_checks" | "sending_fiat" | "fiat_sent" | "retry_required")[]]>;
     }, z.ZodTypeAny, "passthrough">>;
     readonly "payment_detail.updated": z.ZodObject<{} & {
         event: z.ZodLiteral<"payment_detail.updated">;
-        status: z.ZodEnum<[string, ...string[]]>;
+        status: z.ZodEnum<["pending" | "approved" | "failed" | "verified", ...("pending" | "approved" | "failed" | "verified")[]]>;
         paymentDetailsId: z.ZodOptional<z.ZodString>;
         paymentAccountId: z.ZodOptional<z.ZodString>;
         rejectionMessage: z.ZodOptional<z.ZodString>;
     }, "passthrough", z.ZodTypeAny, z.objectOutputType<{} & {
         event: z.ZodLiteral<"payment_detail.updated">;
-        status: z.ZodEnum<[string, ...string[]]>;
+        status: z.ZodEnum<["pending" | "approved" | "failed" | "verified", ...("pending" | "approved" | "failed" | "verified")[]]>;
         paymentDetailsId: z.ZodOptional<z.ZodString>;
         paymentAccountId: z.ZodOptional<z.ZodString>;
         rejectionMessage: z.ZodOptional<z.ZodString>;
     }, z.ZodTypeAny, "passthrough">, z.objectInputType<{} & {
         event: z.ZodLiteral<"payment_detail.updated">;
-        status: z.ZodEnum<[string, ...string[]]>;
+        status: z.ZodEnum<["pending" | "approved" | "failed" | "verified", ...("pending" | "approved" | "failed" | "verified")[]]>;
         paymentDetailsId: z.ZodOptional<z.ZodString>;
         paymentAccountId: z.ZodOptional<z.ZodString>;
         rejectionMessage: z.ZodOptional<z.ZodString>;
     }, z.ZodTypeAny, "passthrough">>;
     readonly "compliance.updated": z.ZodObject<{} & {
         event: z.ZodLiteral<"compliance.updated">;
-        kycStatus: z.ZodOptional<z.ZodEnum<["not_started" | "pending" | "completed" | "initiated" | "failed" | "approved" | "rejected", ...("not_started" | "pending" | "completed" | "initiated" | "failed" | "approved" | "rejected")[]]>>;
-        agreementStatus: z.ZodOptional<z.ZodEnum<["not_started" | "pending" | "signed" | "completed" | "failed" | "rejected", ...("not_started" | "pending" | "signed" | "completed" | "failed" | "rejected")[]]>>;
+        kycStatus: z.ZodOptional<z.ZodEnum<["not_started" | "pending" | "completed" | "initiated" | "approved" | "rejected" | "failed", ...("not_started" | "pending" | "completed" | "initiated" | "approved" | "rejected" | "failed")[]]>>;
+        agreementStatus: z.ZodOptional<z.ZodEnum<["not_started" | "pending" | "signed" | "completed" | "rejected" | "failed", ...("not_started" | "pending" | "signed" | "completed" | "rejected" | "failed")[]]>>;
         isCompliant: z.ZodOptional<z.ZodBoolean>;
     }, "passthrough", z.ZodTypeAny, z.objectOutputType<{} & {
         event: z.ZodLiteral<"compliance.updated">;
-        kycStatus: z.ZodOptional<z.ZodEnum<["not_started" | "pending" | "completed" | "initiated" | "failed" | "approved" | "rejected", ...("not_started" | "pending" | "completed" | "initiated" | "failed" | "approved" | "rejected")[]]>>;
-        agreementStatus: z.ZodOptional<z.ZodEnum<["not_started" | "pending" | "signed" | "completed" | "failed" | "rejected", ...("not_started" | "pending" | "signed" | "completed" | "failed" | "rejected")[]]>>;
+        kycStatus: z.ZodOptional<z.ZodEnum<["not_started" | "pending" | "completed" | "initiated" | "approved" | "rejected" | "failed", ...("not_started" | "pending" | "completed" | "initiated" | "approved" | "rejected" | "failed")[]]>>;
+        agreementStatus: z.ZodOptional<z.ZodEnum<["not_started" | "pending" | "signed" | "completed" | "rejected" | "failed", ...("not_started" | "pending" | "signed" | "completed" | "rejected" | "failed")[]]>>;
         isCompliant: z.ZodOptional<z.ZodBoolean>;
     }, z.ZodTypeAny, "passthrough">, z.objectInputType<{} & {
         event: z.ZodLiteral<"compliance.updated">;
-        kycStatus: z.ZodOptional<z.ZodEnum<["not_started" | "pending" | "completed" | "initiated" | "failed" | "approved" | "rejected", ...("not_started" | "pending" | "completed" | "initiated" | "failed" | "approved" | "rejected")[]]>>;
-        agreementStatus: z.ZodOptional<z.ZodEnum<["not_started" | "pending" | "signed" | "completed" | "failed" | "rejected", ...("not_started" | "pending" | "signed" | "completed" | "failed" | "rejected")[]]>>;
+        kycStatus: z.ZodOptional<z.ZodEnum<["not_started" | "pending" | "completed" | "initiated" | "approved" | "rejected" | "failed", ...("not_started" | "pending" | "completed" | "initiated" | "approved" | "rejected" | "failed")[]]>>;
+        agreementStatus: z.ZodOptional<z.ZodEnum<["not_started" | "pending" | "signed" | "completed" | "rejected" | "failed", ...("not_started" | "pending" | "signed" | "completed" | "rejected" | "failed")[]]>>;
         isCompliant: z.ZodOptional<z.ZodBoolean>;
     }, z.ZodTypeAny, "passthrough">>;
     readonly "payment.partial": z.ZodObject<{} & {
@@ -4708,13 +3834,13 @@ declare const webhookEventSchemas: {
         originalRequestPaymentReference: z.ZodString;
     }, z.ZodTypeAny, "passthrough">>;
 };
-type WebhookEventSchemaMap = typeof webhookEventSchemas;
-type WebhookEventSchema<E extends WebhookEventName = WebhookEventName> = WebhookEventSchemaMap[E];
+type WebhookEventName = keyof typeof webhookEventSchemas;
+type WebhookEventSchema<E extends WebhookEventName = WebhookEventName> = (typeof webhookEventSchemas)[E];
 type WebhookPayloadMap = {
     [E in WebhookEventName]: z.infer<WebhookEventSchema<E>>;
 };
 type WebhookPayload<E extends WebhookEventName = WebhookEventName> = WebhookPayloadMap[E];
-declare const WEBHOOK_EVENT_NAMES: readonly WebhookEventName[];
+declare const WEBHOOK_EVENT_NAMES: readonly ("payment.confirmed" | "payment.failed" | "payment.processing" | "payment_detail.updated" | "compliance.updated" | "payment.partial" | "payment.refunded" | "request.recurring")[];
 declare function getWebhookSchema<E extends WebhookEventName>(event: E): WebhookEventSchema<E> | undefined;
 
 interface ParseWebhookEventOptions {
@@ -6103,27 +5229,24 @@ declare function assertPaymentConfirmedEvent(event: ParsedWebhookEvent): asserts
 
 declare const PAYMENT_FAILED_EVENT: "payment.failed";
 type PaymentFailedEventName = typeof PAYMENT_FAILED_EVENT;
+declare const PAYMENT_FAILED_SUB_STATUSES: readonly ["failed", "bounced", "insufficient_funds"];
+type PaymentFailedSubStatus = (typeof PAYMENT_FAILED_SUB_STATUSES)[number];
 type PaymentFailedPayload = WebhookPayload<PaymentFailedEventName>;
 type PaymentFailedContext = WebhookEventHandlerContext<PaymentFailedEventName>;
 type PaymentFailedHandler = WebhookEventHandler<PaymentFailedEventName>;
-type PaymentFailedSubStatus = NonNullable<PaymentFailedPayload["subStatus"]>;
 declare const isPaymentFailedEvent: (parsed: ParsedWebhookEvent) => parsed is ParsedWebhookEvent<"payment.failed">;
 declare function onPaymentFailed(dispatcher: WebhookDispatcher, handler: PaymentFailedHandler): () => void;
 declare function assertPaymentFailedEvent(event: ParsedWebhookEvent): asserts event is ParsedWebhookEvent<PaymentFailedEventName>;
-declare function isBouncedFailure(payload: Pick<PaymentFailedPayload, "subStatus">): payload is PaymentFailedPayload & {
-    subStatus: Extract<PaymentFailedSubStatus, "bounced">;
-};
-declare function isInsufficientFundsFailure(payload: Pick<PaymentFailedPayload, "subStatus">): payload is PaymentFailedPayload & {
-    subStatus: Extract<PaymentFailedSubStatus, "insufficient_funds">;
-};
+declare function isBouncedFailure(payload: Pick<PaymentFailedPayload, "subStatus">): boolean;
+declare function isInsufficientFundsFailure(payload: Pick<PaymentFailedPayload, "subStatus">): boolean;
 
 declare const PAYMENT_PROCESSING_EVENT: "payment.processing";
 type PaymentProcessingEventName = typeof PAYMENT_PROCESSING_EVENT;
+declare const PAYMENT_PROCESSING_STAGES: readonly ["initiated", "pending_internal_assessment", "ongoing_checks", "processing", "sending_fiat", "fiat_sent", "bounced", "retry_required"];
+type PaymentProcessingStage = (typeof PAYMENT_PROCESSING_STAGES)[number];
 type PaymentProcessingPayload = WebhookPayload<PaymentProcessingEventName>;
 type PaymentProcessingContext = WebhookEventHandlerContext<PaymentProcessingEventName>;
 type PaymentProcessingHandler = WebhookEventHandler<PaymentProcessingEventName>;
-type PaymentProcessingStage = PaymentProcessingPayload["subStatus"];
-declare const PAYMENT_PROCESSING_STAGES: readonly ["initiated", "pending_internal_assessment", "ongoing_checks", "processing", "sending_fiat", "fiat_sent", "bounced", "retry_required"];
 declare const isPaymentProcessingEvent: (parsed: ParsedWebhookEvent) => parsed is ParsedWebhookEvent<"payment.processing">;
 declare function onPaymentProcessing(dispatcher: WebhookDispatcher, handler: PaymentProcessingHandler): () => void;
 declare function assertPaymentProcessingEvent(event: ParsedWebhookEvent): asserts event is ParsedWebhookEvent<PaymentProcessingEventName>;
@@ -6133,26 +5256,18 @@ declare function isRetryRequired(stage: PaymentProcessingStage): boolean;
 
 declare const PAYMENT_DETAIL_UPDATED_EVENT: "payment_detail.updated";
 type PaymentDetailUpdatedEventName = typeof PAYMENT_DETAIL_UPDATED_EVENT;
+declare const PAYMENT_DETAIL_STATUSES: readonly ["approved", "failed", "pending", "verified"];
+type PaymentDetailStatus = (typeof PAYMENT_DETAIL_STATUSES)[number];
 type PaymentDetailUpdatedPayload = WebhookPayload<PaymentDetailUpdatedEventName>;
 type PaymentDetailUpdatedContext = WebhookEventHandlerContext<PaymentDetailUpdatedEventName>;
 type PaymentDetailUpdatedHandler = WebhookEventHandler<PaymentDetailUpdatedEventName>;
-type PaymentDetailStatus = PaymentDetailUpdatedPayload["status"];
-declare const PAYMENT_DETAIL_STATUSES: readonly ["approved", "failed", "pending", "verified"];
 declare const isPaymentDetailUpdatedEvent: (parsed: ParsedWebhookEvent) => parsed is ParsedWebhookEvent<"payment_detail.updated">;
 declare function onPaymentDetailUpdated(dispatcher: WebhookDispatcher, handler: PaymentDetailUpdatedHandler): () => void;
 declare function assertPaymentDetailUpdatedEvent(event: ParsedWebhookEvent): asserts event is ParsedWebhookEvent<PaymentDetailUpdatedEventName>;
-declare function isPaymentDetailApproved(payload: Pick<PaymentDetailUpdatedPayload, "status">): payload is PaymentDetailUpdatedPayload & {
-    status: "approved";
-};
-declare function isPaymentDetailRejected(payload: Pick<PaymentDetailUpdatedPayload, "status">): payload is PaymentDetailUpdatedPayload & {
-    status: "failed";
-};
-declare function isPaymentDetailPending(payload: Pick<PaymentDetailUpdatedPayload, "status">): payload is PaymentDetailUpdatedPayload & {
-    status: "pending";
-};
-declare function isPaymentDetailVerified(payload: Pick<PaymentDetailUpdatedPayload, "status">): payload is PaymentDetailUpdatedPayload & {
-    status: "verified";
-};
+declare function isPaymentDetailApproved(payload: Pick<PaymentDetailUpdatedPayload, "status">): boolean;
+declare function isPaymentDetailRejected(payload: Pick<PaymentDetailUpdatedPayload, "status">): boolean;
+declare function isPaymentDetailPending(payload: Pick<PaymentDetailUpdatedPayload, "status">): boolean;
+declare function isPaymentDetailVerified(payload: Pick<PaymentDetailUpdatedPayload, "status">): boolean;
 
 declare const COMPLIANCE_UPDATED_EVENT: "compliance.updated";
 type ComplianceUpdatedEventName = typeof COMPLIANCE_UPDATED_EVENT;
@@ -6210,6 +5325,7 @@ declare const index$1_PAYMENT_CONFIRMED_EVENT: typeof PAYMENT_CONFIRMED_EVENT;
 declare const index$1_PAYMENT_DETAIL_STATUSES: typeof PAYMENT_DETAIL_STATUSES;
 declare const index$1_PAYMENT_DETAIL_UPDATED_EVENT: typeof PAYMENT_DETAIL_UPDATED_EVENT;
 declare const index$1_PAYMENT_FAILED_EVENT: typeof PAYMENT_FAILED_EVENT;
+declare const index$1_PAYMENT_FAILED_SUB_STATUSES: typeof PAYMENT_FAILED_SUB_STATUSES;
 declare const index$1_PAYMENT_PARTIAL_EVENT: typeof PAYMENT_PARTIAL_EVENT;
 declare const index$1_PAYMENT_PROCESSING_EVENT: typeof PAYMENT_PROCESSING_EVENT;
 declare const index$1_PAYMENT_PROCESSING_STAGES: typeof PAYMENT_PROCESSING_STAGES;
@@ -6287,7 +5403,7 @@ declare const index$1_onRequestRecurring: typeof onRequestRecurring;
 declare const index$1_processingStageLabel: typeof processingStageLabel;
 declare const index$1_registerEventHandler: typeof registerEventHandler;
 declare namespace index$1 {
-  export { index$1_COMPLIANCE_AGREEMENT_STATUSES as COMPLIANCE_AGREEMENT_STATUSES, index$1_COMPLIANCE_KYC_STATUSES as COMPLIANCE_KYC_STATUSES, index$1_COMPLIANCE_UPDATED_EVENT as COMPLIANCE_UPDATED_EVENT, type index$1_ComplianceAgreementStatus as ComplianceAgreementStatus, type index$1_ComplianceKycStatus as ComplianceKycStatus, type index$1_ComplianceUpdatedContext as ComplianceUpdatedContext, type index$1_ComplianceUpdatedEventName as ComplianceUpdatedEventName, type index$1_ComplianceUpdatedHandler as ComplianceUpdatedHandler, type index$1_ComplianceUpdatedPayload as ComplianceUpdatedPayload, index$1_PAYMENT_CONFIRMED_EVENT as PAYMENT_CONFIRMED_EVENT, index$1_PAYMENT_DETAIL_STATUSES as PAYMENT_DETAIL_STATUSES, index$1_PAYMENT_DETAIL_UPDATED_EVENT as PAYMENT_DETAIL_UPDATED_EVENT, index$1_PAYMENT_FAILED_EVENT as PAYMENT_FAILED_EVENT, index$1_PAYMENT_PARTIAL_EVENT as PAYMENT_PARTIAL_EVENT, index$1_PAYMENT_PROCESSING_EVENT as PAYMENT_PROCESSING_EVENT, index$1_PAYMENT_PROCESSING_STAGES as PAYMENT_PROCESSING_STAGES, index$1_PAYMENT_REFUNDED_EVENT as PAYMENT_REFUNDED_EVENT, type index$1_PaymentConfirmedContext as PaymentConfirmedContext, type index$1_PaymentConfirmedEventName as PaymentConfirmedEventName, type index$1_PaymentConfirmedHandler as PaymentConfirmedHandler, type index$1_PaymentConfirmedPayload as PaymentConfirmedPayload, type index$1_PaymentDetailStatus as PaymentDetailStatus, type index$1_PaymentDetailUpdatedContext as PaymentDetailUpdatedContext, type index$1_PaymentDetailUpdatedEventName as PaymentDetailUpdatedEventName, type index$1_PaymentDetailUpdatedHandler as PaymentDetailUpdatedHandler, type index$1_PaymentDetailUpdatedPayload as PaymentDetailUpdatedPayload, type index$1_PaymentFailedContext as PaymentFailedContext, type index$1_PaymentFailedEventName as PaymentFailedEventName, type index$1_PaymentFailedHandler as PaymentFailedHandler, type index$1_PaymentFailedPayload as PaymentFailedPayload, type index$1_PaymentFailedSubStatus as PaymentFailedSubStatus, type index$1_PaymentPartialContext as PaymentPartialContext, type index$1_PaymentPartialEventName as PaymentPartialEventName, type index$1_PaymentPartialHandler as PaymentPartialHandler, type index$1_PaymentPartialPayload as PaymentPartialPayload, type index$1_PaymentProcessingContext as PaymentProcessingContext, type index$1_PaymentProcessingEventName as PaymentProcessingEventName, type index$1_PaymentProcessingHandler as PaymentProcessingHandler, type index$1_PaymentProcessingPayload as PaymentProcessingPayload, type index$1_PaymentProcessingStage as PaymentProcessingStage, type index$1_PaymentRefundedContext as PaymentRefundedContext, type index$1_PaymentRefundedEventName as PaymentRefundedEventName, type index$1_PaymentRefundedHandler as PaymentRefundedHandler, type index$1_PaymentRefundedPayload as PaymentRefundedPayload, index$1_REQUEST_RECURRING_EVENT as REQUEST_RECURRING_EVENT, type index$1_RequestRecurringContext as RequestRecurringContext, type index$1_RequestRecurringEventName as RequestRecurringEventName, type index$1_RequestRecurringHandler as RequestRecurringHandler, type index$1_RequestRecurringPayload as RequestRecurringPayload, type index$1_WebhookEventHandler as WebhookEventHandler, type index$1_WebhookEventHandlerContext as WebhookEventHandlerContext, index$1_assertComplianceUpdatedEvent as assertComplianceUpdatedEvent, index$1_assertPaymentConfirmedEvent as assertPaymentConfirmedEvent, index$1_assertPaymentDetailUpdatedEvent as assertPaymentDetailUpdatedEvent, index$1_assertPaymentFailedEvent as assertPaymentFailedEvent, index$1_assertPaymentPartialEvent as assertPaymentPartialEvent, index$1_assertPaymentProcessingEvent as assertPaymentProcessingEvent, index$1_assertPaymentRefundedEvent as assertPaymentRefundedEvent, index$1_assertRequestRecurringEvent as assertRequestRecurringEvent, index$1_complianceStatusSummary as complianceStatusSummary, index$1_createEventPredicate as createEventPredicate, index$1_isAgreementRejected as isAgreementRejected, index$1_isBouncedFailure as isBouncedFailure, index$1_isComplianceUpdatedEvent as isComplianceUpdatedEvent, index$1_isInsufficientFundsFailure as isInsufficientFundsFailure, index$1_isKycComplete as isKycComplete, index$1_isPaymentConfirmedEvent as isPaymentConfirmedEvent, index$1_isPaymentDetailApproved as isPaymentDetailApproved, index$1_isPaymentDetailPending as isPaymentDetailPending, index$1_isPaymentDetailRejected as isPaymentDetailRejected, index$1_isPaymentDetailUpdatedEvent as isPaymentDetailUpdatedEvent, index$1_isPaymentDetailVerified as isPaymentDetailVerified, index$1_isPaymentFailedEvent as isPaymentFailedEvent, index$1_isPaymentPartialEvent as isPaymentPartialEvent, index$1_isPaymentProcessingEvent as isPaymentProcessingEvent, index$1_isPaymentRefundedEvent as isPaymentRefundedEvent, index$1_isProcessingTerminalStatus as isProcessingTerminalStatus, index$1_isRequestRecurringEvent as isRequestRecurringEvent, index$1_isRetryRequired as isRetryRequired, index$1_onComplianceUpdated as onComplianceUpdated, index$1_onPaymentConfirmed as onPaymentConfirmed, index$1_onPaymentDetailUpdated as onPaymentDetailUpdated, index$1_onPaymentFailed as onPaymentFailed, index$1_onPaymentPartial as onPaymentPartial, index$1_onPaymentProcessing as onPaymentProcessing, index$1_onPaymentRefunded as onPaymentRefunded, index$1_onRequestRecurring as onRequestRecurring, index$1_processingStageLabel as processingStageLabel, index$1_registerEventHandler as registerEventHandler };
+  export { index$1_COMPLIANCE_AGREEMENT_STATUSES as COMPLIANCE_AGREEMENT_STATUSES, index$1_COMPLIANCE_KYC_STATUSES as COMPLIANCE_KYC_STATUSES, index$1_COMPLIANCE_UPDATED_EVENT as COMPLIANCE_UPDATED_EVENT, type index$1_ComplianceAgreementStatus as ComplianceAgreementStatus, type index$1_ComplianceKycStatus as ComplianceKycStatus, type index$1_ComplianceUpdatedContext as ComplianceUpdatedContext, type index$1_ComplianceUpdatedEventName as ComplianceUpdatedEventName, type index$1_ComplianceUpdatedHandler as ComplianceUpdatedHandler, type index$1_ComplianceUpdatedPayload as ComplianceUpdatedPayload, index$1_PAYMENT_CONFIRMED_EVENT as PAYMENT_CONFIRMED_EVENT, index$1_PAYMENT_DETAIL_STATUSES as PAYMENT_DETAIL_STATUSES, index$1_PAYMENT_DETAIL_UPDATED_EVENT as PAYMENT_DETAIL_UPDATED_EVENT, index$1_PAYMENT_FAILED_EVENT as PAYMENT_FAILED_EVENT, index$1_PAYMENT_FAILED_SUB_STATUSES as PAYMENT_FAILED_SUB_STATUSES, index$1_PAYMENT_PARTIAL_EVENT as PAYMENT_PARTIAL_EVENT, index$1_PAYMENT_PROCESSING_EVENT as PAYMENT_PROCESSING_EVENT, index$1_PAYMENT_PROCESSING_STAGES as PAYMENT_PROCESSING_STAGES, index$1_PAYMENT_REFUNDED_EVENT as PAYMENT_REFUNDED_EVENT, type index$1_PaymentConfirmedContext as PaymentConfirmedContext, type index$1_PaymentConfirmedEventName as PaymentConfirmedEventName, type index$1_PaymentConfirmedHandler as PaymentConfirmedHandler, type index$1_PaymentConfirmedPayload as PaymentConfirmedPayload, type index$1_PaymentDetailStatus as PaymentDetailStatus, type index$1_PaymentDetailUpdatedContext as PaymentDetailUpdatedContext, type index$1_PaymentDetailUpdatedEventName as PaymentDetailUpdatedEventName, type index$1_PaymentDetailUpdatedHandler as PaymentDetailUpdatedHandler, type index$1_PaymentDetailUpdatedPayload as PaymentDetailUpdatedPayload, type index$1_PaymentFailedContext as PaymentFailedContext, type index$1_PaymentFailedEventName as PaymentFailedEventName, type index$1_PaymentFailedHandler as PaymentFailedHandler, type index$1_PaymentFailedPayload as PaymentFailedPayload, type index$1_PaymentFailedSubStatus as PaymentFailedSubStatus, type index$1_PaymentPartialContext as PaymentPartialContext, type index$1_PaymentPartialEventName as PaymentPartialEventName, type index$1_PaymentPartialHandler as PaymentPartialHandler, type index$1_PaymentPartialPayload as PaymentPartialPayload, type index$1_PaymentProcessingContext as PaymentProcessingContext, type index$1_PaymentProcessingEventName as PaymentProcessingEventName, type index$1_PaymentProcessingHandler as PaymentProcessingHandler, type index$1_PaymentProcessingPayload as PaymentProcessingPayload, type index$1_PaymentProcessingStage as PaymentProcessingStage, type index$1_PaymentRefundedContext as PaymentRefundedContext, type index$1_PaymentRefundedEventName as PaymentRefundedEventName, type index$1_PaymentRefundedHandler as PaymentRefundedHandler, type index$1_PaymentRefundedPayload as PaymentRefundedPayload, index$1_REQUEST_RECURRING_EVENT as REQUEST_RECURRING_EVENT, type index$1_RequestRecurringContext as RequestRecurringContext, type index$1_RequestRecurringEventName as RequestRecurringEventName, type index$1_RequestRecurringHandler as RequestRecurringHandler, type index$1_RequestRecurringPayload as RequestRecurringPayload, type index$1_WebhookEventHandler as WebhookEventHandler, type index$1_WebhookEventHandlerContext as WebhookEventHandlerContext, index$1_assertComplianceUpdatedEvent as assertComplianceUpdatedEvent, index$1_assertPaymentConfirmedEvent as assertPaymentConfirmedEvent, index$1_assertPaymentDetailUpdatedEvent as assertPaymentDetailUpdatedEvent, index$1_assertPaymentFailedEvent as assertPaymentFailedEvent, index$1_assertPaymentPartialEvent as assertPaymentPartialEvent, index$1_assertPaymentProcessingEvent as assertPaymentProcessingEvent, index$1_assertPaymentRefundedEvent as assertPaymentRefundedEvent, index$1_assertRequestRecurringEvent as assertRequestRecurringEvent, index$1_complianceStatusSummary as complianceStatusSummary, index$1_createEventPredicate as createEventPredicate, index$1_isAgreementRejected as isAgreementRejected, index$1_isBouncedFailure as isBouncedFailure, index$1_isComplianceUpdatedEvent as isComplianceUpdatedEvent, index$1_isInsufficientFundsFailure as isInsufficientFundsFailure, index$1_isKycComplete as isKycComplete, index$1_isPaymentConfirmedEvent as isPaymentConfirmedEvent, index$1_isPaymentDetailApproved as isPaymentDetailApproved, index$1_isPaymentDetailPending as isPaymentDetailPending, index$1_isPaymentDetailRejected as isPaymentDetailRejected, index$1_isPaymentDetailUpdatedEvent as isPaymentDetailUpdatedEvent, index$1_isPaymentDetailVerified as isPaymentDetailVerified, index$1_isPaymentFailedEvent as isPaymentFailedEvent, index$1_isPaymentPartialEvent as isPaymentPartialEvent, index$1_isPaymentProcessingEvent as isPaymentProcessingEvent, index$1_isPaymentRefundedEvent as isPaymentRefundedEvent, index$1_isProcessingTerminalStatus as isProcessingTerminalStatus, index$1_isRequestRecurringEvent as isRequestRecurringEvent, index$1_isRetryRequired as isRetryRequired, index$1_onComplianceUpdated as onComplianceUpdated, index$1_onPaymentConfirmed as onPaymentConfirmed, index$1_onPaymentDetailUpdated as onPaymentDetailUpdated, index$1_onPaymentFailed as onPaymentFailed, index$1_onPaymentPartial as onPaymentPartial, index$1_onPaymentProcessing as onPaymentProcessing, index$1_onPaymentRefunded as onPaymentRefunded, index$1_onRequestRecurring as onRequestRecurring, index$1_processingStageLabel as processingStageLabel, index$1_registerEventHandler as registerEventHandler };
 }
 
 declare const DEFAULT_TEST_WEBHOOK_SECRET = "whsec_test_secret";

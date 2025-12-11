@@ -7,14 +7,6 @@ export const PAYMENT_PROCESSING_EVENT = "payment.processing" as const;
 
 export type PaymentProcessingEventName = typeof PAYMENT_PROCESSING_EVENT;
 
-export type PaymentProcessingPayload = WebhookPayload<PaymentProcessingEventName>;
-
-export type PaymentProcessingContext = WebhookEventHandlerContext<PaymentProcessingEventName>;
-
-export type PaymentProcessingHandler = WebhookEventHandler<PaymentProcessingEventName>;
-
-export type PaymentProcessingStage = PaymentProcessingPayload["subStatus"];
-
 export const PAYMENT_PROCESSING_STAGES = Object.freeze([
   "initiated",
   "pending_internal_assessment",
@@ -24,7 +16,15 @@ export const PAYMENT_PROCESSING_STAGES = Object.freeze([
   "fiat_sent",
   "bounced",
   "retry_required",
-] as const satisfies readonly PaymentProcessingStage[]);
+] as const);
+
+export type PaymentProcessingStage = (typeof PAYMENT_PROCESSING_STAGES)[number];
+
+export type PaymentProcessingPayload = WebhookPayload<PaymentProcessingEventName>;
+
+export type PaymentProcessingContext = WebhookEventHandlerContext<PaymentProcessingEventName>;
+
+export type PaymentProcessingHandler = WebhookEventHandler<PaymentProcessingEventName>;
 
 const TERMINAL_STAGES = new Set<PaymentProcessingStage>(["fiat_sent", "bounced", "retry_required"]);
 

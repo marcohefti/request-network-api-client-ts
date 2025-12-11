@@ -14,8 +14,6 @@ import { webhooks } from "../../src";
 const PAYMENT_PROCESSING_FIXTURE = "payment-processing.json";
 const PAYMENT_PROCESSING_EVENT = "payment.processing" as const;
 
-const STAGES = webhooks.events.PAYMENT_PROCESSING_STAGES;
-
 describe("webhooks.payment.processing", () => {
   it("invokes handler with stage metadata and helper utilities", async () => {
     const dispatcher = webhooks.createWebhookDispatcher();
@@ -35,11 +33,11 @@ describe("webhooks.payment.processing", () => {
 
     expect(handler).toHaveBeenCalledTimes(1);
     const [[eventPayload, context]] = handler.mock.calls;
-    expect(eventPayload.event).toBe(PAYMENT_PROCESSING_EVENT);
-    expect(eventPayload.subStatus).toBe("processing");
-    expect(webhooks.events.processingStageLabel(eventPayload.subStatus)).toContain("Processing");
-    expect(webhooks.events.isProcessingTerminalStatus(eventPayload.subStatus)).toBe(false);
-    expect(webhooks.events.isRetryRequired(eventPayload.subStatus)).toBe(false);
+    const stage: webhooks.events.PaymentProcessingStage = "processing";
+    expect(eventPayload.subStatus).toBe(stage);
+    expect(webhooks.events.processingStageLabel(stage)).toContain("Processing");
+    expect(webhooks.events.isProcessingTerminalStatus(stage)).toBe(false);
+    expect(webhooks.events.isRetryRequired(stage)).toBe(false);
     expect(context.dispatchContext.req).toBe(req);
     expect(req.webhook?.event).toBe(PAYMENT_PROCESSING_EVENT);
     expect(next).toHaveBeenCalledOnce();
@@ -49,7 +47,18 @@ describe("webhooks.payment.processing", () => {
   it("evaluates all stages for terminal and retry helpers", () => {
     const terminal = new Set<string>();
     const retryStages: string[] = [];
-    for (const stage of STAGES) {
+    const allStages: webhooks.events.PaymentProcessingStage[] = [
+      "initiated",
+      "pending_internal_assessment",
+      "ongoing_checks",
+      "processing",
+      "sending_fiat",
+      "fiat_sent",
+      "bounced",
+      "retry_required",
+    ];
+
+    for (const stage of allStages) {
       if (webhooks.events.isProcessingTerminalStatus(stage)) {
         terminal.add(stage);
       }

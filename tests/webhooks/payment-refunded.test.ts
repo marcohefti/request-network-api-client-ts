@@ -32,9 +32,9 @@ describe("webhooks.payment.refunded", () => {
     await invokeMiddleware(middleware, req, res, next);
 
     expect(handler).toHaveBeenCalledOnce();
-    const [[eventPayload, context]] = handler.mock.calls;
+    const [eventPayload, context] = handler.mock.calls[0];
     expect(eventPayload.event).toBe(PAYMENT_REFUNDED_EVENT);
-    expect(eventPayload.refundedTo.toLowerCase()).toContain("742d35cc");
+    expect(String(eventPayload.refundedTo).toLowerCase()).toContain("742d35cc");
     expect(eventPayload.refundAmount).toBe("100.0");
     expect(context.dispatchContext.req).toBe(req);
     expect(next).toHaveBeenCalledOnce();

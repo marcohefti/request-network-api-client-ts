@@ -2,25 +2,6 @@ import { z } from "zod";
 
 import { schemaRegistry } from "../validation/schema.registry";
 
-type WebhookSpec = typeof import("@marcohefti/request-network-api-contracts/specs/webhooks/request-network-webhooks.json");
-
-export type WebhookEventName = Extract<keyof WebhookSpec["webhooks"], string>;
-
-type PaymentFailedAllOf = WebhookSpec["components"]["schemas"]["PaymentFailedEvent"]["allOf"][1];
-type PaymentFailedSubStatusValues = NonNullable<PaymentFailedAllOf["properties"]>["subStatus"] extends { enum: readonly string[] }
-  ? NonNullable<PaymentFailedAllOf["properties"]>["subStatus"]["enum"][number]
-  : never;
-
-type PaymentProcessingAllOf = WebhookSpec["components"]["schemas"]["PaymentProcessingEvent"]["allOf"][1];
-type PaymentProcessingSubStatusValues = NonNullable<PaymentProcessingAllOf["properties"]>["subStatus"] extends { enum: readonly string[] }
-  ? NonNullable<PaymentProcessingAllOf["properties"]>["subStatus"]["enum"][number]
-  : never;
-
-type PaymentDetailAllOf = WebhookSpec["components"]["schemas"]["PaymentDetailUpdatedEvent"]["allOf"][1];
-type PaymentDetailStatusValues = NonNullable<PaymentDetailAllOf["properties"]>["status"] extends { enum: readonly string[] }
-  ? NonNullable<PaymentDetailAllOf["properties"]>["status"]["enum"][number]
-  : never;
-
 // The shared contract currently enumerates only `not_started` and `completed`
 // for compliance status values. Legacy webhook payloads have reported a richer
 // set historically, so we keep a superset here until the upstream schema
@@ -45,7 +26,9 @@ const COMPLIANCE_AGREEMENT_STATUSES = [
 ] as const;
 type ComplianceAgreementStatusValues = (typeof COMPLIANCE_AGREEMENT_STATUSES)[number];
 
-const PAYMENT_FAILED_SUB_STATUSES = ["failed", "bounced", "insufficient_funds"] as const satisfies readonly PaymentFailedSubStatusValues[];
+const PAYMENT_FAILED_SUB_STATUSES = ["failed", "bounced", "insufficient_funds"] as const;
+type PaymentFailedSubStatusValues = (typeof PAYMENT_FAILED_SUB_STATUSES)[number];
+
 const PAYMENT_PROCESSING_SUB_STATUSES = [
   "initiated",
   "pending_internal_assessment",
@@ -55,8 +38,11 @@ const PAYMENT_PROCESSING_SUB_STATUSES = [
   "bounced",
   "retry_required",
   "processing",
-] as const satisfies readonly PaymentProcessingSubStatusValues[];
-const PAYMENT_DETAIL_STATUSES = ["approved", "failed", "pending", "verified"] as const satisfies readonly PaymentDetailStatusValues[];
+] as const;
+type PaymentProcessingSubStatusValues = (typeof PAYMENT_PROCESSING_SUB_STATUSES)[number];
+
+const PAYMENT_DETAIL_STATUSES = ["approved", "failed", "pending", "verified"] as const;
+type PaymentDetailStatusValues = (typeof PAYMENT_DETAIL_STATUSES)[number];
 
 // Base webhook schema: require `event` and allow all other fields through
 // without strict typing so manual webhook payloads from the Request API do
@@ -126,9 +112,9 @@ const webhookEventSchemas = {
   "request.recurring": requestRecurringSchema,
 } as const;
 
-type WebhookEventSchemaMap = typeof webhookEventSchemas;
+export type WebhookEventName = keyof typeof webhookEventSchemas;
 
-export type WebhookEventSchema<E extends WebhookEventName = WebhookEventName> = WebhookEventSchemaMap[E];
+export type WebhookEventSchema<E extends WebhookEventName = WebhookEventName> = (typeof webhookEventSchemas)[E];
 
 export type WebhookPayloadMap = {
   [E in WebhookEventName]: z.infer<WebhookEventSchema<E>>;
@@ -136,7 +122,7 @@ export type WebhookPayloadMap = {
 
 export type WebhookPayload<E extends WebhookEventName = WebhookEventName> = WebhookPayloadMap[E];
 
-export const WEBHOOK_EVENT_NAMES = Object.freeze(Object.keys(webhookEventSchemas) as WebhookEventName[]);
+export const WEBHOOK_EVENT_NAMES = Object.freeze(Object.keys(webhookEventSchemas) as readonly WebhookEventName[]);
 
 for (const [eventName, schema] of Object.entries(webhookEventSchemas) as [WebhookEventName, WebhookEventSchema][]) {
   schemaRegistry.register({
@@ -146,5 +132,5 @@ for (const [eventName, schema] of Object.entries(webhookEventSchemas) as [Webhoo
 }
 
 export function getWebhookSchema<E extends WebhookEventName>(event: E): WebhookEventSchema<E> | undefined {
-  return webhookEventSchemas[event];
+  return webhookEventSchemas[event] as WebhookEventSchema<E> | undefined;
 }

@@ -3195,6 +3195,7 @@ __export(events_exports, {
   PAYMENT_DETAIL_STATUSES: () => PAYMENT_DETAIL_STATUSES2,
   PAYMENT_DETAIL_UPDATED_EVENT: () => PAYMENT_DETAIL_UPDATED_EVENT,
   PAYMENT_FAILED_EVENT: () => PAYMENT_FAILED_EVENT,
+  PAYMENT_FAILED_SUB_STATUSES: () => PAYMENT_FAILED_SUB_STATUSES2,
   PAYMENT_PARTIAL_EVENT: () => PAYMENT_PARTIAL_EVENT,
   PAYMENT_PROCESSING_EVENT: () => PAYMENT_PROCESSING_EVENT,
   PAYMENT_PROCESSING_STAGES: () => PAYMENT_PROCESSING_STAGES,
@@ -3264,6 +3265,7 @@ function assertPaymentConfirmedEvent(event) {
 
 // src/webhooks/events/payment-failed.event.ts
 var PAYMENT_FAILED_EVENT = "payment.failed";
+var PAYMENT_FAILED_SUB_STATUSES2 = Object.freeze(["failed", "bounced", "insufficient_funds"]);
 var isPaymentFailedEvent = createEventPredicate(PAYMENT_FAILED_EVENT);
 function onPaymentFailed(dispatcher, handler) {
   return registerEventHandler(dispatcher, PAYMENT_FAILED_EVENT, handler);
@@ -3324,12 +3326,7 @@ function isRetryRequired(stage) {
 
 // src/webhooks/events/payment-detail-updated.event.ts
 var PAYMENT_DETAIL_UPDATED_EVENT = "payment_detail.updated";
-var PAYMENT_DETAIL_STATUSES2 = Object.freeze([
-  "approved",
-  "failed",
-  "pending",
-  "verified"
-]);
+var PAYMENT_DETAIL_STATUSES2 = Object.freeze(["approved", "failed", "pending", "verified"]);
 var isPaymentDetailUpdatedEvent = createEventPredicate(PAYMENT_DETAIL_UPDATED_EVENT);
 function onPaymentDetailUpdated(dispatcher, handler) {
   return registerEventHandler(dispatcher, PAYMENT_DETAIL_UPDATED_EVENT, handler);
@@ -3369,7 +3366,6 @@ var COMPLIANCE_AGREEMENT_STATUSES2 = Object.freeze([
   "failed",
   "signed"
 ]);
-var AGREEMENT_REJECTED_STATES = /* @__PURE__ */ new Set(["rejected", "failed"]);
 var isComplianceUpdatedEvent = createEventPredicate(COMPLIANCE_UPDATED_EVENT);
 function onComplianceUpdated(dispatcher, handler) {
   return registerEventHandler(dispatcher, COMPLIANCE_UPDATED_EVENT, handler);
@@ -3383,18 +3379,16 @@ function isKycComplete(payload) {
   return payload.kycStatus === "approved";
 }
 function isAgreementRejected(payload) {
-  const status = payload.agreementStatus;
-  if (!status) return false;
-  return AGREEMENT_REJECTED_STATES.has(status);
+  return payload.agreementStatus === "rejected" || payload.agreementStatus === "failed";
 }
 function complianceStatusSummary(payload) {
   const parts = [];
-  const kyc = payload.kycStatus ? payload.kycStatus.replace(/_/g, " ") : "unknown";
-  const agreement = payload.agreementStatus ? payload.agreementStatus.replace(/_/g, " ") : "unknown";
+  const kyc = payload.kycStatus ? String(payload.kycStatus).replace(/_/g, " ") : "unknown";
+  const agreement = payload.agreementStatus ? String(payload.agreementStatus).replace(/_/g, " ") : "unknown";
   parts.push(`KYC: ${kyc}`);
   parts.push(`Agreement: ${agreement}`);
   if (payload.clientUserId) {
-    const clientUserId = typeof payload.clientUserId === "string" ? payload.clientUserId : JSON.stringify(payload.clientUserId);
+    const clientUserId = JSON.stringify(payload.clientUserId);
     parts.push(`Client user: ${clientUserId}`);
   }
   return parts.join(" | ");

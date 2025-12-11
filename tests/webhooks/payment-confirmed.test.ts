@@ -63,8 +63,7 @@ describe("webhooks.payment.confirmed", () => {
 
     const middleware = webhooks.createWebhookMiddleware({ secret: TEST_SECRET, dispatcher });
 
-    const tamperedPayload = { ...payload, totalAmountPaid: "5.00" };
-    const tamperedRawBody = serialisePayload(tamperedPayload);
+    const tamperedRawBody = serialisePayload({ ...payload, totalAmountPaid: "5.00" });
     const req = createRequest(tamperedRawBody, signature);
     const res = createResponse();
     const next = vi.fn();
@@ -87,12 +86,12 @@ describe("webhooks.payment.confirmed", () => {
     const calls: string[] = [];
 
     webhooks.events.onPaymentConfirmed(dispatcher, (eventPayload) => {
-      const requestId =
-        typeof eventPayload.requestId === "string" ? eventPayload.requestId : "";
+      const requestId = String(eventPayload.requestId ?? "");
       calls.push(`first:${requestId}`);
     });
     webhooks.events.onPaymentConfirmed(dispatcher, (_, ctx) => {
-      calls.push(`second:${ctx.event.signature ?? ""}`);
+      const sig = ctx.event.signature ?? "";
+      calls.push(`second:${sig}`);
     });
 
     const parsed = webhooks.parseWebhookEvent({
@@ -105,8 +104,7 @@ describe("webhooks.payment.confirmed", () => {
 
     await dispatcher.dispatch(parsed, { source: "unit-test" });
 
-    const expectedRequestId =
-      typeof payload.requestId === "string" ? payload.requestId : "";
+    const expectedRequestId = String(payload.requestId ?? "");
 
     expect(calls).toEqual([`first:${expectedRequestId}`, `second:${signature}`]);
   });

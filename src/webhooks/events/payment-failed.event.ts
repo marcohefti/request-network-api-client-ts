@@ -7,13 +7,15 @@ export const PAYMENT_FAILED_EVENT = "payment.failed" as const;
 
 export type PaymentFailedEventName = typeof PAYMENT_FAILED_EVENT;
 
+export const PAYMENT_FAILED_SUB_STATUSES = Object.freeze(["failed", "bounced", "insufficient_funds"] as const);
+
+export type PaymentFailedSubStatus = (typeof PAYMENT_FAILED_SUB_STATUSES)[number];
+
 export type PaymentFailedPayload = WebhookPayload<PaymentFailedEventName>;
 
 export type PaymentFailedContext = WebhookEventHandlerContext<PaymentFailedEventName>;
 
 export type PaymentFailedHandler = WebhookEventHandler<PaymentFailedEventName>;
-
-export type PaymentFailedSubStatus = NonNullable<PaymentFailedPayload["subStatus"]>;
 
 export const isPaymentFailedEvent = createEventPredicate<PaymentFailedEventName>(PAYMENT_FAILED_EVENT);
 
@@ -27,14 +29,10 @@ export function assertPaymentFailedEvent(event: ParsedWebhookEvent): asserts eve
   }
 }
 
-export function isBouncedFailure(payload: Pick<PaymentFailedPayload, "subStatus">): payload is PaymentFailedPayload & {
-  subStatus: Extract<PaymentFailedSubStatus, "bounced">;
-} {
+export function isBouncedFailure(payload: Pick<PaymentFailedPayload, "subStatus">): boolean {
   return payload.subStatus === "bounced";
 }
 
-export function isInsufficientFundsFailure(payload: Pick<PaymentFailedPayload, "subStatus">): payload is PaymentFailedPayload & {
-  subStatus: Extract<PaymentFailedSubStatus, "insufficient_funds">;
-} {
+export function isInsufficientFundsFailure(payload: Pick<PaymentFailedPayload, "subStatus">): boolean {
   return payload.subStatus === "insufficient_funds";
 }

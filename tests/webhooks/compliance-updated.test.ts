@@ -49,8 +49,7 @@ describe("webhooks.compliance.updated", () => {
     const rejected = loadFixture(FIXTURES.rejected) as webhooks.events.ComplianceUpdatedPayload;
     expect(webhooks.events.isAgreementRejected(rejected)).toBe(true);
 
-    const failedAgreement = { ...rejected, agreementStatus: "failed" as const };
-    expect(webhooks.events.isAgreementRejected(failedAgreement)).toBe(true);
+    expect(webhooks.events.isAgreementRejected({ ...rejected, agreementStatus: "failed" })).toBe(true);
 
     const pending = loadFixture(FIXTURES.pending) as webhooks.events.ComplianceUpdatedPayload;
     expect(webhooks.events.isAgreementRejected(pending)).toBe(false);

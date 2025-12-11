@@ -7,20 +7,15 @@ export const PAYMENT_DETAIL_UPDATED_EVENT = "payment_detail.updated" as const;
 
 export type PaymentDetailUpdatedEventName = typeof PAYMENT_DETAIL_UPDATED_EVENT;
 
+export const PAYMENT_DETAIL_STATUSES = Object.freeze(["approved", "failed", "pending", "verified"] as const);
+
+export type PaymentDetailStatus = (typeof PAYMENT_DETAIL_STATUSES)[number];
+
 export type PaymentDetailUpdatedPayload = WebhookPayload<PaymentDetailUpdatedEventName>;
 
 export type PaymentDetailUpdatedContext = WebhookEventHandlerContext<PaymentDetailUpdatedEventName>;
 
 export type PaymentDetailUpdatedHandler = WebhookEventHandler<PaymentDetailUpdatedEventName>;
-
-export type PaymentDetailStatus = PaymentDetailUpdatedPayload["status"];
-
-export const PAYMENT_DETAIL_STATUSES = Object.freeze([
-  "approved",
-  "failed",
-  "pending",
-  "verified",
-] as const satisfies readonly PaymentDetailStatus[]);
 
 export const isPaymentDetailUpdatedEvent = createEventPredicate<PaymentDetailUpdatedEventName>(PAYMENT_DETAIL_UPDATED_EVENT);
 
@@ -34,26 +29,18 @@ export function assertPaymentDetailUpdatedEvent(event: ParsedWebhookEvent): asse
   }
 }
 
-export function isPaymentDetailApproved(payload: Pick<PaymentDetailUpdatedPayload, "status">): payload is PaymentDetailUpdatedPayload & {
-  status: "approved";
-} {
+export function isPaymentDetailApproved(payload: Pick<PaymentDetailUpdatedPayload, "status">): boolean {
   return payload.status === "approved";
 }
 
-export function isPaymentDetailRejected(payload: Pick<PaymentDetailUpdatedPayload, "status">): payload is PaymentDetailUpdatedPayload & {
-  status: "failed";
-} {
+export function isPaymentDetailRejected(payload: Pick<PaymentDetailUpdatedPayload, "status">): boolean {
   return payload.status === "failed";
 }
 
-export function isPaymentDetailPending(payload: Pick<PaymentDetailUpdatedPayload, "status">): payload is PaymentDetailUpdatedPayload & {
-  status: "pending";
-} {
+export function isPaymentDetailPending(payload: Pick<PaymentDetailUpdatedPayload, "status">): boolean {
   return payload.status === "pending";
 }
 
-export function isPaymentDetailVerified(payload: Pick<PaymentDetailUpdatedPayload, "status">): payload is PaymentDetailUpdatedPayload & {
-  status: "verified";
-} {
+export function isPaymentDetailVerified(payload: Pick<PaymentDetailUpdatedPayload, "status">): boolean {
   return payload.status === "verified";
 }

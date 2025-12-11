@@ -18,11 +18,11 @@ Use this checklist when preparing public releases of
   - `description`, `keywords`, `repository`, and `engines.node` reflect current scope.
 
 ### Spec & Generated Types (0.5.x)
-- [ ] Run `pnpm run prepare:spec` and commit any changes:
+- [x] Run `pnpm run prepare:spec` and commit any changes:
   - `pnpm run fetch:openapi`
   - `pnpm run generate:types`
   - `pnpm run generate:zod`
-- [ ] Confirm the bundled OpenAPI spec comes from `@marcohefti/request-network-api-contracts/specs/openapi/request-network-openapi.json` and matches the production Request API.
+- [x] Confirm the bundled OpenAPI spec comes from `@marcohefti/request-network-api-contracts/specs/openapi/request-network-openapi.json` and matches the production Request API.
 
 ### Build, Lint, and Tests (0.5.x)
 - [ ] From the repo root, run and pass:
