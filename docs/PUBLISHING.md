@@ -33,32 +33,63 @@ Use this checklist when preparing public releases of
 - [ ] Optionally run additional coverage or Node version matrices locally before publishing (for example, a `coverage:matrix` script that mirrors your CI configuration).
 
 ### Documentation & Examples (0.5.x)
-- [x] Keep `README.md` minimal: purpose, installation, quick start, compatibility, and links into `docs/*.md` and `docs-site/`.
-- [x] Ensure `docs/ARCHITECTURE.md`, `docs/TESTING.md`, `docs/ENDPOINTS.md`, and `docs/WEBHOOKS.md` are fresh enough to match the 0.5.0 surface (no obvious lies or deprecated flows).
+- [x] Keep `README.md` minimal: purpose, installation, quick start, compatibility, and links into `docs/*.md`.
+- [x] Ensure documentation is up to date:
+  - `docs/QUICK-START.md` - Installation and basic usage
+  - `docs/DOMAINS.md` - API reference for all domains
+  - `docs/HTTP-AND-ERRORS.md` - HTTP client and error handling
+  - `docs/SCOPE.md` - When to use this vs protocol SDK
+  - `docs/WEBHOOKS.md` - Webhook setup and handlers
+  - `docs/ARCHITECTURE.md` - System design
+  - `docs/TESTING.md` - Test strategy
+  - `docs/PUBLISHING.md` - Release process
 - [x] Ensure at least one runnable example in `examples/` works against the current Request API (e.g., a Node script that lists currencies).
 - [ ] (Optional for 0.5.x) Generate and publish TypeDoc (or similar) API reference, linked from `README.md`.
-- [ ] (Optional for 0.5.x) Keep the VitePress docs site (`docs-site/`) building locally via:
-  - `pnpm docs:dev`
-  - `pnpm docs:build`
 
 ### Quality & Support (0.5.x)
 - [x] Document versioning policy (SemVer with 0.x “breaking changes may occur” caveat) in `README.md`.
 - [x] Add a short “Support & issues” section in `README.md` pointing to the GitHub repo for bug reports and questions.
 - [ ] Confirm error handling behaviour and retry defaults are described at a high level in `docs/WEBHOOKS.md`, `docs/ENDPOINTS.md`, or the docs site.
 
-### Release Execution (0.5.0)
-- [ ] Ensure you are logged into npm as `marcohefti` with 2FA configured for publish.
-- [ ] From the TS client repository root, dry-run the publish:
-  - `pnpm publish --access public --dry-run`
-- [ ] Tag the release locally:
-  - `git tag v0.5.0`
-- [ ] Publish the package from the repository root:
-  - `pnpm publish --access public`
-- [ ] Push commits and tags:
-  - `git push`
-  - `git push --tags`
-- [ ] Add a short 0.5.0 section to `CHANGELOG.md` (once the file exists) or summarize changes in the GitHub release notes.
-- [x] Maintain a manual Changesets-based release workflow stub (GitHub Actions) for future automation.
+### Release Execution (Automated via GitHub Actions)
+
+Publishing is fully automated using GitHub Actions and OIDC trusted publishers. No npm tokens required.
+
+**To publish a new version:**
+
+1. Bump the version using pnpm:
+   ```bash
+   pnpm version patch   # for bug fixes (0.5.5 -> 0.5.6)
+   pnpm version minor   # for new features (0.5.5 -> 0.6.0)
+   pnpm version major   # for breaking changes (0.5.5 -> 1.0.0)
+   ```
+
+2. Push the tag to GitHub:
+   ```bash
+   git push --follow-tags
+   ```
+
+3. GitHub Actions automatically:
+   - Runs validation (`pnpm tsc && pnpm lint && pnpm test`)
+   - Builds the package (`pnpm build`)
+   - Publishes to npm using OIDC authentication
+   - Generates provenance attestations
+
+4. Verify the publish succeeded:
+   - Check GitHub Actions: https://github.com/marcohefti/request-network-api-client-ts/actions
+   - Check npm: https://www.npmjs.com/package/@marcohefti/request-network-api-client
+
+**Prerequisites:**
+- Trusted publisher configured on npmjs.com (already set up)
+- Workflow file exists: `.github/workflows/publish.yml`
+- Repository uses npm 11.5.1+ in CI
+
+**Manual publish (emergency only):**
+If GitHub Actions is unavailable, you can publish manually:
+```bash
+npm login
+pnpm publish --access public
+```
 
 ## 1.0.0 Hardening Checklist (Later)
 
@@ -75,12 +106,11 @@ a 1.0.0 “stable” release.
 - [ ] Document a spec refresh cadence (e.g., monthly or on upstream Request API release notes).
 
 ### CI, Coverage, and Docs
-- [ ] Extend CI to run `pnpm lint`, `pnpm tsc`, `pnpm test`, and `pnpm build` on every PR and push to main.
+- [x] Publish workflow runs `pnpm lint`, `pnpm tsc`, `pnpm test`, and `pnpm build` on tag push.
+- [ ] Add PR/push workflow for validation on every commit (not just releases).
 - [ ] Add a Node version matrix (20/22/24) in CI to match the documented compatibility matrix.
 - [ ] Integrate coverage reporting (Vitest + V8) and enforce minimum thresholds for merges.
 - [ ] Publish API reference docs (TypeDoc or equivalent) and link from `README.md`.
-- [ ] Re-enable the VitePress deployment workflow for pushes (restore the `push` trigger in `.github/workflows/sdk-docs.yml` and pass `enablement: true` to `actions/configure-pages`) once the repository is public or on a plan that supports private Pages.
-- [ ] Configure GitHub Pages with GitHub Actions as the deployment source for the docs site.
 
 ### Quality & Support
 - [ ] Finalize versioning policy and support expectations in `README.md` and `CONTRIBUTING.md`.
