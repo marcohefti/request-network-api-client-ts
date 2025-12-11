@@ -1,0 +1,165 @@
+{
+  "name": "@marcohefti/request-network-api-client",
+  "version": "0.5.0",
+  "private": false,
+  "description": "Request Network API client for Node and Browser.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/marcohefti/request-network-api-client-ts.git"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "keywords": [
+    "request-network",
+    "payments",
+    "rest",
+    "client",
+    "typescript",
+    "web3"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "build:watch": "tsup --watch",
+    "dev": "pnpm run build:watch",
+    "dev:webhook": "tsx examples/webhooks/local-listener.ts",
+    "tunnel:webhook": "tsx scripts/run-cloudflared.ts",
+    "webhook:dev:all": "concurrently -k -n listener,tunnel \"pnpm run dev:webhook\" \"pnpm run tunnel:webhook\"",
+    "lint": "eslint ./src ./tests --ext .ts",
+    "lint:fix": "eslint ./src ./tests --ext .ts --fix",
+    "test": "vitest run --passWithNoTests",
+    "coverage": "vitest run --coverage --passWithNoTests",
+    "test:matrix": "bash scripts/test-matrix.sh test",
+    "coverage:matrix": "bash scripts/test-matrix.sh coverage",
+    "test:watch": "vitest --passWithNoTests",
+    "test:live": "node scripts/run-integration-suite.mjs live",
+    "tsc": "tsc --project tsconfig.build.json --noEmit && tsc --project tsconfig.vitest.json --noEmit && tsc --project tsconfig.configs.json --noEmit",
+    "typecheck": "pnpm run tsc",
+    "fetch:openapi": "node scripts/fetch-openapi.mjs",
+    "generate:types": "node scripts/generate-types.mjs",
+    "generate:zod": "node scripts/generate-zod.mjs",
+    "prepare:spec": "pnpm run fetch:openapi && pnpm run generate:types && pnpm run generate:zod",
+    "docs:dev": "vitepress dev docs-site",
+    "docs:build": "vitepress build docs-site",
+    "docs:preview": "vitepress preview docs-site"
+  },
+  "main": "./dist/cjs/index.js",
+  "module": "./dist/esm/index.js",
+  "types": "./dist/esm/index.d.mts",
+  "exports": {
+    ".": {
+      "types": "./dist/esm/index.d.mts",
+      "import": "./dist/esm/index.js",
+      "require": "./dist/cjs/index.js",
+      "default": "./dist/esm/index.js"
+    },
+    "./currencies": {
+      "types": "./dist/esm/domains/currencies/index.d.mts",
+      "import": "./dist/esm/domains/currencies/index.js",
+      "require": "./dist/cjs/domains/currencies/index.js"
+    },
+    "./v1/currencies": {
+      "types": "./dist/esm/domains/currencies/v1/index.d.mts",
+      "import": "./dist/esm/domains/currencies/v1/index.js",
+      "require": "./dist/cjs/domains/currencies/v1/index.js"
+    },
+    "./client-ids": {
+      "types": "./dist/esm/domains/client-ids/index.d.mts",
+      "import": "./dist/esm/domains/client-ids/index.js",
+      "require": "./dist/cjs/domains/client-ids/index.js"
+    },
+    "./requests": {
+      "types": "./dist/esm/domains/requests/index.d.mts",
+      "import": "./dist/esm/domains/requests/index.js",
+      "require": "./dist/cjs/domains/requests/index.js"
+    },
+    "./v1/requests": {
+      "types": "./dist/esm/domains/requests/v1/index.d.mts",
+      "import": "./dist/esm/domains/requests/v1/index.js",
+      "require": "./dist/cjs/domains/requests/v1/index.js"
+    },
+    "./payouts": {
+      "types": "./dist/esm/domains/payouts/index.d.mts",
+      "import": "./dist/esm/domains/payouts/index.js",
+      "require": "./dist/cjs/domains/payouts/index.js"
+    },
+    "./payments": {
+      "types": "./dist/esm/domains/payments/index.d.mts",
+      "import": "./dist/esm/domains/payments/index.js",
+      "require": "./dist/cjs/domains/payments/index.js"
+    },
+    "./pay": {
+      "types": "./dist/esm/domains/pay/index.d.mts",
+      "import": "./dist/esm/domains/pay/index.js",
+      "require": "./dist/cjs/domains/pay/index.js"
+    },
+    "./payer": {
+      "types": "./dist/esm/domains/payer/index.d.mts",
+      "import": "./dist/esm/domains/payer/index.js",
+      "require": "./dist/cjs/domains/payer/index.js"
+    },
+    "./v1/payer": {
+      "types": "./dist/esm/domains/payer/v1/index.d.mts",
+      "import": "./dist/esm/domains/payer/v1/index.js",
+      "require": "./dist/cjs/domains/payer/v1/index.js"
+    },
+    "./v2/payer": {
+      "types": "./dist/esm/domains/payer/v2/index.d.mts",
+      "import": "./dist/esm/domains/payer/v2/index.js",
+      "require": "./dist/cjs/domains/payer/v2/index.js"
+    },
+    "./v1/pay": {
+      "types": "./dist/esm/domains/pay/v1/index.d.mts",
+      "import": "./dist/esm/domains/pay/v1/index.js",
+      "require": "./dist/cjs/domains/pay/v1/index.js"
+    },
+    "./errors": {
+      "types": "./dist/esm/index.d.mts",
+      "import": "./dist/esm/index.js",
+      "require": "./dist/cjs/index.js"
+    },
+    "./http": {
+      "types": "./dist/esm/index.d.mts",
+      "import": "./dist/esm/index.js",
+      "require": "./dist/cjs/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "dependencies": {
+    "zod": "^3.23.8"
+  },
+  "sideEffects": [
+    "./src/validation/generated/**",
+    "./src/validation/overrides/**"
+  ],
+  "devDependencies": {
+    "@marcohefti/request-network-api-contracts": "^0.5.0",
+    "@eslint/js": "^9.38.0",
+    "@types/express": "^4.17.25",
+    "@types/express-serve-static-core": "^4.19.7",
+    "@types/node": "^24.9.2",
+    "@typescript-eslint/eslint-plugin": "^8.46.2",
+    "@typescript-eslint/parser": "^8.46.2",
+    "@vitest/coverage-v8": "^4.0.5",
+    "eslint": "^9.38.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-eslint-comments": "^3.2.0",
+    "eslint-plugin-import": "^2.32.0",
+    "eslint-plugin-prettier": "^5.5.4",
+    "eslint-plugin-sonarjs": "^3.0.5",
+    "concurrently": "^9.1.0",
+    "express": "^4.19.2",
+    "msw": "^2.11.6",
+    "openapi-typescript": "^7.10.1",
+    "prettier": "^3.6.2",
+    "tsup": "^8.5.0",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.46.2",
+    "vitepress": "^1.6.4",
+    "vitest": "^4.0.5",
+    "tsx": "^4.19.2"
+  }
+}

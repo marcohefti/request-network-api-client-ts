@@ -1,0 +1,41 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Request API Client - Browser Quick Start</title>
+  </head>
+  <body>
+    <h1>Request API Client (Browser)</h1>
+    <pre id="out"></pre>
+    <script type="module">
+      // This example assumes a bundler or import map resolves '@request-suite/request-api-client'.
+      // For local sandboxing, point to your built ESM bundle instead.
+      import { createRequestClient, browserFetchAdapter, isRequestApiError } from '@request-suite/request-api-client';
+
+      const out = document.getElementById('out');
+      function log(...args) {
+        out.textContent += args.map(String).join(' ') + '\n';
+      }
+
+      const client = createRequestClient({
+        baseUrl: 'https://api.request.network',
+        clientId: 'YOUR_CLIENT_ID',
+        adapter: browserFetchAdapter,
+      });
+
+      try {
+        const routes = await client.currencies.getConversionRoutes('USDC', { networks: 'sepolia' });
+        log('Routes:', JSON.stringify(routes, null, 2));
+
+        const payments = await client.payments.search({ limit: '1', offset: '0' });
+        log('Payments:', JSON.stringify({ total: payments.pagination.total }, null, 2));
+      } catch (err) {
+        if (isRequestApiError(err)) {
+          log('API error', JSON.stringify(err.toJSON(), null, 2));
+        } else {
+          log('Error:', err?.message ?? String(err));
+        }
+      }
+    </script>
+  </body>
+  </html>

@@ -1,0 +1,29 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "rootDir": ".",
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": [
+        "./src/*"
+      ],
+      "@request-suite/request-api-client": [
+        "./src/index.ts"
+      ],
+      "@request-suite/request-api-client/*": [
+        "./src/*"
+      ]
+    }
+  },
+  "include": [
+    "tsup.config.ts",
+    "vitest.config.mts",
+    "eslint.config.*",
+    "examples/**/*.ts",
+    "scripts/**/*.ts"
+  ]
+}

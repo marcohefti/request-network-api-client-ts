@@ -1,0 +1,30 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "baseUrl": ".",
+    "paths": {
+      "@/*": [
+        "./src/*"
+      ],
+      "@request-suite/request-api-client": [
+        "./src/index.ts"
+      ],
+      "@request-suite/request-api-client/*": [
+        "./src/*"
+      ]
+    },
+    "types": [
+      "node"
+    ]
+  },
+  "include": [
+    "src",
+    "tests",
+    "vitest.config.mts",
+    "tsup.config.ts",
+    "eslint.config.*",
+    "examples",
+    "scripts"
+  ]
+}
