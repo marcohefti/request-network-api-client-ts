@@ -12,7 +12,7 @@ const pkgDir = path.join(
   ".."
 );
 const require = createRequire(import.meta.url);
-const contractsPackagePath = require.resolve("@request-suite/request-client-contracts/package.json");
+const contractsPackagePath = require.resolve("@request/request-network-api-contracts/package.json");
 const contractsDir = path.dirname(contractsPackagePath);
 const openapiDir = path.join(contractsDir, "specs", "openapi");
 const specPath = path.join(openapiDir, "request-network-openapi.json");

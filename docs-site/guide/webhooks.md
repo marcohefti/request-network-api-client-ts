@@ -1,6 +1,6 @@
 # Webhooks
 
-Request Network sends HMAC-SHA256 signed JSON payloads to your webhook endpoint. The `@request-suite/request-api-client` package ships a dedicated module that verifies signatures, validates payloads, routes events, and exposes test helpers.
+Request Network sends HMAC-SHA256 signed JSON payloads to your webhook endpoint. The `@request/request-network-api-client` package ships a dedicated module that verifies signatures, validates payloads, routes events, and exposes test helpers.
 
 ## Capturing the Raw Body
 
@@ -15,7 +15,7 @@ The signature covers the **raw request body**. Make sure your framework hands th
 ## Signature Verification
 
 ```ts
-import { webhooks } from "@request-suite/request-api-client";
+import { webhooks } from "@request/request-network-api-client";
 
 const { signature } = webhooks.verifyWebhookSignature({
   rawBody: rawPayloadBuffer,
@@ -30,7 +30,7 @@ const { signature } = webhooks.verifyWebhookSignature({
 
 ```ts
 import express from "express";
-import { webhooks } from "@request-suite/request-api-client";
+import { webhooks } from "@request/request-network-api-client";
 
 const dispatcher = webhooks.createWebhookDispatcher();
 
@@ -59,7 +59,7 @@ When you prefer to keep verification and routing inside a NestJS controller or s
 ```ts
 import { BadRequestException, Controller, Post, Req } from "@nestjs/common";
 import type { Request } from "express";
-import { webhooks, ValidationError } from "@request-suite/request-api-client";
+import { webhooks, ValidationError } from "@request/request-network-api-client";
 
 type RawBodyRequest = Request & { rawBody?: Buffer | string | Uint8Array };
 
@@ -127,7 +127,7 @@ For a persistent hostname, authenticate with `cloudflared login`, create a named
 - `request.recurring` - dispatcher helper for recurring requests (`onRequestRecurring`).
 - `compliance.updated` - compliance helpers (`isKycComplete`, `isAgreementRejected`, `complianceStatusSummary`) and agreement status coverage, including `signed`.
 
-Every helper validates against `@request-suite/request-client-contracts/specs/webhooks/request-network-webhooks.json`; `webhooks.WEBHOOK_EVENT_NAMES` and the parity guard (`tests/webhooks/event-parity.test.ts`) keep exports aligned with the spec.
+Every helper validates against `@request/request-network-api-contracts/specs/webhooks/request-network-webhooks.json`; `webhooks.WEBHOOK_EVENT_NAMES` and the parity guard (`tests/webhooks/event-parity.test.ts`) keep exports aligned with the spec.
 
 ## Testing Utilities
 
@@ -138,4 +138,4 @@ Every helper validates against `@request-suite/request-client-contracts/specs/we
 - `createMockWebhookResponse()`
 - `withWebhookVerificationDisabled(fn)` / `setWebhookVerificationBypass(true)`
 
-Use them inside Vitest suites or downstream packages to avoid duplicating HMAC logic. Fixtures for the documented events live in `@request-suite/request-client-contracts/fixtures/webhooks/**`.
+Use them inside Vitest suites or downstream packages to avoid duplicating HMAC logic. Fixtures for the documented events live in `@request/request-network-api-contracts/fixtures/webhooks/**`.

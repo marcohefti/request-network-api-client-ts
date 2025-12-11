@@ -1,6 +1,6 @@
 # Request API Client – Endpoint Notes
 
-This reference supplements the OpenAPI spec with behavioural notes, prerequisites, and known quirks discovered while integrating the Request Network API through `@request-suite/request-api-client`.
+This reference supplements the OpenAPI spec with behavioural notes, prerequisites, and known quirks discovered while integrating the Request Network API through `@request/request-network-api-client`.
 
 ## Client IDs
 

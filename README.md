@@ -1,4 +1,4 @@
-# @request-suite/request-api-client
+# @request/request-network-api-client
 
 Work-in-progress TypeScript API client for the Request Network hosted API. The goal is
 to provide typed, ergonomic helpers for the API domains showcased in the Request
@@ -86,7 +86,7 @@ Matrix requirements:
 Node (API key) - tested on Node 20.x-24.x with the built-in `fetch` implementation:
 
 ```ts
-import { createRequestClient, RequestEnvironment, isRequestApiError } from '@request-suite/request-api-client';
+import { createRequestClient, RequestEnvironment, isRequestApiError } from '@request/request-network-api-client';
 
 const client = createRequestClient({
   baseUrl: RequestEnvironment.production,
@@ -114,7 +114,7 @@ Runtime validation is on by default-the client verifies request payloads, succes
 From env:
 
 ```ts
-import { createRequestClientFromEnv } from '@request-suite/request-api-client';
+import { createRequestClientFromEnv } from '@request/request-network-api-client';
 
 const client = createRequestClientFromEnv();
 // Reads REQUEST_API_URL, REQUEST_API_KEY, REQUEST_CLIENT_ID (falls back to legacy REQUEST_SDK_* vars)
@@ -123,11 +123,11 @@ const client = createRequestClientFromEnv();
 Subpath imports (tree‑shake domains):
 
 ```ts
-import { createRequestClient } from '@request-suite/request-api-client';
-import { createPaymentsApi } from '@request-suite/request-api-client/payments';
-import { createPayApi } from '@request-suite/request-api-client/pay';
-import { createRequestsV1Api } from '@request-suite/request-api-client/v1/requests';
-import { createCurrenciesV1Api } from '@request-suite/request-api-client/v1/currencies';
+import { createRequestClient } from '@request/request-network-api-client';
+import { createPaymentsApi } from '@request/request-network-api-client/payments';
+import { createPayApi } from '@request/request-network-api-client/pay';
+import { createRequestsV1Api } from '@request/request-network-api-client/v1/requests';
+import { createCurrenciesV1Api } from '@request/request-network-api-client/v1/currencies';
 
 const client = createRequestClient({ apiKey: process.env.REQUEST_API_KEY! });
 
@@ -149,7 +149,7 @@ await pay.payRequest({
 });
 ```
 
-Root-level facades cover the REST v2 surface (`client.requests`, `client.payments`, `client.payouts`, `client.payer`, `client.currencies`, `client.pay`). Legacy endpoints stay available via `client.<domain>.legacy` (for example `client.currencies.legacy.list(...)`) or explicit versioned barrels such as `@request-suite/request-api-client/v1/requests`.
+Root-level facades cover the REST v2 surface (`client.requests`, `client.payments`, `client.payouts`, `client.payer`, `client.currencies`, `client.pay`). Legacy endpoints stay available via `client.<domain>.legacy` (for example `client.currencies.legacy.list(...)`) or explicit versioned barrels such as `@request/request-network-api-client/v1/requests`.
 
 Per‑request retry override and metadata:
 
@@ -164,9 +164,9 @@ const res = await client.http.request({
 Browser/Edge (client ID):
 
 ```html
-<!-- Requires a bundler or import map to resolve '@request-suite/request-api-client' -->
+<!-- Requires a bundler or import map to resolve '@request/request-network-api-client' -->
 <script type="module">
-  import { createRequestClient, browserFetchAdapter } from '@request-suite/request-api-client';
+  import { createRequestClient, browserFetchAdapter } from '@request/request-network-api-client';
 
   const client = createRequestClient({
     baseUrl: 'https://api.request.network',
@@ -184,15 +184,15 @@ const routes = await client.currencies.getConversionRoutes('USDC', { networks: '
 - Domain facades use consistent verbs: `create`, `list`, `findOne`, `update`, `delete`. Derived getters keep descriptive prefixes (`getPaymentRoutes`, `getPaymentCalldata`, `getConversionRoutes`) and fire-and-forget helpers use imperatives such as `sendPaymentIntent`.
 - Method arguments are ordered as path identifiers (`requestId`, `clientId`, etc.), followed by the primary payload/body, then an optional `options` bag for params or overrides. Avoid positional booleans or unnamed tuples.
 - Identifiers mirror REST paths-reuse upstream names instead of inventing aliases. `list*` methods return raw arrays; `findOne*` methods return a single object (or `null` when 404s are handled). Union responses expose a `kind` discriminant to make type narrowing straightforward.
-- Tree-shakeable domain barrels are published at `@request-suite/request-api-client/requests`, `.../payouts`, `.../payer`, `.../currencies`, and `.../client-ids`. Additional domains must follow the same naming pattern.
+- Tree-shakeable domain barrels are published at `@request/request-network-api-client/requests`, `.../payouts`, `.../payer`, `.../currencies`, and `.../client-ids`. Additional domains must follow the same naming pattern.
 
 ### Shared Request REST types (single source of truth)
 
 Use the client’s exported types instead of mirroring Request REST shapes downstream:
 
-- `PaymentCalldataResult`, `PaymentRoutesResponse`/`PaymentRoute`, `RequestStatusResult`, `GetPaymentCalldataOptions` from `@request-suite/request-api-client/requests` (also re-exported at the package root).
-- `CurrencyToken` from `@request-suite/request-api-client/currencies`.
-- `ClientIdResponse` from `@request-suite/request-api-client/client-ids`.
+- `PaymentCalldataResult`, `PaymentRoutesResponse`/`PaymentRoute`, `RequestStatusResult`, `GetPaymentCalldataOptions` from `@request/request-network-api-client/requests` (also re-exported at the package root).
+- `CurrencyToken` from `@request/request-network-api-client/currencies`.
+- `ClientIdResponse` from `@request/request-network-api-client/client-ids`.
 
 If a Request domain type is missing, add it here rather than re-declaring it in consumers.
 
@@ -212,7 +212,7 @@ If a Request domain type is missing, add it here rather than re-declaring it in 
 The `webhooks` module exposes low-level helpers to verify Request Network webhook deliveries. Every webhook is signed with an HMAC-SHA256 digest in the `x-request-network-signature` header. Recompute the digest over the **raw request body** (no JSON parsing) and compare it using a constant-time check:
 
 ```ts
-import { webhooks } from "@request-suite/request-api-client";
+import { webhooks } from "@request/request-network-api-client";
 
 const { signature, matchedSecret } = webhooks.verifyWebhookSignature({
   rawBody: rawPayloadBuffer,
@@ -229,7 +229,7 @@ const { signature, matchedSecret } = webhooks.verifyWebhookSignature({
 
 ```ts
 import express from "express";
-import { webhooks } from "@request-suite/request-api-client";
+import { webhooks } from "@request/request-network-api-client";
 
 const dispatcher = webhooks.createWebhookDispatcher();
 
@@ -289,7 +289,7 @@ For a stable hostname, authenticate with `cloudflared login`, create a named tun
 Example:
 
 ```ts
-import { webhooks } from "@request-suite/request-api-client";
+import { webhooks } from "@request/request-network-api-client";
 
 const payload = { event: "payment.confirmed", requestId: "req_123" };
 const signature = webhooks.testing.generateTestWebhookSignature(payload, "whsec_test");
@@ -311,7 +311,7 @@ Each documented webhook event ships with a typed facade:
 - `request.recurring` - dispatcher helper for recurring requests (`onRequestRecurring`).
 - `compliance.updated` - compliance summaries (`isKycComplete`, `isAgreementRejected`, `complianceStatusSummary`) with `agreementStatus: "signed"` support.
 
-All helpers validate payloads against the shared webhook spec in `@request-suite/request-client-contracts/specs/webhooks/request-network-webhooks.json`. The parity guard (`tests/webhooks/event-parity.test.ts`) ensures the exported event list stays in sync with the spec.
+All helpers validate payloads against the shared webhook spec in `@request/request-network-api-contracts/specs/webhooks/request-network-webhooks.json`. The parity guard (`tests/webhooks/event-parity.test.ts`) ensures the exported event list stays in sync with the spec.
 
 ## Error Handling
 
@@ -319,7 +319,7 @@ All helpers validate payloads against the shared webhook spec in `@request-suite
 - Call `error.toJSON()` to log or emit structured telemetry without losing context:
 
 ```ts
-import { isRequestApiError } from "@request-suite/request-api-client";
+import { isRequestApiError } from "@request/request-network-api-client";
 
 try {
   await client.requests.get("req-123");
@@ -340,7 +340,7 @@ try {
 The high-level client exposes typed facades for core REST domains:
 
 ```ts
-import { createRequestClient } from '@request-suite/request-api-client';
+import { createRequestClient } from '@request/request-network-api-client';
 
 const client = createRequestClient({ baseUrl: 'https://api.request.network', apiKey: '...' });
 
@@ -404,7 +404,7 @@ All domain methods honour the runtime validation toggle and leverage operationId
 
 - Root exports target the Request hosted REST API v2 endpoints. Keep new integrations on these defaults so they inherit the latest behaviour automatically.
 - The client does not expose a global `apiVersion` toggle. Mixing versions within one instance is discouraged.
-- When legacy support is required, use explicit subpath barrels (e.g., `@request-suite/request-api-client/v1/requests`) that map to older endpoints. These barrels are introduced only when we need to support multiple versions in parallel.
+- When legacy support is required, use explicit subpath barrels (e.g., `@request/request-network-api-client/v1/requests`) that map to older endpoints. These barrels are introduced only when we need to support multiple versions in parallel.
 - Version-specific barrels reuse the same HTTP pipeline and surface identical method names-the version difference lives in the request path and generated types.
 
 ## Available Tooling
@@ -429,7 +429,7 @@ All domain methods honour the runtime validation toggle and leverage operationId
 
 ## Working with the OpenAPI Spec
 
-- The canonical API definition is downloaded via `pnpm run fetch:openapi`, which now writes the latest schema into the shared contracts package at `@request-suite/request-client-contracts/specs/openapi/request-network-openapi.json` alongside metadata (`request-network-openapi.meta.json`).
+- The canonical API definition is downloaded via `pnpm run fetch:openapi`, which now writes the latest schema into the shared contracts package at `@request/request-network-api-contracts/specs/openapi/request-network-openapi.json` alongside metadata (`request-network-openapi.meta.json`).
 - `pnpm run generate:types` converts that shared spec into TypeScript exports at `src/generated/openapi-types.ts`. Do not hand-edit the generated file.
 - Commit both the raw spec changes under `packages/request-client-contracts/specs/` and the regenerated outputs in this package so diffs surface upstream API updates during review.
 - `pnpm run generate:zod` emits Zod schemas (by operationId) and registers them. Parsers are grouped by tag/controller so domains lazy‑load only what they need.
@@ -470,14 +470,14 @@ current surface so contributors can integrate without guesswork.
 - Use presets via `RequestEnvironment`:
   
   ```ts
-  import { createRequestClient, RequestEnvironment } from '@request-suite/request-api-client';
+  import { createRequestClient, RequestEnvironment } from '@request/request-network-api-client';
   const client = createRequestClient({ baseUrl: RequestEnvironment.production, apiKey: process.env.REQUEST_API_KEY });
   ```
 
 - Or load from env variables with `createRequestClientFromEnv()`:
   
   ```ts
-  import { createRequestClientFromEnv } from '@request-suite/request-api-client';
+  import { createRequestClientFromEnv } from '@request/request-network-api-client';
   const client = createRequestClientFromEnv();
   // Reads REQUEST_API_URL, REQUEST_API_KEY, REQUEST_CLIENT_ID (falls back to legacy REQUEST_SDK_* vars)
   ```

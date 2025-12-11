@@ -28,4 +28,4 @@ const routes = await client.requests.getPaymentRoutes(request.requestId!, { wall
 - `create` validates request bodies before dispatch and returns `{ paymentReference, requestId }`.
 - `getPaymentCalldata` returns `{ kind: 'calldata' | 'paymentIntent', ... }` so callers can switch by `kind`.
 - Per-call overrides accept `{ signal, timeoutMs, validation }` for transport control.
-- Legacy request endpoints remain available via `createRequestsV1Api(client.http)` or the `@request-suite/request-api-client/v1/requests` barrel (includes status polling and recurrence helpers).
+- Legacy request endpoints remain available via `createRequestsV1Api(client.http)` or the `@request/request-network-api-client/v1/requests` barrel (includes status polling and recurrence helpers).

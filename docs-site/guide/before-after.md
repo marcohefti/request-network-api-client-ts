@@ -40,8 +40,8 @@ const payout = await resp.json(); // { transactions: [...], requestId, ... }
 After (our client)
 
 ```ts
-import { createRequestClient, browserFetchAdapter, isRequestApiError } from '@request-suite/request-api-client';
-import { executePaymentTransactions } from '@request-suite/request-api-client/payments';
+import { createRequestClient, browserFetchAdapter, isRequestApiError } from '@request/request-network-api-client';
+import { executePaymentTransactions } from '@request/request-network-api-client/payments';
 
 const client = createRequestClient({
   baseUrl: process.env.NEXT_PUBLIC_REQUEST_API_URL,
@@ -87,7 +87,7 @@ const { routes, platformFee } = res.data;
 After (our client)
 
 ```ts
-import { createRequestClient } from '@request-suite/request-api-client';
+import { createRequestClient } from '@request/request-network-api-client';
 
 const client = createRequestClient({
   baseUrl: process.env.REQUEST_API_URL,

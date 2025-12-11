@@ -9,7 +9,7 @@ import { webhooks } from "../../src";
 export const TEST_SECRET = webhooks.testing.DEFAULT_TEST_WEBHOOK_SECRET;
 
 const require = createRequire(import.meta.url);
-const contractsPackagePath = require.resolve("@request-suite/request-client-contracts/package.json");
+const contractsPackagePath = require.resolve("@request/request-network-api-contracts/package.json");
 const FIXTURES_DIR = path.join(path.dirname(contractsPackagePath), "fixtures", "webhooks");
 
 export function loadFixture(name: string): Record<string, unknown> {

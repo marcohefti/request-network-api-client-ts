@@ -3,7 +3,7 @@
 All HTTP failures are converted to `RequestApiError` with `status`, `code`, `detail`, `errors[]`, and correlation IDs. Call `error.toJSON()` for a structured snapshot that is safe to log or send to monitoring systems.
 
 ```ts
-import { isRequestApiError } from '@request-suite/request-api-client';
+import { isRequestApiError } from '@request/request-network-api-client';
 
 try {
   await client.currencies.list();

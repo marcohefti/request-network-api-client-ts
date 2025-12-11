@@ -5,7 +5,7 @@
 The client exposes a fetch-based HTTP client with interceptors for retry and logging.
 
 ```ts
-import { createHttpClient } from '@request-suite/request-api-client';
+import { createHttpClient } from '@request/request-network-api-client';
 
 const http = createHttpClient({ baseUrl: 'https://api.request.network', apiKey: '...' });
 
