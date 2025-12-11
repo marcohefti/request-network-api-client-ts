@@ -1,4 +1,4 @@
-# @request/request-network-api-client
+# @marcohefti/request-network-api-client
 
 TypeScript API client for the Request Network hosted API. The goal is
 to provide typed, ergonomic helpers for the API domains showcased in the Request
