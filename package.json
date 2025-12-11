@@ -42,10 +42,7 @@
     "fetch:openapi": "node scripts/fetch-openapi.mjs",
     "generate:types": "node scripts/generate-types.mjs",
     "generate:zod": "node scripts/generate-zod.mjs",
-    "prepare:spec": "pnpm run fetch:openapi && pnpm run generate:types && pnpm run generate:zod",
-    "docs:dev": "vitepress dev docs-site",
-    "docs:build": "vitepress build docs-site",
-    "docs:preview": "vitepress preview docs-site"
+    "prepare:spec": "pnpm run fetch:openapi && pnpm run generate:types && pnpm run generate:zod"
   },
   "main": "./dist/cjs/index.js",
   "module": "./dist/esm/index.js",
@@ -161,7 +158,6 @@
     "tsup": "^8.5.0",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.46.2",
-    "vitepress": "^1.6.4",
     "vitest": "^4.0.5",
     "tsx": "^4.19.2"
   }

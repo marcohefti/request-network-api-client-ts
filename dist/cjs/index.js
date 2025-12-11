@@ -3385,8 +3385,8 @@ function isAgreementRejected(payload) {
 }
 function complianceStatusSummary(payload) {
   const parts = [];
-  const kyc = payload.kycStatus ? String(payload.kycStatus).replace(/_/g, " ") : "unknown";
-  const agreement = payload.agreementStatus ? String(payload.agreementStatus).replace(/_/g, " ") : "unknown";
+  const kyc = payload.kycStatus ? payload.kycStatus.replace(/_/g, " ") : "unknown";
+  const agreement = payload.agreementStatus ? payload.agreementStatus.replace(/_/g, " ") : "unknown";
   parts.push(`KYC: ${kyc}`);
   parts.push(`Agreement: ${agreement}`);
   if (payload.clientUserId) {

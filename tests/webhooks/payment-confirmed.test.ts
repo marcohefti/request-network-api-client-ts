@@ -86,7 +86,7 @@ describe("webhooks.payment.confirmed", () => {
     const calls: string[] = [];
 
     webhooks.events.onPaymentConfirmed(dispatcher, (eventPayload) => {
-      const requestId = String(eventPayload.requestId ?? "");
+      const requestId = eventPayload.requestId ? JSON.stringify(eventPayload.requestId) : "";
       calls.push(`first:${requestId}`);
     });
     webhooks.events.onPaymentConfirmed(dispatcher, (_, ctx) => {
@@ -104,7 +104,7 @@ describe("webhooks.payment.confirmed", () => {
 
     await dispatcher.dispatch(parsed, { source: "unit-test" });
 
-    const expectedRequestId = String(payload.requestId ?? "");
+    const expectedRequestId = payload.requestId ? JSON.stringify(payload.requestId) : "";
 
     expect(calls).toEqual([`first:${expectedRequestId}`, `second:${signature}`]);
   });
