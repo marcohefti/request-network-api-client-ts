@@ -10,7 +10,7 @@
   - Offer extensibility for future features (webhooks, analytics, caching).
 - **Non-Goals (for the initial release)**
   - Implement full webhook verification or signer utilities (stub included for follow-up).
-  - Provide UI elements or React hooks (lives in `packages/request-react`).
+  - Provide UI elements or React hooks (these live outside this library).
 
 See also - docs site: [Scope & Positioning](/guide/scope), [Before/After](/guide/before-after)
 
@@ -24,7 +24,7 @@ See also - docs site: [Quick Start](/guide/quick-start)
 ## 3. High-Level Package Layout
 
 ```
-packages/request-api-client/
+.
 ├── docs/
 │   ├── ARCHITECTURE.md
 │   ├── TESTING.md
@@ -270,7 +270,7 @@ Outstanding webhook schema gaps (track in issue backlog until Request publishes 
 - `WebhookDispatcher` fans out events to handlers registered via the typed helpers under `webhooks.events.*`. Registration order is preserved, and helper predicates (`isBouncedFailure`, `isProcessingTerminalStatus`, `isPaymentDetailApproved`, `isKycComplete`, etc.) narrow payloads for ergonomics.
 - Testing utilities live under `webhooks.testing`: `generateTestWebhookSignature`, `createMockWebhookRequest/Response`, `withWebhookVerificationDisabled`, and setters for the bypass flag. Unit suites in `tests/webhooks/**` consume these helpers so downstream packages can mirror the pattern.
 - A parity guard (`tests/webhooks/event-parity.test.ts`) keeps `WEBHOOK_EVENT_NAMES` aligned with `@marcohefti/request-network-api-contracts/specs/webhooks/request-network-webhooks.json`. Update the spec first when introducing new events.
-- `examples/webhooks/local-listener.ts` spins up an Express server that wires the middleware and dispatcher together. Run it (plus Cloudflare Tunnel) with `pnpm --filter "./packages/request-api-client" webhook:dev:all`. The `tunnel:webhook` script shells out to `pnpm dlx cloudflared tunnel --url http://localhost:8787` by default, honours `REQUEST_WEBHOOK_TUNNEL_HOSTNAME`, and switches to `pnpm dlx cloudflared tunnel run <name>` when `REQUEST_WEBHOOK_TUNNEL_NAME` is present. `REQUEST_WEBHOOK_PUBLIC_URL` (optional) stores the public tunnel URL alongside `REQUEST_WEBHOOK_SECRET` for operator handoffs.
+- `examples/webhooks/local-listener.ts` spins up an Express server that wires the middleware and dispatcher together. Run it (plus Cloudflare Tunnel) with `pnpm webhook:dev:all`. The `tunnel:webhook` script shells out to `pnpm dlx cloudflared tunnel --url http://localhost:8787` by default, honours `REQUEST_WEBHOOK_TUNNEL_HOSTNAME`, and switches to `pnpm dlx cloudflared tunnel run <name>` when `REQUEST_WEBHOOK_TUNNEL_NAME` is present. `REQUEST_WEBHOOK_PUBLIC_URL` (optional) stores the public tunnel URL alongside `REQUEST_WEBHOOK_SECRET` for operator handoffs.
   - Detailed operator checklist lives in `docs/WEBHOOKS.md`.
 
 ## 12. Testing Strategy
@@ -307,7 +307,7 @@ See also - docs site: [Quick Start](/guide/quick-start), [Before/After](/guide/b
 - Rate limit telemetry (surfacing headers or events for observability).
 - Retry policy customization (pluggable strategies).
 - Optional caching layer for currency routes.
-- React hooks live in `packages/request-react` but should reuse shared modules.
+- React hooks and UI components can be built on top of this library by reusing shared modules.
 - Extend webhook coverage once Request publishes the remaining event identifiers (partial/refunded lifecycle, additional headers) and update the spec/fixtures accordingly.
 
 ---

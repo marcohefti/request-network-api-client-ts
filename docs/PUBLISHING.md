@@ -30,9 +30,7 @@ Use this checklist when preparing public releases of
   - `pnpm tsc`
   - `pnpm test`
   - `pnpm build`
-- [ ] Optionally run the full matrix locally before publishing:
-  - `pnpm coverage`
-  - `pnpm --filter "./packages/request-network-api-client-ts" coverage:matrix` (or `test:matrix`) from the monorepo root.
+- [ ] Optionally run additional coverage or Node version matrices locally before publishing (for example, a `coverage:matrix` script that mirrors your CI configuration).
 
 ### Documentation & Examples (0.5.x)
 - [x] Keep `README.md` minimal: purpose, installation, quick start, compatibility, and links into `docs/*.md` and `docs-site/`.

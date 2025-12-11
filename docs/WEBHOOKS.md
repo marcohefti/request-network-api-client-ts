@@ -5,15 +5,20 @@ This guide shows how to configure a local webhook listener, expose it via Cloudf
 ## Prerequisites
 
 - Node.js ≥ 20.x and pnpm 10.17.1 (per repo toolchain)
-- `pnpm install` (or `pnpm install --filter "./packages/request-network-api-client-ts"`)
+- `pnpm install`
 - An API key that can create webhooks in the Request API Portal
 - Cloudflare Tunnel (`cloudflared`) installed locally
   - macOS: `brew install cloudflared`
   - Other platforms: see [Cloudflare’s docs](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/get-started/)
 
-## 1. Populate the local env file
+## 1. Populate environment variables
 
-Update `env/request-api-client.local.env` (copy the `.example` if it doesn’t exist) and fill the credentials you already have:
+Create a `.env`‑style file for your webhook tests (or export the variables directly in your shell). The easiest approach is:
+
+- Copy `env/request-api-client.local.env.example` in this repository to
+  `env/request-api-client.local.env`.
+- Set `REQUEST_API_CLIENT_ENV_FILE=env/request-api-client.local.env` before
+  running the webhook scripts.
 
 ```dotenv
 REQUEST_API_KEY=...
@@ -63,7 +68,7 @@ What happens:
   - `pnpm dlx cloudflared tunnel run <REQUEST_WEBHOOK_TUNNEL_NAME>` when the name is present (persistent hostname).
   - `pnpm dlx cloudflared tunnel --url http://localhost:8787` otherwise (quick tunnel). Set `REQUEST_WEBHOOK_TUNNEL_HOSTNAME` to request a specific quick-tunnel hostname.
 
-Leave the command running. Both processes stream logs and exit together when you press `Ctrl+C`. The scripts load `env/request-api-client.local.env` automatically, so you don’t have to export variables manually.
+Leave the command running. Both processes stream logs and exit together when you press `Ctrl+C`. The scripts load environment variables via the shared env loader (honouring `REQUEST_API_CLIENT_ENV_FILE` and workspace defaults), so you don’t have to export variables manually.
 
 ## 4. Register the webhook & capture the secret
 

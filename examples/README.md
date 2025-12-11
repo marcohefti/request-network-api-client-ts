@@ -20,7 +20,7 @@ This folder contains minimal, copy‑pasteable examples for @marcohefti/request-
 
    ```sh
    export REQUEST_API_KEY=your_api_portal_key
-   node packages/request-network-api-client-ts/examples/node/quick-start.mjs
+   node examples/node/quick-start.mjs
    ```
 
    The script creates a client via `createRequestClientFromEnv()`, lists currencies, exercises the legacy currencies facade, and performs a sample payments search.
@@ -45,13 +45,13 @@ The browser example expects a bundler (Vite, Webpack, etc.) or an import map tha
        <script type="importmap">
          {
            "imports": {
-           "@marcohefti/request-network-api-client": "/packages/request-network-api-client-ts/dist/esm/index.js"
+           "@marcohefti/request-network-api-client": "/dist/esm/index.js"
            }
          }
        </script>
      </head>
      <body>
-       <script type="module" src="/packages/request-network-api-client-ts/examples/browser/quick-start.html"></script>
+       <script type="module" src="/examples/browser/quick-start.html"></script>
      </body>
    </html>
    ```

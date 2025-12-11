@@ -103,10 +103,13 @@ Make sure `req.rawBody` is populated as described in the **Capturing the Raw Bod
 
 1. Start the bundled listener and tunnel together (stop with `Ctrl+C` when finished):
    ```sh
-   pnpm --filter "./packages/request-api-client" webhook:dev:all
+   pnpm webhook:dev:all
    ```
    The listener runs on `http://localhost:8787/webhook`. The tunnel shells out to `pnpm dlx cloudflared tunnel --url http://localhost:8787`.
-   - Prefer separate processes? Use `pnpm --filter "./packages/request-api-client" dev:webhook` and `pnpm --filter "./packages/request-api-client" tunnel:webhook`.
+   - Prefer separate processes? Use `pnpm dev:webhook` and `pnpm tunnel:webhook`.
+   - Point `REQUEST_API_CLIENT_ENV_FILE` at your repo-local env file (for example
+     `env/request-api-client.local.env`) so the scripts can pick up credentials
+     without manual `export` steps.
    - Set `REQUEST_WEBHOOK_TUNNEL_HOSTNAME` to request a specific hostname (requires `cloudflared login`). Provide `REQUEST_WEBHOOK_TUNNEL_NAME` to run an existing named tunnel via `cloudflared tunnel run <name>` for a persistent URL.
    - If `REQUEST_WEBHOOK_SECRET` is missing, the listener starts in verification-bypass mode with a placeholder secret so you can register the webhook. Update the env and restart once the real secret is available.
    - Need more detail? See `docs/WEBHOOKS.md` in the repository for the full checklist.

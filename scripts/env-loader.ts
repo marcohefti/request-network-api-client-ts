@@ -12,10 +12,13 @@ function getEnvPath(): string | undefined {
   if (process.env.REQUEST_API_CLIENT_ENV_FILE) {
     return resolve(process.cwd(), process.env.REQUEST_API_CLIENT_ENV_FILE);
   }
-  const workspaceRoot = resolve(process.cwd(), "..", "..");
   const candidates = [
-    resolve(workspaceRoot, "env/request-api-client.local.env"),
-    resolve(workspaceRoot, "env/request-api-client.integration.env"),
+    // Repo-local env files (preferred for standalone usage)
+    resolve(process.cwd(), "env/request-api-client.local.env"),
+    resolve(process.cwd(), "env/request-api-client.integration.env"),
+    // Backwards-compatible workspace fallbacks
+    resolve(process.cwd(), "..", "..", "env/request-api-client.local.env"),
+    resolve(process.cwd(), "..", "..", "env/request-api-client.integration.env"),
   ];
   for (const candidate of candidates) {
     if (existsSync(candidate)) {
@@ -49,5 +52,5 @@ function stripQuotes(value: string): string {
 }
 
 export function resolveProjectRoot(): string {
-  return resolve(process.cwd(), "..", "..");
+  return process.cwd();
 }

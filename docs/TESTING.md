@@ -34,14 +34,25 @@ When new scripts are introduced, update `package.json`, `docs/TESTING.md`, and t
 - Run only the webhook-focused suites during local development with:
 
   ```sh
-  pnpm --filter "./packages/request-api-client" test -- --run tests/webhooks/*.test.ts
+  pnpm test -- --run tests/webhooks/*.test.ts
   ```
 
 - Fixtures live in `@marcohefti/request-network-api-contracts/fixtures/webhooks/**` and mirror the payloads defined in `@marcohefti/request-network-api-contracts/specs/webhooks/request-network-webhooks.json`. Update the shared contracts package first when new events or fields land, then refresh client helpers as needed.
 
 ## Environment Variables
 
-Integration suites read from a single env file. Copy `env/request-api-client.integration.env.example` to `env/request-api-client.local.env` (gitignored) and populate the values before running `pnpm --filter "./packages/request-api-client" test:live`.
+Integration suites read from environment variables. The recommended setup is:
+
+- Copy `env/request-api-client.local.env.example` in this repository to
+  `env/request-api-client.local.env`.
+- Either export the variables manually in your shell **or** set
+  `REQUEST_API_CLIENT_ENV_FILE=env/request-api-client.local.env` before running
+  `pnpm test:live`.
+
+The env loader also falls back to a workspace-level file (for example
+`env/request-api-client.local.env` at the workspace root) when you consume this
+package inside a larger monorepo, but standalone usage should rely on the
+repo-local `env/` directory.
 
 **Required**
 
@@ -74,7 +85,7 @@ The default live scenario now performs a pure wallet-to-wallet flow (create requ
 Use the webhook-focused integration suite when you need to validate recurring request lifecycles end-to-end:
 
 ```sh
-pnpm --filter "./packages/request-api-client" test -- --run tests/integration/live/webhooks-recurring.test.ts
+pnpm test -- --run tests/integration/live/webhooks-recurring.test.ts
 ```
 
 **Extra env requirements**
@@ -104,13 +115,13 @@ Follow these steps whenever you need a real webhook secret or want to replay liv
    See [Cloudflare’s docs](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/get-started/) for additional platforms.
 2. **Start the listener + tunnel together** (stop with `Ctrl+C` when you are finished):  
    ```sh
-   pnpm --filter "./packages/request-api-client" webhook:dev:all
+   pnpm webhook:dev:all
    ```  
    The listener binds to `http://localhost:8787/webhook` and the tunnel shells out to `pnpm dlx cloudflared tunnel --url http://localhost:8787`. Both processes stream logs and exit together.
-   - Run the pieces separately with `pnpm --filter "./packages/request-api-client" dev:webhook` and `pnpm --filter "./packages/request-api-client" tunnel:webhook` when you need to restart one side.
+   - Run the pieces separately with `pnpm dev:webhook` and `pnpm tunnel:webhook` when you need to restart one side.
    - Set `REQUEST_WEBHOOK_TUNNEL_HOSTNAME` to request a specific hostname (requires `cloudflared login`). Provide `REQUEST_WEBHOOK_TUNNEL_NAME` to run an existing named tunnel via `cloudflared tunnel run <name>` for a persistent URL.
    - Missing `REQUEST_WEBHOOK_SECRET`? The listener automatically enters verification-bypass mode with a placeholder secret so you can create the webhook. Update the env and restart once you copy the real secret from the portal.
-   - The scripts load `env/request-api-client.local.env` automatically. No manual `export` step is required.
+   - The scripts load environment variables via the shared env loader (using `REQUEST_API_CLIENT_ENV_FILE` or workspace defaults), so no manual `export` step is required.
 3. **Grab the public URL from the tunnel logs** (for example, `https://purple-bird.trycloudflare.com`). Copy the value (including the `/webhook` suffix) and, if you want to track it in your env file, set `REQUEST_WEBHOOK_PUBLIC_URL`.
    - To keep a stable hostname, authenticate with `cloudflared login`, create a named tunnel, and map it to a CNAME you control. Cloudflare still routes traffic through the same edge network while giving you a predictable URL.
 4. **Register the webhook:** open the Request API Portal -> Webhooks, create a webhook pointing at the Cloudflare URL, and copy the generated secret into `REQUEST_WEBHOOK_SECRET`. Restart the local listener so it re-reads the env file.
@@ -187,7 +198,7 @@ Before writing tests or implementation, capture answers (in PR description or ta
 
 Once the client exposes its first feature slice, maintain a minimal smoke script (`examples/smoke.mjs`) that:
 
-1. Builds the package (`pnpm --filter "./packages/request-api-client" build`).
+1. Builds the package (`pnpm build`).
 2. Imports the built bundle from `dist/` using Node 20 (rerun with Node 24 when testing new runtime features).
 3. Instantiates a `RequestClient` with sandbox credentials and performs a simple request (e.g., list currencies).
 
