@@ -79,6 +79,11 @@ For deeper details (HTTP client options, domain facades, webhooks, error model),
 - Node.js: 20 / 22 / 24
 - Package manager: pnpm 10.17.1 (recommended via `corepack enable pnpm@10.17.1`)
 
+## Versioning & support
+
+- Versioning: this package follows SemVer, but while the major version is `0.x`, minor and patch releases may include breaking changes as the surface stabilises.
+- Support & issues: report bugs or request features via GitHub issues on [`marcohefti/request-network-api-client-ts`](https://github.com/marcohefti/request-network-api-client-ts).
+
 ## Development
 
 Common commands:
@@ -90,4 +95,3 @@ Common commands:
 
 See [`docs/TESTING.md`](docs/TESTING.md) for the full test/coverage matrix and live integration setup, and
 [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for the HTTP pipeline and domain layout.
-

@@ -5,7 +5,7 @@ This guide shows how to configure a local webhook listener, expose it via Cloudf
 ## Prerequisites
 
 - Node.js ≥ 20.x and pnpm 10.17.1 (per repo toolchain)
-- `pnpm install --filter "./packages/request-api-client"`
+- `pnpm install` (or `pnpm install --filter "./packages/request-network-api-client-ts"`)
 - An API key that can create webhooks in the Request API Portal
 - Cloudflare Tunnel (`cloudflared`) installed locally
   - macOS: `brew install cloudflared`
@@ -53,7 +53,7 @@ Skip this section if rotating quick tunnels is fine **or** if your Cloudflare lo
 ## 3. Start the listener + tunnel via pnpm
 
 ```sh
-pnpm --filter "./packages/request-api-client" webhook:dev:all
+pnpm webhook:dev:all
 ```
 
 What happens:
@@ -71,7 +71,7 @@ Leave the command running. Both processes stream logs and exit together when you
 2. Open the Request API Portal -> Webhooks -> “Create webhook”.
 3. Paste the URL, select the events you need, and submit.
 4. Copy the generated signing secret into `REQUEST_WEBHOOK_SECRET` inside `env/request-api-client.local.env`.
-5. Restart `pnpm --filter "./packages/request-api-client" webhook:dev:all` so the listener picks up the new secret and re-enables verification.
+5. Restart `pnpm webhook:dev:all` so the listener picks up the new secret and re-enables verification.
 
 Optionally, set `REQUEST_WEBHOOK_PUBLIC_URL` to the same URL so tooling and logs reference it explicitly.
 
@@ -83,13 +83,13 @@ Once the secret is in place (and the listener is running), you can hit staging f
 
 ```sh
 # Start listener + tunnel (stop with Ctrl+C)
-pnpm --filter "./packages/request-api-client" webhook:dev:all
+pnpm webhook:dev:all
 
 # Listener only
-pnpm --filter "./packages/request-api-client" dev:webhook
+pnpm dev:webhook
 
 # Tunnel only (quick tunnel or named tunnel depending on env vars)
-pnpm --filter "./packages/request-api-client" tunnel:webhook
+pnpm tunnel:webhook
 ```
 
 Restart `webhook:dev:all` whenever you rotate secrets or change env vars.

@@ -13,14 +13,14 @@ This folder contains minimal, copy‑pasteable examples for @marcohefti/request-
 1. Build the client so Node can resolve the self‑reference import:
 
    ```sh
-   pnpm --filter "./packages/request-api-client" build
+   pnpm build
    ```
 
 2. Export your API key and run the script:
 
    ```sh
    export REQUEST_API_KEY=your_api_portal_key
-   node packages/request-api-client/examples/node/quick-start.mjs
+   node packages/request-network-api-client-ts/examples/node/quick-start.mjs
    ```
 
    The script creates a client via `createRequestClientFromEnv()`, lists currencies, exercises the legacy currencies facade, and performs a sample payments search.
@@ -32,7 +32,7 @@ The browser example expects a bundler (Vite, Webpack, etc.) or an import map tha
 1. Build the client:
 
    ```sh
-   pnpm --filter "./packages/request-api-client" build
+   pnpm build
    ```
 
 2. Use a tiny import map (for a quick local demo without a bundler):
@@ -45,13 +45,13 @@ The browser example expects a bundler (Vite, Webpack, etc.) or an import map tha
        <script type="importmap">
          {
            "imports": {
-             "@marcohefti/request-network-api-client": "/dist/esm/index.js"
+           "@marcohefti/request-network-api-client": "/packages/request-network-api-client-ts/dist/esm/index.js"
            }
          }
        </script>
      </head>
      <body>
-       <script type="module" src="/packages/request-api-client/examples/browser/quick-start.html"></script>
+       <script type="module" src="/packages/request-network-api-client-ts/examples/browser/quick-start.html"></script>
      </body>
    </html>
    ```
@@ -62,4 +62,4 @@ The browser example expects a bundler (Vite, Webpack, etc.) or an import map tha
 
 - Browser/Edge requires a Client ID. Browsers set the `Origin` header automatically.
 - For advanced setups, prefer a bundler and import the package normally: `import { createRequestClient } from '@marcohefti/request-network-api-client'`.
-- If you change code, rebuild with `pnpm --filter "./packages/request-api-client" build` before reloading examples.
+- If you change code, rebuild with `pnpm build` before reloading examples.

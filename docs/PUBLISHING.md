@@ -36,16 +36,16 @@ Use this checklist when preparing public releases of
 
 ### Documentation & Examples (0.5.x)
 - [x] Keep `README.md` minimal: purpose, installation, quick start, compatibility, and links into `docs/*.md` and `docs-site/`.
-- [ ] Ensure `docs/ARCHITECTURE.md`, `docs/TESTING.md`, `docs/ENDPOINTS.md`, and `docs/WEBHOOKS.md` are fresh enough to match the 0.5.0 surface (no obvious lies or deprecated flows).
-- [ ] Ensure at least one runnable example in `examples/` works against the current Request API (e.g., a Node script that lists currencies).
+- [x] Ensure `docs/ARCHITECTURE.md`, `docs/TESTING.md`, `docs/ENDPOINTS.md`, and `docs/WEBHOOKS.md` are fresh enough to match the 0.5.0 surface (no obvious lies or deprecated flows).
+- [x] Ensure at least one runnable example in `examples/` works against the current Request API (e.g., a Node script that lists currencies).
 - [ ] (Optional for 0.5.x) Generate and publish TypeDoc (or similar) API reference, linked from `README.md`.
 - [ ] (Optional for 0.5.x) Keep the VitePress docs site (`docs-site/`) building locally via:
   - `pnpm docs:dev`
   - `pnpm docs:build`
 
 ### Quality & Support (0.5.x)
-- [ ] Document versioning policy (SemVer with 0.x “breaking changes may occur” caveat) in `README.md`.
-- [ ] Add a short “Support & issues” section in `README.md` pointing to the GitHub repo for bug reports and questions.
+- [x] Document versioning policy (SemVer with 0.x “breaking changes may occur” caveat) in `README.md`.
+- [x] Add a short “Support & issues” section in `README.md` pointing to the GitHub repo for bug reports and questions.
 - [ ] Confirm error handling behaviour and retry defaults are described at a high level in `docs/WEBHOOKS.md`, `docs/ENDPOINTS.md`, or the docs site.
 
 ### Release Execution (0.5.0)

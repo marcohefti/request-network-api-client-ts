@@ -14,14 +14,12 @@ The Vitest + MSW suites back every facade and enforce OpenAPI parity so future c
 
 | Command | Status | Description |
 | --- | --- | --- |
-| `pnpm --filter "./packages/request-api-client" test` | Available | Runs unit tests. Uses MSW handlers stored alongside fixtures under `tests/msw`. |
-| `pnpm --filter "./packages/request-api-client" typecheck` | Available | Runs `tsc --project tsconfig.build.json --noEmit` *and* `tsconfig.vitest.json` so source + test files stay in sync. |
-| `pnpm --filter "./packages/request-api-client" test:live` | Available | Executes the live integration suite under `tests/integration/live/**`. MSW is disabled so requests hit the real API. Point the env values at Sepolia or mainnet depending on what you want to validate. |
-| `pnpm --filter "./packages/request-api-client" coverage` | Available | Runs Vitest with `--coverage` and enforces thresholds (≥80 %). |
-| `pnpm --filter "./packages/request-api-client" build` | Available | Bundles CJS/ESM/d.ts outputs via tsup. Mirrors the CI packaging stage. |
-| `pnpm --filter "./packages/request-api-client" test:watch` | Available | Starts Vitest in watch mode (unit + integration when env vars are present). |
-| `pnpm --filter "./packages/request-api-client" test:unit` | Planned | Wrapper around `vitest run` that skips integration suites. |
-| `pnpm --filter "./packages/request-api-client" test:types` | Planned | Additional structural typing assertions layered on top of `pnpm typecheck`. |
+| `pnpm test` | Available | Runs unit tests. Uses MSW handlers stored alongside fixtures under `tests/msw`. |
+| `pnpm typecheck` | Available | Runs `tsc --project tsconfig.build.json --noEmit` *and* `tsconfig.vitest.json` so source + test files stay in sync. |
+| `pnpm test:live` | Available | Executes the live integration suite under `tests/integration/live/**`. MSW is disabled so requests hit the real API. Point the env values at Sepolia or mainnet depending on what you want to validate. |
+| `pnpm coverage` | Available | Runs Vitest with `--coverage` and enforces thresholds (≥80 %). |
+| `pnpm build` | Available | Bundles CJS/ESM/d.ts outputs via tsup. Mirrors the CI packaging stage. |
+| `pnpm test:watch` | Available | Starts Vitest in watch mode (unit + integration when env vars are present). |
 
 When new scripts are introduced, update `package.json`, `docs/TESTING.md`, and the root `AGENTS.md` so automation stays consistent.
 
@@ -168,11 +166,11 @@ Vitest’s V8 coverage reporter enforces ≥80 % line/function thresholds (bra
 
 | Check | Details |
 | --- | --- |
-| Lint | CI runs `pnpm --filter "./packages/request-api-client" lint` on Node 20/22/24. |
-| Typecheck | `pnpm --filter "./packages/request-api-client" typecheck` executes on the same Node matrix. |
-| Unit tests + coverage | `pnpm --filter "./packages/request-api-client" test` enforces coverage thresholds on Node 20/22/24. |
-| Packaging guard | Node 20 job builds, then runs `pnpm --filter "./packages/request-api-client" pack --pack-destination tmp/pack --json`. |
-| OpenAPI regen | Guard job runs `pnpm --filter "./packages/request-api-client" generate:types` + `generate:zod` and fails on `git diff --exit-code`. |
+| Lint | CI runs `pnpm lint` on Node 20/22/24. |
+| Typecheck | `pnpm typecheck` executes on the same Node matrix. |
+| Unit tests + coverage | `pnpm test` enforces coverage thresholds on Node 20/22/24. |
+| Packaging guard | Node 20 job builds, then runs `pnpm pack --pack-destination tmp/pack --json`. |
+| OpenAPI regen | Guard job runs `pnpm generate:types` + `pnpm generate:zod` and fails on `git diff --exit-code`. |
 | Integration tests | Separate workflow triggered manually or on release branches. Uses the sandbox env vars above. |
 
 ## Reason Step Checklist
