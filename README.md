@@ -1,8 +1,12 @@
 # Request Network API Client (TypeScript)
 
-[![npm version](https://img.shields.io/npm/v/@marcohefti/request-network-api-client.svg)](https://www.npmjs.com/package/@marcohefti/request-network-api-client)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
-[![Node.js CI](https://github.com/marcohefti/request-network-api-client-ts/actions/workflows/ci.yml/badge.svg)](https://github.com/marcohefti/request-network-api-client-ts/actions/workflows/ci.yml)
+[![npm version](https://img.shields.io/npm/v/@marcohefti/request-network-api-client.svg?style=flat-square)](https://www.npmjs.com/package/@marcohefti/request-network-api-client)
+[![Node.js CI](https://img.shields.io/github/actions/workflow/status/marcohefti/request-network-api-client-ts/ci.yml?branch=main&label=tests&style=flat-square)](https://github.com/marcohefti/request-network-api-client-ts/actions/workflows/ci.yml)
+[![Node Version](https://img.shields.io/node/v/@marcohefti/request-network-api-client.svg?style=flat-square)](https://www.npmjs.com/package/@marcohefti/request-network-api-client)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](https://opensource.org/licenses/MIT)
+[![Total Downloads](https://img.shields.io/npm/dt/@marcohefti/request-network-api-client.svg?style=flat-square)](https://www.npmjs.com/package/@marcohefti/request-network-api-client)
+[![Bundle Size](https://img.shields.io/bundlephobia/minzip/@marcohefti/request-network-api-client?style=flat-square)](https://bundlephobia.com/package/@marcohefti/request-network-api-client)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue?style=flat-square&logo=typescript)](https://www.typescriptlang.org/)
 
 TypeScript client for the Request Network hosted REST API. Provides typed, ergonomic helpers for requests, payouts, payer/compliance, client IDs, currencies, and payments, with runtime validation and webhook utilities built in.
 
