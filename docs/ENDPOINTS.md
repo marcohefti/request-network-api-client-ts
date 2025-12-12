@@ -179,7 +179,7 @@ Create a new payment request.
 const request = await client.requests.create({
   amount: '12.50',
   invoiceCurrency: 'USD',
-  paymentCurrency: 'USDC-sepolia',
+  paymentCurrency: 'ETH-sepolia-sepolia',
   payee: '0xYourWalletAddress',
   payer: '0xPayerWalletAddress', // optional
   reason: 'Invoice #1234',
@@ -312,7 +312,6 @@ Create a single payout.
 const payout = await client.payouts.create({
   payee: '0xPayeeWalletAddress',
   amount: '100.00',
-  invoiceCurrency: 'USD',
   paymentCurrency: 'USDC-mainnet',
   reason: 'Contractor payment',
 });
@@ -336,13 +335,11 @@ const batch = await client.payouts.createBatch({
     {
       payee: '0xPayee1',
       amount: '50.00',
-      invoiceCurrency: 'USD',
       paymentCurrency: 'USDC-mainnet',
     },
     {
       payee: '0xPayee2',
       amount: '75.00',
-      invoiceCurrency: 'USD',
       paymentCurrency: 'USDC-mainnet',
     },
   ],
@@ -546,7 +543,7 @@ await client.pay.payRequest({
   payee: '0xMerchantWallet',
   amount: '42.00',
   invoiceCurrency: 'USD',
-  paymentCurrency: 'USDC-sepolia',
+  paymentCurrency: 'ETH-sepolia-sepolia',
   reason: 'Product purchase',
 });
 ```

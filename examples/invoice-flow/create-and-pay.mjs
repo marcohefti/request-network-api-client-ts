@@ -39,9 +39,9 @@ async function main() {
     // 2. Create a payment request
     console.log('📝 Creating payment request...');
     const request = await client.requests.create({
-      amount: '12.50',
-      invoiceCurrency: 'USD',
-      paymentCurrency: 'USDC-sepolia',
+      amount: '0.01',
+      paymentNetwork: 'erc20-sepolia',
+      paymentCurrency: 'ETH-sepolia-sepolia',
       payee: process.env.REQUEST_PAYEE_WALLET,
       payer: process.env.REQUEST_PAYER_WALLET,
       reason: 'Example Invoice #12345',
@@ -107,8 +107,8 @@ async function main() {
     // 6. Summary
     console.log('📊 Summary:');
     console.log(`   Request ID: ${request.requestId}`);
-    console.log(`   Amount: 12.50 USD`);
-    console.log(`   Payment Currency: USDC-sepolia`);
+    console.log(`   Amount: 0.01 ETH`);
+    console.log(`   Payment Currency: ETH-sepolia-sepolia`);
     console.log(`   Status: ${status.kind}`);
     console.log(`   Available Routes: ${routes.routes.length}`);
     console.log();

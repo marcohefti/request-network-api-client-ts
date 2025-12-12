@@ -7,7 +7,7 @@ export const currenciesHandlers = [
     HttpResponse.json(
       [
         {
-          id: "USDC-sepolia",
+          id: "ETH-sepolia-sepolia",
           name: "USD Coin",
           symbol: "USDC",
           decimals: 6,

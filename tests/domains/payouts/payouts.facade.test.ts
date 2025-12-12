@@ -8,7 +8,7 @@ import { TEST_BASE_URL } from "../../utils/test-env";
 
 const PAYEE = "0xpayee" as const;
 const INVOICE_CURRENCY = "USD" as const;
-const PAYMENT_CURRENCY = "USDC-sepolia" as const;
+const PAYMENT_CURRENCY = "ETH-sepolia-sepolia" as const;
 
 describe("Payouts facade", () => {
   const client = createRequestClient({ baseUrl: TEST_BASE_URL });

@@ -130,7 +130,7 @@ async function main() {
     // Intentionally invalid request (missing required fields)
     await client.requests.create({
       amount: 'invalid',
-      invoiceCurrency: '',
+      paymentNetwork: '',
       paymentCurrency: '',
     });
   } catch (err) {

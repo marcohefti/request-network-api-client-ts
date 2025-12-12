@@ -48,10 +48,13 @@ export interface RequestClient {
  *
  * const client = createRequestClient({
  *   apiKey: process.env.REQUEST_API_KEY,
- *   logLevel: 'info',
  * });
  *
- * const tokens = await client.currencies.list({ network: 'sepolia' });
+ * const request = await client.requests.create({
+ *   amount: '0.01',
+ *   paymentNetwork: 'erc20-sepolia',
+ *   paymentCurrency: 'ETH-sepolia-sepolia',
+ * });
  * ```
  */
 export function createRequestClient(options?: CreateClientOptions): RequestClient {

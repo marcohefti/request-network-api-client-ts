@@ -142,9 +142,9 @@ Root exports (`@marcohefti/request-network-api-client`) point at REST v2 endpoin
 
 ```ts
 const request = await client.requests.create({
-  amount: '12.5',
-  invoiceCurrency: 'USD',
-  paymentCurrency: 'USDC-sepolia',
+  amount: '0.01',
+  paymentNetwork: 'erc20-sepolia',
+  paymentCurrency: 'ETH-sepolia-sepolia',
 });
 console.log('Request ID:', request.requestId);
 ```
@@ -161,9 +161,9 @@ console.log('Total payments:', results.pagination.total);
 ```ts
 await client.pay.payRequest({
   payee: '0xmerchant',
-  amount: '42',
-  invoiceCurrency: 'USD',
-  paymentCurrency: 'USDC-sepolia',
+  amount: '0.5',
+  paymentNetwork: 'erc20-sepolia',
+  paymentCurrency: 'ETH-sepolia-sepolia',
 });
 ```
 

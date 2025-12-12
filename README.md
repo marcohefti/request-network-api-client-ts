@@ -45,9 +45,9 @@ const client = createRequestClient({
 
 // Create a request
 const request = await client.requests.create({
-  amount: '12.5',
-  invoiceCurrency: 'USD',
-  paymentCurrency: 'USDC-sepolia',
+  amount: '0.01',
+  paymentNetwork: 'erc20-sepolia',
+  paymentCurrency: 'ETH-sepolia-sepolia',
 });
 
 // List currencies

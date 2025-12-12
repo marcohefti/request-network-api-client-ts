@@ -12,7 +12,7 @@ Work with payment requests, payment routes, and payment intents.
 const request = await client.requests.create({
   amount: '12.5',
   invoiceCurrency: 'USD',
-  paymentCurrency: 'USDC-sepolia',
+  paymentCurrency: 'ETH-sepolia-sepolia',
 });
 
 console.log('Request ID:', request.requestId);
@@ -83,7 +83,7 @@ const payout = await client.payouts.create({
   payee: '0xpayee',
   amount: '250',
   invoiceCurrency: 'USD',
-  paymentCurrency: 'USDC-sepolia',
+  paymentCurrency: 'ETH-sepolia-sepolia',
 });
 ```
 
@@ -96,13 +96,13 @@ const batch = await client.payouts.createBatch({
       payee: '0xpayee1',
       amount: '120',
       invoiceCurrency: 'USD',
-      paymentCurrency: 'USDC-sepolia',
+      paymentCurrency: 'ETH-sepolia-sepolia',
     },
     {
       payee: '0xpayee2',
       amount: '80',
       invoiceCurrency: 'USD',
-      paymentCurrency: 'USDC-sepolia',
+      paymentCurrency: 'ETH-sepolia-sepolia',
     },
   ],
 });
@@ -220,7 +220,7 @@ await client.pay.payRequest({
   payee: '0xmerchant',
   amount: '42',
   invoiceCurrency: 'USD',
-  paymentCurrency: 'USDC-sepolia',
+  paymentCurrency: 'ETH-sepolia-sepolia',
 });
 ```
 

@@ -33,32 +33,32 @@ async function main() {
       {
         name: 'Alice (Contractor)',
         wallet: '0x1111111111111111111111111111111111111111',
-        amount: '500.00',
+        amount: '0.5',
         reason: 'November contracting work',
       },
       {
         name: 'Bob (Freelancer)',
         wallet: '0x2222222222222222222222222222222222222222',
-        amount: '750.00',
+        amount: '0.75',
         reason: 'Design services',
       },
       {
         name: 'Carol (Developer)',
         wallet: '0x3333333333333333333333333333333333333333',
-        amount: '1200.00',
+        amount: '1.2',
         reason: 'Backend development Q4',
       },
     ];
 
     console.log(`📋 Preparing batch payout for ${payees.length} recipients:`);
     payees.forEach((payee, index) => {
-      console.log(`   ${index + 1}. ${payee.name}: $${payee.amount} USD`);
+      console.log(`   ${index + 1}. ${payee.name}: ${payee.amount} ETH`);
     });
     console.log();
 
     // Calculate total
     const total = payees.reduce((sum, p) => sum + parseFloat(p.amount), 0);
-    console.log(`💵 Total payout amount: $${total.toFixed(2)} USD\n`);
+    console.log(`💵 Total payout amount: ${total.toFixed(2)} ETH\n`);
 
     // Create batch payout
     console.log('🚀 Creating batch payout...');
@@ -66,8 +66,8 @@ async function main() {
       requests: payees.map((payee) => ({
         payee: payee.wallet,
         amount: payee.amount,
-        invoiceCurrency: 'USD',
-        paymentCurrency: 'USDC-mainnet',
+        paymentNetwork: 'erc20-sepolia',
+        paymentCurrency: 'ETH-sepolia-sepolia',
         reason: payee.reason,
       })),
     });
@@ -84,7 +84,7 @@ async function main() {
       batch.requests.forEach((request, index) => {
         console.log(`   ${index + 1}. ${payees[index].name}`);
         console.log(`      Request ID: ${request.requestId || 'N/A'}`);
-        console.log(`      Amount: $${payees[index].amount}`);
+        console.log(`      Amount: ${payees[index].amount} ETH`);
         console.log(`      Status: ${request.status || 'pending'}`);
       });
       console.log();
