@@ -13,12 +13,8 @@ function getEnvPath(): string | undefined {
     return resolve(process.cwd(), process.env.REQUEST_API_CLIENT_ENV_FILE);
   }
   const candidates = [
-    // Repo-local env files (preferred for standalone usage)
-    resolve(process.cwd(), "env/request-api-client.local.env"),
-    resolve(process.cwd(), "env/request-api-client.integration.env"),
-    // Backwards-compatible workspace fallbacks
-    resolve(process.cwd(), "..", "..", "env/request-api-client.local.env"),
-    resolve(process.cwd(), "..", "..", "env/request-api-client.integration.env"),
+    resolve(process.cwd(), ".env"),
+    resolve(process.cwd(), ".env.local"),
   ];
   for (const candidate of candidates) {
     if (existsSync(candidate)) {

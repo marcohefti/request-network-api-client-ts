@@ -43,16 +43,13 @@ When new scripts are introduced, update `package.json`, `docs/TESTING.md`, and t
 
 Integration suites read from environment variables. The recommended setup is:
 
-- Copy `env/request-api-client.local.env.example` in this repository to
-  `env/request-api-client.local.env`.
-- Either export the variables manually in your shell **or** set
-  `REQUEST_API_CLIENT_ENV_FILE=env/request-api-client.local.env` before running
-  `pnpm test:live`.
+- Copy `.env.example` to `.env` in the repository root
+- Fill in your credentials and test wallet addresses
+- The test scripts will automatically load variables from `.env`
 
-The env loader also falls back to a workspace-level file (for example
-`env/request-api-client.local.env` at the workspace root) when you consume this
-package inside a larger monorepo, but standalone usage should rely on the
-repo-local `env/` directory.
+Alternatively, you can:
+- Export variables manually in your shell before running tests
+- Set `REQUEST_API_CLIENT_ENV_FILE=path/to/custom.env` to use a custom file location
 
 **Required**
 

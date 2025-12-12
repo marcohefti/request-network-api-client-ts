@@ -54,22 +54,21 @@ async function main() {
 main();
 ```
 
-### Environment-based Configuration
+### Using Environment Variables
+
+You can configure the client using environment variables in your application:
 
 ```ts
-import { createRequestClientFromEnv } from '@marcohefti/request-network-api-client';
+import {
+  createRequestClient,
+  RequestEnvironment,
+} from '@marcohefti/request-network-api-client';
 
-const client = createRequestClientFromEnv();
-// Reads REQUEST_API_URL, REQUEST_API_KEY, REQUEST_CLIENT_ID
-// Falls back to legacy REQUEST_SDK_* variables for backwards compatibility
-```
-
-Required environment variables:
-
-```dotenv
-REQUEST_API_KEY=your-api-key
-REQUEST_CLIENT_ID=your-client-id  # optional, for frontend auth
-REQUEST_API_URL=https://api.request.network  # optional, defaults to production
+const client = createRequestClient({
+  baseUrl: process.env.REQUEST_API_URL || RequestEnvironment.production,
+  apiKey: process.env.REQUEST_API_KEY!,
+  clientId: process.env.REQUEST_CLIENT_ID,
+});
 ```
 
 ## Runtime Validation

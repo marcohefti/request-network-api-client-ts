@@ -140,12 +140,10 @@ This section shows how to configure a local webhook listener, expose it via Clou
 
 ### 1. Populate Environment Variables
 
-Create a `.env`‑style file for your webhook tests (or export the variables directly in your shell). The easiest approach is:
+Create a `.env` file for your webhook tests (or export the variables directly in your shell):
 
-- Copy `env/request-api-client.local.env.example` in this repository to
-  `env/request-api-client.local.env`.
-- Set `REQUEST_API_CLIENT_ENV_FILE=env/request-api-client.local.env` before
-  running the webhook scripts.
+- Copy `.env.example` to `.env` in the repository root
+- Fill in your credentials
 
 ```dotenv
 REQUEST_API_KEY=...
@@ -200,9 +198,9 @@ Leave the command running. Both processes stream logs and exit together when you
 ### 4. Register the Webhook & Capture the Secret
 
 1. Copy the public URL printed by Cloudflare (append `/webhook` if the suffix is missing).
-2. Open the Request API Portal -> Webhooks -> “Create webhook”.
+2. Open the Request API Portal -> Webhooks -> "Create webhook".
 3. Paste the URL, select the events you need, and submit.
-4. Copy the generated signing secret into `REQUEST_WEBHOOK_SECRET` inside `env/request-api-client.local.env`.
+4. Copy the generated signing secret into `REQUEST_WEBHOOK_SECRET` in your `.env` file.
 5. Restart `pnpm webhook:dev:all` so the listener picks up the new secret and re-enables verification.
 
 Optionally, set `REQUEST_WEBHOOK_PUBLIC_URL` to the same URL so tooling and logs reference it explicitly.

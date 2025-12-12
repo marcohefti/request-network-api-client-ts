@@ -208,11 +208,18 @@ An OpenAPI parity guard (`tests/validation/openapi-parity.test.ts`) diff-checks 
   - `RequestEnvironment.local` (`http://127.0.0.1:8080`) for proxies or self-managed gateways
   - `RequestEnvironment.staging` (legacy placeholder for partner-managed sandboxes. Request no longer operates a public staging host)
   Consumers can supply custom URLs for regional deployments.
-- **Environment variables** - `createRequestClientFromEnv()` searches for canonical variables first:
-  - `REQUEST_API_URL`
-  - `REQUEST_API_KEY`
-  - `REQUEST_CLIENT_ID`
-  If any are missing, it falls back to legacy names (`REQUEST_SDK_BASE_URL`, `REQUEST_SDK_API_KEY`, `REQUEST_SDK_CLIENT_ID`, `REQUEST_SDK_LOG_LEVEL`) to ease migration. Document both sets in README/testing guides and plan to deprecate the legacy prefixes in a future major release.
+- **Environment variables** - Applications should explicitly pass environment variables to `createRequestClient()`:
+  ```ts
+  const client = createRequestClient({
+    baseUrl: process.env.REQUEST_API_URL || RequestEnvironment.production,
+    apiKey: process.env.REQUEST_API_KEY,
+    clientId: process.env.REQUEST_CLIENT_ID,
+  });
+  ```
+  Common variables:
+  - `REQUEST_API_URL` - API base URL (optional, defaults to production)
+  - `REQUEST_API_KEY` - Server-side API key
+  - `REQUEST_CLIENT_ID` - Client ID for browser/frontend auth
   - `RequestEnvironment` presets remain available for hard-coded environments.
   - Note: `RequestEnvironment.local` (`http://127.0.0.1:8080`) is a placeholder for a locally running Request API. This repo does not start one. Tests do not use it.
 - **Fees** - Fee inputs can be supplied via environment variables (e.g., `FEE_PERCENTAGE_FOR_PAYMENT`, `FEE_ADDRESS_FOR_PAYMENT`) and per-call options. A small helper may be added later to centralize fee policies. Until then, pass values explicitly.

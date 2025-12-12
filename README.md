@@ -57,15 +57,6 @@ try {
 }
 ```
 
-**From environment variables**:
-
-```ts
-import { createRequestClientFromEnv } from '@marcohefti/request-network-api-client';
-
-const client = createRequestClientFromEnv();
-// Reads: REQUEST_API_URL, REQUEST_API_KEY, REQUEST_CLIENT_ID
-```
-
 ## Documentation
 
 - **[Quick Start](docs/QUICK-START.md)** - Installation, environment setup, common recipes

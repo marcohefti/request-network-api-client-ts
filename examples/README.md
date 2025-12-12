@@ -23,7 +23,7 @@ This folder contains minimal, copy‑pasteable examples for @marcohefti/request-
    node examples/node/quick-start.mjs
    ```
 
-   The script creates a client via `createRequestClientFromEnv()`, lists currencies, exercises the legacy currencies facade, and performs a sample payments search.
+   The script creates a client using explicit configuration, lists currencies, and performs a sample payments search.
 
 ## Browser - Quick Start
 

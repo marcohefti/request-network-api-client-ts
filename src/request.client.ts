@@ -69,38 +69,3 @@ export function createRequestClient(options?: CreateClientOptions): RequestClien
   };
 }
 
-export interface EnvOptions {
-  env?: NodeJS.ProcessEnv;
-}
-
-/**
- * Creates a Request Network API client from environment variables.
- *
- * Reads configuration from the following environment variables (in order of preference):
- * - `REQUEST_API_URL` (or legacy `REQUEST_SDK_BASE_URL`)
- * - `REQUEST_API_KEY` (or legacy `REQUEST_SDK_API_KEY`)
- * - `REQUEST_CLIENT_ID` (or legacy `REQUEST_SDK_CLIENT_ID`)
- *
- * @param options - Optional environment override
- * @param options.env - Custom environment object (defaults to process.env)
- *
- * @returns RequestClient instance configured from environment
- *
- * @example
- * ```ts
- * import { createRequestClientFromEnv } from '@marcohefti/request-network-api-client';
- *
- * const client = createRequestClientFromEnv();
- * // Reads REQUEST_API_KEY, REQUEST_CLIENT_ID, REQUEST_API_URL from process.env
- *
- * const tokens = await client.currencies.list({ network: 'sepolia' });
- * ```
- */
-export function createRequestClientFromEnv(options?: EnvOptions): RequestClient {
-  const env = options?.env ?? process.env;
-  // Prefer modern variable names; fall back to legacy REQUEST_SDK_* for compatibility
-  const baseUrl = env.REQUEST_API_URL ?? env.REQUEST_SDK_BASE_URL;
-  const apiKey = env.REQUEST_API_KEY ?? env.REQUEST_SDK_API_KEY;
-  const clientId = env.REQUEST_CLIENT_ID ?? env.REQUEST_SDK_CLIENT_ID;
-  return createRequestClient({ baseUrl, apiKey, clientId });
-}
