@@ -1,6 +1,6 @@
 {
   "name": "@marcohefti/request-network-api-client",
-  "version": "0.5.7",
+  "version": "0.5.8",
   "private": false,
   "description": "Request Network API client for Node and Browser.",
   "publishConfig": {
