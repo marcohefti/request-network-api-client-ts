@@ -67,12 +67,6 @@ try {
 }
 ```
 
-**Benefits:**
-- ✅ Automatic retry with exponential backoff
-- ✅ Typed request and response
-- ✅ Structured error handling with request IDs
-- ✅ Runtime validation (optional)
-
 ---
 
 ## 2. Payment Routes (Server, API Key)
@@ -105,12 +99,6 @@ const { routes, platformFee } = await client.requests.getPaymentRoutes(requestId
   feeAddress: process.env.FEE_ADDRESS,
 });
 ```
-
-**Benefits:**
-- ✅ No manual URL construction
-- ✅ Type-safe parameters
-- ✅ Automatic error handling
-- ✅ Cleaner code
 
 ---
 
@@ -156,12 +144,6 @@ await client.payer.updateComplianceStatus(clientUserId, {
 });
 ```
 
-**Benefits:**
-- ✅ Clean domain methods
-- ✅ Consistent error handling
-- ✅ No manual URL encoding
-- ✅ 80% less code
-
 ---
 
 ## 4. Conversion Routes (Browser, Client ID)
@@ -187,11 +169,6 @@ const routes = await client.currencies.getConversionRoutes('USD', {
   networks: 'sepolia'
 });
 ```
-
-**Benefits:**
-- ✅ One line instead of six
-- ✅ Type-safe parameters
-- ✅ Automatic error handling
 
 ---
 
@@ -236,11 +213,6 @@ const created = await client.requests.create({
 // created.requestId, created.paymentReference (fully typed)
 ```
 
-**Benefits:**
-- ✅ Type-safe response
-- ✅ Automatic status code handling
-- ✅ Better TypeScript autocomplete
-
 ---
 
 ## 6. Get Payment Calldata / Intent (Server, API Key)
@@ -277,12 +249,6 @@ const data = await client.requests.getPaymentCalldata(invoice.requestId, {
 });
 ```
 
-**Benefits:**
-- ✅ No manual query string building
-- ✅ Cleaner parameter handling
-- ✅ Discriminated union response (calldata vs paymentIntent)
-- ✅ 60% less code
-
 ---
 
 ## 7. Send Payment Intent (Server, API Key)
@@ -298,10 +264,6 @@ await axios.post(`/v2/request/payment-intents/${paymentIntent}`, payload);
 ```ts
 await client.requests.sendPaymentIntent(paymentIntent, payload);
 ```
-
-**Benefits:**
-- ✅ Typed payload
-- ✅ Consistent error handling
 
 ---
 
@@ -323,10 +285,6 @@ await client.requests.update(requestId, {
   isRecurrenceStopped: true
 });
 ```
-
-**Benefits:**
-- ✅ Automatic error handling
-- ✅ Type-safe parameters
 
 ---
 
@@ -352,41 +310,3 @@ const detail = await client.payer.createPaymentDetails(
 );
 // detail.id is fully typed
 ```
-
-**Benefits:**
-- ✅ Automatic URL encoding
-- ✅ Typed response
-- ✅ Runtime validation (optional)
-
----
-
-## Summary: Why Use This Client?
-
-### Code Quality
-- **70-80% less boilerplate** - No manual headers, URL building, or error parsing
-- **Type safety** - Full TypeScript types generated from OpenAPI spec
-- **Runtime validation** - Optional Zod validation for requests and responses
-- **Consistent errors** - Structured `RequestApiError` with requestId, status, and retry metadata
-
-### Reliability
-- **Automatic retries** - Exponential backoff with jitter for 429 and 5xx errors
-- **Timeout handling** - Per-request timeout configuration
-- **Rate limiting** - Respects `Retry-After` headers
-- **Request IDs** - Every error includes requestId for support tickets
-
-### Developer Experience
-- **Domain facades** - Clean methods like `client.requests.create()` instead of raw endpoints
-- **Browser & Node** - Works in both environments with appropriate auth
-- **Tree-shakeable** - Subpath exports for minimal bundle size
-- **Well documented** - Comprehensive guides and examples
-
-### Maintenance
-- **OpenAPI sync** - Types auto-generated from official spec
-- **Versioning** - Both v2 and legacy v1 endpoints supported
-- **Testing** - MSW-based tests, webhook utilities, and fixtures included
-
----
-
-## Getting Started
-
-See [QUICK-START.md](./QUICK-START.md) for installation and basic usage.
