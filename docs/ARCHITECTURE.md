@@ -12,7 +12,7 @@
   - Implement full webhook verification or signer utilities (stub included for follow-up).
   - Provide UI elements or React hooks (these live outside this library).
 
-See also - docs site: [Scope & Positioning](/guide/scope), [Before/After](/guide/before-after)
+See also: [SCOPE.md](./SCOPE.md), [BEFORE-AFTER.md](./BEFORE-AFTER.md)
 
 ## 2. Supported Runtimes
 
@@ -300,7 +300,7 @@ Related domain guides - docs site: [Currencies](/guide/domains/currencies), [Cli
 - Example directory (future): minimal Node script + browser snippet demonstrating typical flows.
 - `docs/TESTING.md`: Operational guide for unit, integration, and type tests (MSW setup, sandbox env vars, base URL overrides).
 
-See also - docs site: [Quick Start](/guide/quick-start), [Before/After](/guide/before-after)
+See also: [QUICK-START.md](./QUICK-START.md), [BEFORE-AFTER.md](./BEFORE-AFTER.md)
 
 ## 14. Release Workflow (Future)
 
