@@ -12,13 +12,13 @@
  * Run: node examples/payouts/batch-payout.mjs
  */
 
-import { createRequestClient, RequestEnvironment, isRequestApiError } from '@marcohefti/request-network-api-client';
+import { createRequestClient, isRequestApiError } from '@marcohefti/request-network-api-client';
 
 async function main() {
   console.log('💰 Batch Payout Example\n');
 
   const client = createRequestClient({
-    baseUrl: process.env.REQUEST_API_URL || RequestEnvironment.production,
+    baseUrl: process.env.REQUEST_API_URL, // Optional, defaults to production
     apiKey: process.env.REQUEST_API_KEY,
   });
 

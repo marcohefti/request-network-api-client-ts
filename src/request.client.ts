@@ -31,7 +31,7 @@ export interface RequestClient {
  * Creates a Request Network API client with typed domain facades.
  *
  * @param options - Client configuration options
- * @param options.baseUrl - API base URL (defaults to production if not provided)
+ * @param options.baseUrl - API base URL (defaults to https://api.request.network)
  * @param options.apiKey - API key for server-side authentication
  * @param options.clientId - Client ID for browser/frontend authentication
  * @param options.runtimeValidation - Enable/disable runtime validation (default: true)
@@ -44,10 +44,9 @@ export interface RequestClient {
  *
  * @example
  * ```ts
- * import { createRequestClient, RequestEnvironment } from '@marcohefti/request-network-api-client';
+ * import { createRequestClient } from '@marcohefti/request-network-api-client';
  *
  * const client = createRequestClient({
- *   baseUrl: RequestEnvironment.production,
  *   apiKey: process.env.REQUEST_API_KEY,
  *   logLevel: 'info',
  * });

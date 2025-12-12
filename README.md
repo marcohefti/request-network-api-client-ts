@@ -36,12 +36,10 @@ yarn add @marcohefti/request-network-api-client
 ```ts
 import {
   createRequestClient,
-  RequestEnvironment,
   isRequestApiError,
 } from '@marcohefti/request-network-api-client';
 
 const client = createRequestClient({
-  baseUrl: RequestEnvironment.production,
   apiKey: process.env.REQUEST_API_KEY!,
 });
 

@@ -14,14 +14,14 @@
  * Run: node examples/invoice-flow/create-and-pay.mjs
  */
 
-import { createRequestClient, RequestEnvironment, isRequestApiError } from '@marcohefti/request-network-api-client';
+import { createRequestClient, isRequestApiError } from '@marcohefti/request-network-api-client';
 
 async function main() {
   // 1. Create the client
   console.log('📦 Initializing Request Network client...\n');
 
   const client = createRequestClient({
-    baseUrl: process.env.REQUEST_API_URL || RequestEnvironment.production,
+    baseUrl: process.env.REQUEST_API_URL, // Optional, defaults to production
     apiKey: process.env.REQUEST_API_KEY,
   });
 

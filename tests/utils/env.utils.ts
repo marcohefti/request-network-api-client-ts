@@ -1,6 +1,6 @@
 import { describe, test } from "vitest";
 
-import { createRequestClient, RequestEnvironment, type RequestClient } from "../../src";
+import { createRequestClient, type RequestClient } from "../../src";
 import type { CreateClientOptions } from "../../src/core/http/client.factory";
 
 const LIVE_SUITE_LABEL = "Live integration suite";
@@ -43,7 +43,7 @@ function loadLiveSuiteEnvInternal(options: LoadSuiteOptions = {}): SuiteEnv {
   const requireClientId = options.requireClientId ?? false;
 
   const label = LIVE_SUITE_LABEL;
-  const fallbackBaseUrl = RequestEnvironment.production;
+  const fallbackBaseUrl = "https://api.request.network";
   const baseUrl = resolveBaseUrl(env, fallbackBaseUrl);
   const apiKey = env[BASE_ENV_VARS.apiKey]?.trim();
   const clientId = env[BASE_ENV_VARS.clientId]?.trim();

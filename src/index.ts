@@ -40,7 +40,6 @@ export type {
 export { nodeFetchAdapter } from "./core/http/adapters/node-fetch.adapter";
 export { browserFetchAdapter } from "./core/http/adapters/browser-fetch.adapter";
 export { createRequestClient, type RequestClient } from "./request.client";
-export { RequestEnvironment, type RequestEnvironmentName } from "./core/config/request-environment.config";
 export * as currencies from "./domains/currencies";
 export * as currenciesV1 from "./domains/currencies/v1";
 export * as clientIds from "./domains/client-ids";

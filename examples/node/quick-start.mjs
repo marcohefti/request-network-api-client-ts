@@ -1,9 +1,9 @@
 // Minimal Node example: list currencies
-import { createRequestClient, RequestEnvironment, isRequestApiError } from '@marcohefti/request-network-api-client';
+import { createRequestClient, isRequestApiError } from '@marcohefti/request-network-api-client';
 
 async function main() {
   const client = createRequestClient({
-    baseUrl: process.env.REQUEST_API_URL || RequestEnvironment.production,
+    baseUrl: process.env.REQUEST_API_URL, // Optional, defaults to production
     apiKey: process.env.REQUEST_API_KEY,
     clientId: process.env.REQUEST_CLIENT_ID,
   });

@@ -29,12 +29,10 @@ yarn add @marcohefti/request-network-api-client
 ```ts
 import {
   createRequestClient,
-  RequestEnvironment,
   isRequestApiError,
 } from '@marcohefti/request-network-api-client';
 
 const client = createRequestClient({
-  baseUrl: RequestEnvironment.production,
   apiKey: process.env.REQUEST_API_KEY!,
 });
 
@@ -59,13 +57,10 @@ main();
 You can configure the client using environment variables in your application:
 
 ```ts
-import {
-  createRequestClient,
-  RequestEnvironment,
-} from '@marcohefti/request-network-api-client';
+import { createRequestClient } from '@marcohefti/request-network-api-client';
 
 const client = createRequestClient({
-  baseUrl: process.env.REQUEST_API_URL || RequestEnvironment.production,
+  baseUrl: process.env.REQUEST_API_URL, // Optional, defaults to production
   apiKey: process.env.REQUEST_API_KEY!,
   clientId: process.env.REQUEST_CLIENT_ID,
 });
@@ -77,7 +72,6 @@ Runtime validation is enabled by default. To relax checks globally:
 
 ```ts
 const client = createRequestClient({
-  baseUrl: RequestEnvironment.production,
   apiKey: process.env.REQUEST_API_KEY!,
   runtimeValidation: { errors: false },
 });
@@ -98,7 +92,6 @@ await client.http.get('/v2/currencies', {
 ```ts
 import {
   createRequestClient,
-  RequestEnvironment,
   type RequestClient,
 } from '@marcohefti/request-network-api-client';
 
@@ -120,7 +113,6 @@ export function createRequestApiClient(
   };
 
   return createRequestClient({
-    baseUrl: RequestEnvironment.production,
     apiKey,
     clientId: options.clientId,
     runtimeValidation: true,
