@@ -5,6 +5,32 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.6] - 2024-12-12
+
+### Added
+- Comprehensive CHANGELOG.md with version history
+- Professional badges to README (npm version, license, CI status)
+- GitHub issue templates (bug report, feature request)
+- GitHub pull request template with comprehensive checklist
+- CI workflow for Node.js 20.x, 22.x, 24.x with lint, test, and coverage
+- Realistic examples:
+  - Complete invoice flow (create-and-pay.mjs)
+  - Error handling and retry patterns (retry-patterns.mjs)
+  - Batch payout example (batch-payout.mjs)
+- MIGRATIONS.md guide for future version upgrades
+- Enhanced ENDPOINTS.md with detailed examples for all endpoint groups
+
+### Changed
+- Expanded troubleshooting section in README with 7 common issue categories
+- Updated examples/README.md with comprehensive example index
+- Improved .gitignore to include IDE, OS, and temporary files
+- Enhanced package.json with homepage and bugs URLs
+
+### Documentation
+- Complete rewrite of ENDPOINTS.md with practical examples and use cases
+- Significantly expanded README troubleshooting section
+- Added migration guide template for future breaking changes
+
 ## [0.5.5] - 2024-12-11
 
 ### Changed
@@ -84,6 +110,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Integration and unit test suites
 - MSW-based testing infrastructure
 
+[0.5.6]: https://github.com/marcohefti/request-network-api-client-ts/compare/v0.5.5...v0.5.6
 [0.5.5]: https://github.com/marcohefti/request-network-api-client-ts/compare/v0.5.4...v0.5.5
 [0.5.4]: https://github.com/marcohefti/request-network-api-client-ts/compare/v0.5.3...v0.5.4
 [0.5.3]: https://github.com/marcohefti/request-network-api-client-ts/compare/v0.5.2...v0.5.3
