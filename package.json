@@ -11,6 +11,10 @@
     "type": "git",
     "url": "git+ssh://git@github.com/marcohefti/request-network-api-client-ts.git"
   },
+  "homepage": "https://github.com/marcohefti/request-network-api-client-ts#readme",
+  "bugs": {
+    "url": "https://github.com/marcohefti/request-network-api-client-ts/issues"
+  },
   "engines": {
     "node": ">=20"
   },
