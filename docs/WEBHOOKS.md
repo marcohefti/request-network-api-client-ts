@@ -131,7 +131,7 @@ This section shows how to configure a local webhook listener, expose it via Clou
 
 ### Prerequisites
 
-- Node.js ≥ 20.x and pnpm 10.17.1 (per repo toolchain)
+- Node.js ≥ 20.x and pnpm 10.27.0 (per repo toolchain)
 - `pnpm install`
 - An API key that can create webhooks in the Request API Portal
 - Cloudflare Tunnel (`cloudflared`) installed locally

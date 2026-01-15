@@ -5,7 +5,7 @@ This folder contains copy-pasteable examples for @marcohefti/request-network-api
 ## Prerequisites
 
 - Node.js 20.x+
-- pnpm 10.17.1
+- pnpm 10.27.0
 - A Request Network API key (for the Node examples) or a Client ID (for the Browser example)
 - Required environment variables:
   - `REQUEST_API_KEY` - Your API key from the Request API Portal

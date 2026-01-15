@@ -83,7 +83,7 @@ try {
 | Browsers | Modern browsers with Fetch API |
 | Edge Runtimes | Cloudflare Workers, Vercel Edge, Deno, Bun |
 
-**Package Manager**: pnpm 10.17.1 recommended (`corepack enable pnpm@10.17.1`)
+**Package Manager**: pnpm 10.27.0 recommended (`corepack enable pnpm@10.27.0`)
 
 ## Versioning
 
@@ -234,7 +234,7 @@ If you're still stuck:
 
 ## Development
 
-**Prerequisites**: Node 20/22/24, pnpm 10.17.1
+**Prerequisites**: Node 20/22/24, pnpm 10.27.0
 
 ```bash
 # Install dependencies

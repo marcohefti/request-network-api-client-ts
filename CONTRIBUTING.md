@@ -9,7 +9,7 @@ project-specific behaviour) and aligned with the published OpenAPI contract.
 ## Getting Started
 
 - Node.js: >= 20 (CI covers 20 / 22 / 24).
-- Package manager: pnpm 10.17.1 (recommended via `corepack enable pnpm@10.17.1`).
+- Package manager: pnpm 10.27.0 (recommended via `corepack enable pnpm@10.27.0`).
 
 Install dependencies:
 
