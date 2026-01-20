@@ -1,7 +1,7 @@
 import { OP_CONVERSION_ROUTES, OP_LIST, CurrenciesListSchema, ConversionRoutesSchema } from "./currencies.schemas";
 import type { CurrencyList, ConversionRoutes } from "./currencies.schemas";
 import { createCurrenciesV1Api, type CurrenciesV1Api } from "./v1";
-import type { HttpClient, RuntimeValidationOption } from "../../core/http/http.types";
+import type { HttpClient, RequestOptions, RuntimeValidationOption } from "../../core/http/http.types";
 import { requestJson } from "../../core/http/operation.helper";
 import type { operations } from "../../generated/openapi-types";
 import { parseWithSchema } from "../../validation/zod.helpers";
@@ -18,6 +18,7 @@ export interface CurrencyRequestOptions {
   signal?: AbortSignal;
   timeoutMs?: number;
   validation?: RuntimeValidationOption;
+  meta?: RequestOptions["meta"];
 }
 
 export interface CurrenciesApi {
@@ -45,6 +46,7 @@ export function createCurrenciesApi(http: HttpClient): CurrenciesApi {
         signal: options?.signal,
         timeoutMs: options?.timeoutMs,
         validation: options?.validation,
+        meta: options?.meta,
       });
 
       const parsed = parseWithSchema({
@@ -68,6 +70,7 @@ export function createCurrenciesApi(http: HttpClient): CurrenciesApi {
         signal: options?.signal,
         timeoutMs: options?.timeoutMs,
         validation: options?.validation,
+        meta: options?.meta,
       });
 
       const parsed = parseWithSchema({

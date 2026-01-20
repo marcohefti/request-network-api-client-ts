@@ -199,6 +199,7 @@ interface RequestApiError extends Error {
   requestId?: string;      // Request correlation ID
   correlationId?: string;  // Correlation ID for tracing
   retryAfterMs?: number;   // Milliseconds to wait before retry (429 only)
+  meta?: Record<string, unknown>; // Optional extra metadata (debugging/logging)
   toJSON(): object;        // Structured snapshot for logging
 }
 ```
@@ -225,6 +226,28 @@ try {
   }
 }
 ```
+
+### Capturing HTTP Context (Debugging)
+
+Sometimes you need the exact upstream response body/headers to report an intermittent API issue. You can opt in per call:
+
+```ts
+try {
+  await client.currencies.list(undefined, {
+    meta: { captureErrorContext: true },
+  });
+} catch (err) {
+  if (isRequestApiError(err)) {
+    // Includes request method/url + redacted headers, plus response status/headers/body (truncated)
+    console.error(err.meta);
+  }
+}
+```
+
+Notes:
+- `captureErrorContext` is **off by default**.
+- Sensitive headers are redacted (e.g. `x-api-key`, `authorization`).
+- Response bodies are truncated to keep logs bounded.
 
 ### Handling Specific Error Codes
 

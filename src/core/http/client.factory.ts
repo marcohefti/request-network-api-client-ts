@@ -66,6 +66,77 @@ function asRecord(value: unknown): Record<string, unknown> | undefined {
   return undefined;
 }
 
+const REDACTED_VALUE = "<redacted>";
+const REDACTED_HEADERS = new Set(["x-api-key", "authorization", "cookie"]);
+const RESPONSE_HEADER_ALLOWLIST = new Set(["content-type", "content-length", "x-request-id", "x-correlation-id", "retry-after"]);
+
+const LOG_TRUNCATION = {
+  maxDepth: 5,
+  maxKeys: 50,
+  maxArray: 50,
+  maxString: 2_000,
+} as const;
+
+function redactHeaders(headers?: Record<string, string>): Record<string, string> {
+  const out: Record<string, string> = {};
+  if (!headers) return out;
+  for (const [key, value] of Object.entries(headers)) {
+    const lower = key.toLowerCase();
+    out[lower] = REDACTED_HEADERS.has(lower) ? REDACTED_VALUE : value;
+  }
+  return out;
+}
+
+function pickResponseHeaders(headers: Record<string, string>): Record<string, string> {
+  const out: Record<string, string> = {};
+  for (const [key, value] of Object.entries(headers)) {
+    const lower = key.toLowerCase();
+    if (RESPONSE_HEADER_ALLOWLIST.has(lower)) {
+      out[lower] = value;
+    }
+  }
+  return out;
+}
+
+function truncateStringForLogs(value: string): string {
+  return value.length > LOG_TRUNCATION.maxString ? `${value.slice(0, LOG_TRUNCATION.maxString)}…(truncated)` : value;
+}
+
+function truncateArrayForLogs(value: unknown[], depth: number): unknown[] {
+  const trimmed = value.slice(0, LOG_TRUNCATION.maxArray).map((item) => truncateForLogs(item, depth + 1));
+  return value.length > LOG_TRUNCATION.maxArray ? [...trimmed, "[truncated:max-array]"] : trimmed;
+}
+
+function truncateObjectForLogs(value: Record<string, unknown>, depth: number): Record<string, unknown> {
+  const entries = Object.entries(value);
+  const sliced = entries.slice(0, LOG_TRUNCATION.maxKeys);
+  const out: Record<string, unknown> = {};
+  for (const [key, v] of sliced) {
+    out[key] = truncateForLogs(v, depth + 1);
+  }
+  if (entries.length > LOG_TRUNCATION.maxKeys) {
+    out["__truncated__"] = "max-keys";
+  }
+  return out;
+}
+
+function truncateForLogs(value: unknown, depth = 0): unknown {
+  if (value == null) return value;
+
+  if (typeof value === "string") return truncateStringForLogs(value);
+  if (typeof value === "number" || typeof value === "boolean") return value;
+  if (typeof value === "bigint") return value.toString();
+  if (typeof value === "symbol") return value.toString();
+  if (typeof value === "function") return "[function]";
+
+  if (depth >= LOG_TRUNCATION.maxDepth) return "[truncated:max-depth]";
+
+  if (Array.isArray(value)) return truncateArrayForLogs(value, depth);
+  if (typeof value === "object") return truncateObjectForLogs(value as Record<string, unknown>, depth);
+
+  return "[unserializable]";
+}
+
 function mapToError(res: HttpResponse, req: HttpRequest, validation: RuntimeValidationConfig): never {
   const operationId = req.meta?.operationId;
   const rawPayload = asRecord(res.data);
@@ -85,11 +156,27 @@ function mapToError(res: HttpResponse, req: HttpRequest, validation: RuntimeVali
     payload = asRecord(parsed.data);
   }
 
+  const captureErrorContext = req.meta?.captureErrorContext === true;
   const error = buildRequestApiError({
     payload,
     status: res.status,
     headers: res.headers,
     fallbackMessage: res.text ?? `HTTP ${String(res.status)}`,
+    meta: captureErrorContext
+      ? {
+          request: {
+            method: req.method,
+            url: req.url,
+            headers: redactHeaders(req.headers),
+            hasBody: req.body != null,
+          },
+          response: {
+            status: res.status,
+            headers: pickResponseHeaders(res.headers),
+            body: truncateForLogs(res.data ?? res.text),
+          },
+        }
+      : undefined,
   });
   throw error;
 }
