@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.10] - 2026-01-20
+
+### Added
+- Optional `meta.captureErrorContext` to include sanitized request/response context on `RequestApiError` (helpful for reporting intermittent upstream issues)
+
+### Fixed
+- Relaxed request calldata metadata schema
+
+### Documentation
+- Documented `captureErrorContext` usage in `docs/HTTP-AND-ERRORS.md`
+
+## [0.5.9] - 2026-01-20
+
+### Changed
+- Simplified `baseUrl` configuration (defaults to `https://api.request.network`) and removed `RequestEnvironment`
+- Updated examples to use `ETH-sepolia-sepolia` with `invoiceCurrency: USD`
+
 ## [0.5.8] - 2024-12-12
 
 ### Changed
