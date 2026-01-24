@@ -10,6 +10,7 @@ import { TEST_BASE_URL } from "../../utils/test-env";
 describe("Payments search facade", () => {
   const client = createRequestClient({ baseUrl: TEST_BASE_URL });
   const payments = createPaymentsApi(client.http);
+  const PAYMENT_CURRENCY = "ETH-sepolia-sepolia";
 
   it("searches payments with pagination metadata", async () => {
     const result = await client.payments.search({ limit: "1", offset: "0" });
@@ -23,6 +24,37 @@ describe("Payments search facade", () => {
     expect(result.payments).toHaveLength(0);
     expect(result.pagination.hasMore).toBe(false);
     expect(result.pagination.total).toBe(0);
+  });
+
+  it("accepts fees with null amounts", async () => {
+    server.use(
+      http.get(`${TEST_BASE_URL}/v2/payments`, () =>
+        HttpResponse.json({
+          payments: [
+            {
+              id: "pay-1",
+              amount: "0.01",
+              sourceNetwork: "sepolia",
+              destinationNetwork: "sepolia",
+              timestamp: new Date().toISOString(),
+              type: "direct",
+              currency: "USD",
+              paymentCurrency: PAYMENT_CURRENCY,
+              fees: [
+                { type: "gas", stage: "sending", amount: null, currency: PAYMENT_CURRENCY },
+                { type: "platform", stage: "receiving", amountInUSD: null, currency: "USD" },
+              ],
+              request: { requestId: "req-paid", paymentReference: "0xabc", hasBeenPaid: true },
+            },
+          ],
+          pagination: { hasMore: false, offset: 0, limit: 10, total: 1 },
+        }),
+      ),
+    );
+
+    const result = await client.payments.search({ limit: "1", offset: "0" });
+    expect(result.payments).toHaveLength(1);
+    expect(result.payments[0]?.fees?.[0]?.amount).toBeNull();
   });
 
   it("maps 429 responses to RequestApiError with retry metadata", async () => {
@@ -57,7 +89,7 @@ describe("Payments search facade", () => {
     const walletAddress = "0xabc";
     const limit = "10";
     const offset = "5";
-    const paymentCurrency = "ETH-sepolia-sepolia";
+    const paymentCurrency = PAYMENT_CURRENCY;
     const type = "direct" as const;
 
     await payments.search({
