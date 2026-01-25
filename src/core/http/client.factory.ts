@@ -137,16 +137,30 @@ function truncateForLogs(value: unknown, depth = 0): unknown {
   return "[unserializable]";
 }
 
+function resolveFallbackMessage(res: HttpResponse): string {
+  const raw = typeof res.text === "string" ? res.text.trim() : "";
+  if (!raw) {
+    return `HTTP ${String(res.status)}`;
+  }
+
+  // Avoid surfacing full HTML pages or noisy upstream responses as an error message.
+  if (raw.startsWith("<") || raw.length > 200) {
+    return `HTTP ${String(res.status)}`;
+  }
+
+  return raw;
+}
+
 function mapToError(res: HttpResponse, req: HttpRequest, validation: RuntimeValidationConfig): never {
   const operationId = req.meta?.operationId;
   const rawPayload = asRecord(res.data);
   let payload = rawPayload;
 
-  if (validation.errors && operationId) {
+  if (validation.errors && operationId && rawPayload) {
     const schemaKey: SchemaKey = { operationId, kind: "response", status: res.status };
     const parsed = parseWithRegistry({
       key: schemaKey,
-      value: rawPayload ?? res.data,
+      value: rawPayload,
       description: `Error response for ${operationId}`,
       skipOnMissingSchema: true,
     });
@@ -161,7 +175,7 @@ function mapToError(res: HttpResponse, req: HttpRequest, validation: RuntimeVali
     payload,
     status: res.status,
     headers: res.headers,
-    fallbackMessage: res.text ?? `HTTP ${String(res.status)}`,
+    fallbackMessage: resolveFallbackMessage(res),
     meta: captureErrorContext
       ? {
           request: {

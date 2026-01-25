@@ -12,7 +12,7 @@ export const nodeFetchAdapter: HttpAdapter = {
       let text: string | undefined;
       if (res.status !== 204) {
         try {
-          if (contentType.includes("application/json")) {
+          if (contentType.toLowerCase().includes("json")) {
             data = await res.json();
           } else {
             text = await res.text();
