@@ -3,7 +3,7 @@
 Thanks for your interest in improving the Request Network API client.
 
 This repository is a TypeScript/Node client for the hosted Request Network REST
-API. Contributions should keep the package generic (no RelayCamel- or
+API. Contributions should keep the package generic (no product-specific or
 project-specific behaviour) and aligned with the published OpenAPI contract.
 
 ## Getting Started
@@ -49,4 +49,3 @@ Then review and commit the updated spec, generated types, and Zod schemas.
   before submitting a PR.
 
 Security-sensitive issues should follow the guidance in `SECURITY.md`.
-
