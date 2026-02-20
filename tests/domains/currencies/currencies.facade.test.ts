@@ -8,6 +8,8 @@ import { TEST_BASE_URL } from "../../utils/test-env";
 
 describe("Currencies facade", () => {
   const client = createRequestClient({ baseUrl: TEST_BASE_URL });
+  const USDC_SYMBOL = "USDC";
+  const USDC_SEPOLIA = "USDC-sepolia";
 
   it("lists currencies", async () => {
     const items = await client.currencies.list({ network: "sepolia" });
@@ -49,5 +51,27 @@ describe("Currencies facade", () => {
       expect(error.retryAfterMs).toBeGreaterThanOrEqual(0);
       return true;
     });
+  });
+
+  it("accepts currencies payloads without name", async () => {
+    server.use(
+      http.get(`${TEST_BASE_URL}/v2/currencies`, () =>
+        HttpResponse.json(
+          [
+            {
+              id: USDC_SEPOLIA,
+              symbol: USDC_SYMBOL,
+              decimals: 6,
+              network: "sepolia",
+            },
+          ],
+          { status: 200 },
+        ),
+      ),
+    );
+
+    const items = await client.currencies.list();
+    expect(items[0]?.id).toBe(USDC_SEPOLIA);
+    expect(items[0]?.symbol).toBe(USDC_SYMBOL);
   });
 });

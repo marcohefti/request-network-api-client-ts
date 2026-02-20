@@ -9,7 +9,7 @@ export const OP_CONVERSION_ROUTES = "CurrenciesV2Controller_getConversionRoutes_
 export const CurrencyTokenSchema = z
   .object({
     id: z.string(),
-    name: z.string(),
+    name: z.string().optional(),
     symbol: z.string(),
     decimals: z.number(),
     address: z.string().optional(),
