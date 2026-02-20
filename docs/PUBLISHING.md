@@ -108,7 +108,7 @@ a 1.0.0 “stable” release.
 ### CI, Coverage, and Docs
 - [x] Publish workflow runs `pnpm lint`, `pnpm tsc`, `pnpm test`, and `pnpm build` on tag push.
 - [ ] Add PR/push workflow for validation on every commit (not just releases).
-- [ ] Add a Node version matrix (20/22/24) in CI to match the documented compatibility matrix.
+- [x] Add a Node version matrix (20/22/24/25) in CI to match the documented compatibility matrix.
 - [ ] Integrate coverage reporting (Vitest + V8) and enforce minimum thresholds for merges.
 - [ ] Publish API reference docs (TypeDoc or equivalent) and link from `README.md`.
 

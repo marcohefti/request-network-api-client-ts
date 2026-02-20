@@ -9,7 +9,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PACKAGE_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 
-NODE_MATRIX_DEFAULT=("20" "22" "24")
+NODE_MATRIX_DEFAULT=("20" "22" "24" "25")
 
 NODE_MATRIX_ENV="${NODE_MATRIX:-}"
 declare -a NODE_MATRIX

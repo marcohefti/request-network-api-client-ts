@@ -234,7 +234,7 @@ If you're still stuck:
 
 ## Development
 
-**Prerequisites**: Node 20/22/24, pnpm 10.27.0
+**Prerequisites**: Node 20/22/24/25, pnpm 10.27.0
 
 ```bash
 # Install dependencies
@@ -256,7 +256,7 @@ pnpm build
 **Full validation** (before submitting PRs):
 
 ```bash
-pnpm coverage:matrix  # Node 20/22/24 coverage matrix
+pnpm coverage:matrix  # Node 20/22/24/25 coverage matrix
 pnpm build            # Verify packaging
 ```
 
