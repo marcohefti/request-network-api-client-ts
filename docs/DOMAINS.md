@@ -1,6 +1,6 @@
 # Domain API Reference
 
-This document covers all domain APIs exposed by the client: requests, payouts, payer/compliance, payments, currencies, and client IDs.
+This document covers all domain APIs exposed by the client: requests, payouts, payer/compliance, payee destination, payments, currencies, and client IDs.
 
 ## Requests
 
@@ -334,6 +334,46 @@ await client.clientIds.revoke(created.id!);
 
 - Uses type-safe inputs from the OpenAPI types.
 - Validates responses using operationId-mapped Zod schemas.
+
+## Payee Destination
+
+Manage payee destinations using Client ID + Origin authenticated flows.
+
+### Get Signing Data
+
+```ts
+const signingData = await client.payeeDestination.getSigningData({
+  walletAddress: '0xabc',
+  action: 'add',
+  tokenAddress: '0xdef',
+  chainId: '8453',
+});
+```
+
+### Get Active Destination
+
+```ts
+const active = await client.payeeDestination.getActive('0xabc');
+```
+
+### Create and Deactivate
+
+```ts
+await client.payeeDestination.create({
+  signature: '0x...',
+  nonce: 'nonce-1',
+});
+
+await client.payeeDestination.deactivate('base:0xabc:0xdef', {
+  signature: '0x...',
+  nonce: 'nonce-2',
+});
+```
+
+### Notes
+
+- Responses currently use `unknown` because the upstream OpenAPI documents these response bodies without schemas.
+- Request payloads are still validated at runtime (`signature`, `nonce`) before dispatch.
 
 ## Transport Overrides
 

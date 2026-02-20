@@ -1,6 +1,6 @@
 {
   "name": "@marcohefti/request-network-api-client",
-  "version": "0.5.10",
+  "version": "0.5.11",
   "private": false,
   "description": "Request Network API client for Node and Browser.",
   "publishConfig": {
@@ -102,6 +102,11 @@
       "types": "./dist/esm/domains/payer/index.d.mts",
       "import": "./dist/esm/domains/payer/index.js",
       "require": "./dist/cjs/domains/payer/index.js"
+    },
+    "./payee-destination": {
+      "types": "./dist/esm/domains/payee-destination/index.d.mts",
+      "import": "./dist/esm/domains/payee-destination/index.js",
+      "require": "./dist/cjs/domains/payee-destination/index.js"
     },
     "./v1/payer": {
       "types": "./dist/esm/domains/payer/v1/index.d.mts",

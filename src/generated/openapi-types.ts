@@ -604,6 +604,74 @@ export type paths = {
         patch: operations["PayoutV2Controller_updateRecurringPayment_v2"];
         trace?: never;
     };
+    "/v2/payee-destination/signing-data": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get EIP-712 signing data with nonce
+         * @description Generate a nonce and return the complete EIP-712 signing data structure for payee destination creation or deactivation
+         */
+        get: operations["PayeeDestinationController_getSigningData_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v2/payee-destination": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get active payee destination for wallet
+         * @description Retrieve the active payee destination for a specific wallet address. Returns null if no active destination exists.
+         */
+        get: operations["PayeeDestinationController_getActivePayeeDestination_v2"];
+        put?: never;
+        /**
+         * Create payee destination
+         * @description Create a payee destination with EIP-712 signature verification
+         */
+        post: operations["PayeeDestinationController_createPayeeDestination_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v2/payee-destination/{destinationId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get payee destination by ID
+         * @description Retrieve a payee destination using the format network:walletAddress:tokenAddress
+         */
+        get: operations["PayeeDestinationController_getPayeeDestination_v2"];
+        put?: never;
+        post?: never;
+        /**
+         * Deactivate payee destination
+         * @description Deactivate a payee destination with EIP-712 signature verification. Sets active=false without deleting the record.
+         */
+        delete: operations["PayeeDestinationController_deactivatePayeeDestination_v2"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 };
 export type webhooks = Record<string, never>;
 export type components = {
@@ -841,11 +909,9 @@ export interface operations {
     ClientIdV2Controller_findAll_v2: {
         parameters: {
             query?: never;
-            header?: {
-                /** @description API key for authentication (optional if using session) */
-                "x-api-key"?: string;
-                /** @description Bearer token for session authentication (optional if using API key) */
-                Authorization?: string;
+            header: {
+                /** @description API key for authentication */
+                "x-api-key": string;
             };
             path?: never;
             cookie?: never;
@@ -869,7 +935,7 @@ export interface operations {
                     }[];
                 };
             };
-            /** @description Unauthorized - invalid session */
+            /** @description Unauthorized */
             401: {
                 headers: {
                     [name: string]: unknown;
@@ -888,11 +954,9 @@ export interface operations {
     ClientIdV2Controller_create_v2: {
         parameters: {
             query?: never;
-            header?: {
-                /** @description API key for authentication (optional if using session) */
-                "x-api-key"?: string;
-                /** @description Bearer token for session authentication (optional if using API key) */
-                Authorization?: string;
+            header: {
+                /** @description API key for authentication */
+                "x-api-key": string;
             };
             path?: never;
             cookie?: never;
@@ -903,10 +967,16 @@ export interface operations {
                     label: string;
                     /** @description List of allowed domain origins (normalized) */
                     allowedDomains: string[];
-                    /** @description Fee percentage (e.g., '1' = 1%, '2.5' = 2.5%). If set to '0', allows API request fees to take precedence. If set to any other value, overrides any fee passed via API. */
+                    /** @description Fee percentage (e.g., '1' = 1%, '2.5' = 2.5%, '2.55' = 2.55%). Maximum 2 decimal places. If set to '0', allows API request fees to take precedence. If set to any other value, overrides any fee passed via API. */
                     feePercentage?: string;
                     /** @description Wallet address to receive fees. Required if feePercentage is set. */
                     feeAddress?: string;
+                    /** @description Wallet address that will act as operator for commerce payments. The API operator wallet will execute transactions on behalf of this address. Can be a smart wallet that has granted permissions to the API operator. */
+                    operatorWalletAddress?: string;
+                    /** @description Default pre-approval expiry duration in seconds for commerce transactions. If set, overrides the value passed in /v2/commerce-payments/authorize/calldata endpoint. */
+                    defaultPreApprovalExpiry?: number;
+                    /** @description Default authorization expiry duration in seconds for commerce transactions. If set, overrides the value passed in /v2/commerce-payments/authorize/calldata endpoint. */
+                    defaultAuthorizationExpiry?: number;
                 };
             };
         };
@@ -924,6 +994,9 @@ export interface operations {
                         allowedDomains?: string[];
                         feePercentage?: string | null;
                         feeAddress?: string | null;
+                        operatorWalletAddress?: string | null;
+                        defaultPreApprovalExpiry?: number | null;
+                        defaultAuthorizationExpiry?: number | null;
                         status?: string;
                         createdAt?: string;
                     };
@@ -936,7 +1009,7 @@ export interface operations {
                 };
                 content?: never;
             };
-            /** @description Unauthorized - invalid session */
+            /** @description Unauthorized */
             401: {
                 headers: {
                     [name: string]: unknown;
@@ -955,11 +1028,9 @@ export interface operations {
     ClientIdV2Controller_findOne_v2: {
         parameters: {
             query?: never;
-            header?: {
-                /** @description API key for authentication (optional if using session) */
-                "x-api-key"?: string;
-                /** @description Bearer token for session authentication (optional if using API key) */
-                Authorization?: string;
+            header: {
+                /** @description API key for authentication */
+                "x-api-key": string;
             };
             path: {
                 /** @description Client ID internal identifier */
@@ -982,6 +1053,9 @@ export interface operations {
                         allowedDomains?: string[];
                         feePercentage?: string | null;
                         feeAddress?: string | null;
+                        operatorWalletAddress?: string | null;
+                        defaultPreApprovalExpiry?: number | null;
+                        defaultAuthorizationExpiry?: number | null;
                         status?: string;
                         createdAt?: string;
                         updatedAt?: string;
@@ -989,7 +1063,7 @@ export interface operations {
                     };
                 };
             };
-            /** @description Unauthorized - invalid session */
+            /** @description Unauthorized */
             401: {
                 headers: {
                     [name: string]: unknown;
@@ -1015,11 +1089,9 @@ export interface operations {
     ClientIdV2Controller_update_v2: {
         parameters: {
             query?: never;
-            header?: {
-                /** @description API key for authentication (optional if using session) */
-                "x-api-key"?: string;
-                /** @description Bearer token for session authentication (optional if using API key) */
-                Authorization?: string;
+            header: {
+                /** @description API key for authentication */
+                "x-api-key": string;
             };
             path: {
                 /** @description Client ID internal identifier */
@@ -1033,10 +1105,16 @@ export interface operations {
                     label?: string;
                     /** @description List of allowed domain origins (normalized) */
                     allowedDomains?: string[];
-                    /** @description Fee percentage (e.g., '1' = 1%, '2.5' = 2.5%). If set to '0', allows API request fees to take precedence. If set to any other value, overrides any fee passed via API. Set to null to unset. */
+                    /** @description Fee percentage (e.g., '1' = 1%, '2.5' = 2.5%, '2.55' = 2.55%). Maximum 2 decimal places. If set to '0', allows API request fees to take precedence. If set to any other value, overrides any fee passed via API. Set to null to unset. */
                     feePercentage?: string | null;
                     /** @description Wallet address to receive fees. Required if feePercentage is set. Set to null to unset. */
                     feeAddress?: string | null;
+                    /** @description Wallet address that will act as operator for commerce payments. The API operator wallet will execute transactions on behalf of this address. Can be a smart wallet that has granted permissions to the API operator. Set to null to unset. Note: Changing this will only affect new payments; existing payments will continue using their original operator address. */
+                    operatorWalletAddress?: string | null;
+                    /** @description Default pre-approval expiry duration in seconds for commerce transactions. If set, overrides the value passed in /v2/commerce-payments/authorize/calldata endpoint. Set to null to unset. */
+                    defaultPreApprovalExpiry?: number | null;
+                    /** @description Default authorization expiry duration in seconds for commerce transactions. If set, overrides the value passed in /v2/commerce-payments/authorize/calldata endpoint. Set to null to unset. */
+                    defaultAuthorizationExpiry?: number | null;
                     /** @enum {string} */
                     status?: "active" | "inactive" | "revoked";
                 };
@@ -1056,6 +1134,9 @@ export interface operations {
                         allowedDomains?: string[];
                         feePercentage?: string | null;
                         feeAddress?: string | null;
+                        operatorWalletAddress?: string | null;
+                        defaultPreApprovalExpiry?: number | null;
+                        defaultAuthorizationExpiry?: number | null;
                         status?: string;
                         updatedAt?: string;
                     };
@@ -1068,7 +1149,7 @@ export interface operations {
                 };
                 content?: never;
             };
-            /** @description Unauthorized - invalid session */
+            /** @description Unauthorized */
             401: {
                 headers: {
                     [name: string]: unknown;
@@ -1094,11 +1175,9 @@ export interface operations {
     ClientIdV2Controller_delete_v2: {
         parameters: {
             query?: never;
-            header?: {
-                /** @description API key for authentication (optional if using session) */
-                "x-api-key"?: string;
-                /** @description Bearer token for session authentication (optional if using API key) */
-                Authorization?: string;
+            header: {
+                /** @description API key for authentication */
+                "x-api-key": string;
             };
             path: {
                 /** @description Client ID internal identifier */
@@ -1115,7 +1194,7 @@ export interface operations {
                 };
                 content?: never;
             };
-            /** @description Unauthorized - invalid session */
+            /** @description Unauthorized */
             401: {
                 headers: {
                     [name: string]: unknown;
@@ -1153,7 +1232,7 @@ export interface operations {
                 "application/json": {
                     /** @description The wallet address of the payer */
                     payer?: string;
-                    /** @description The wallet address of the payee */
+                    /** @description The wallet address of the payee (Ethereum 0x... or TRON T...) */
                     payee: string;
                     /** @description The payable amount of the invoice, in human readable format */
                     amount: string;
@@ -1342,7 +1421,7 @@ export interface operations {
                 /** @description The source chain of the crosschain payment */
                 chain?: "BASE" | "OPTIMISM" | "ARBITRUM" | "ETHEREUM";
                 /** @description The source token of the crosschain payment */
-                token?: "USDC" | "USDT" | "DAI";
+                token?: "USDC" | "USDT";
                 /** @description The amount to pay, in human readable format */
                 amount?: string;
             };
@@ -1634,7 +1713,7 @@ export interface operations {
                 "application/json": {
                     /** @description The wallet address of the payer */
                     payer?: string;
-                    /** @description The wallet address of the payee. Required for all requests except crypto-to-fiat */
+                    /** @description The wallet address of the payee (Ethereum 0x... or TRON T...). Required for all requests except crypto-to-fiat */
                     payee?: string;
                     /** @description The payable amount of the invoice, in human readable format */
                     amount: string;
@@ -1806,6 +1885,47 @@ export interface operations {
                         } | null;
                         /** @description Merchant reference for receipt tracking and identification */
                         reference?: string | null;
+                        /** @description Request amount in USD (actual if paid, current market rate if unpaid) */
+                        amountInUsd?: string | null;
+                        /** @description Conversion rate. Available for: unpaid requests and fully paid requests with single payment. Null for: partially paid requests and fully paid requests with multiple payments. */
+                        conversionRate?: string | null;
+                        /**
+                         * @description Source of the conversion rate
+                         * @enum {string}
+                         */
+                        rateSource?: "lifi" | "chainlink" | "coingecko" | "unknown" | "mixed";
+                        /** @description Detailed breakdown for partial payments or multiple payments. Provides individual payment rates when top-level rate is null. */
+                        conversionBreakdown?: {
+                            paidAmount?: string;
+                            paidAmountInUsd?: string;
+                            remainingAmount?: string;
+                            remainingAmountInUsd?: string;
+                            currentMarketRate?: string | null;
+                            /** @enum {string|null} */
+                            currentMarketRateSource?: "lifi" | "chainlink" | "coingecko" | "unknown" | null;
+                            payments?: {
+                                amount?: string;
+                                amountInUsd?: string;
+                                conversionRate?: string;
+                                /** @enum {string} */
+                                rateSource?: "lifi" | "chainlink" | "coingecko" | "unknown";
+                                timestamp?: string;
+                            }[];
+                        } | null;
+                        /** @description Associated fees (actual if paid, empty if unpaid) */
+                        fees?: {
+                            /**
+                             * @description Type of fee
+                             * @enum {string}
+                             */
+                            type?: "gas" | "platform" | "crosschain" | "crypto-to-fiat" | "offramp";
+                            /** @description Fee provider */
+                            provider?: string;
+                            /** @description Fee amount in human-readable format (formatted with token decimals) */
+                            amount?: string;
+                            /** @description Fee currency */
+                            currency?: string;
+                        }[] | null;
                     };
                 };
             };
@@ -1842,7 +1962,14 @@ export interface operations {
             };
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @description Whether the recurrence is stopped */
+                    isRecurrenceStopped: boolean;
+                };
+            };
+        };
         responses: {
             /** @description Recurrence updated successfully */
             200: {
@@ -1875,7 +2002,7 @@ export interface operations {
                 /** @description The source chain of the crosschain payment */
                 chain?: "BASE" | "OPTIMISM" | "ARBITRUM" | "ETHEREUM";
                 /** @description The source token of the crosschain payment */
-                token?: "USDC" | "USDT" | "DAI";
+                token?: "USDC" | "USDT";
                 /** @description The amount to pay, in human readable format */
                 amount?: string;
                 /** @description Optional client user ID for off-ramp payments */
@@ -3189,7 +3316,7 @@ export interface operations {
         requestBody: {
             content: {
                 "application/json": {
-                    /** @description The wallet address of the payee */
+                    /** @description The wallet address of the payee (Ethereum 0x... or TRON T...) */
                     payee: string;
                     /** @description The payable amount of the invoice, in human readable format */
                     amount: string;
@@ -3240,7 +3367,7 @@ export interface operations {
             query?: {
                 /** @description Search by blockchain transaction hash (source or destination). Returns ALL payments from the same transaction, including batch payments. Must be a valid 66-character hex string starting with '0x'. Example: '0x1234567890abcdef...' */
                 txHash?: string;
-                /** @description Search by Ethereum wallet address (payer or payee). Returns ALL payments involving this address, including batch payments where the address is either sender or recipient. Example: '0x6923831ACf5c327260D7ac7C9DfF5b1c3cB3C7D7' */
+                /** @description Search by wallet address (payer or payee). Supports Ethereum (0x...) and TRON (T...) addresses. Returns ALL payments involving this address, including batch payments where the address is either sender or recipient. */
                 walletAddress?: string;
                 /** @description Search by unique payment reference generated by the Request Network. This is the hex identifier used for on-chain payments. Example: '0xb3581f0b0f74cc61' */
                 paymentReference?: string;
@@ -3464,7 +3591,7 @@ export interface operations {
         requestBody: {
             content: {
                 "application/json": {
-                    /** @description The wallet address of the payee */
+                    /** @description The wallet address of the payee (Ethereum 0x... or TRON T...) */
                     payee: string;
                     /** @description The payable amount of the invoice, in human readable format */
                     amount: string;
@@ -3474,7 +3601,7 @@ export interface operations {
                     paymentCurrency: string;
                     /** @description Fee percentage to apply at payment time (e.g., '2.5' for 2.5%) */
                     feePercentage?: string;
-                    /** @description Address to receive the fee */
+                    /** @description Address to receive the fee (Ethereum 0x... or TRON T...) */
                     feeAddress?: string;
                     /** @description Configuration details for recurring payments */
                     recurrence?: {
@@ -3492,6 +3619,8 @@ export interface operations {
                     };
                     /** @description The wallet address of the payer, use to check if payer approval exists */
                     payerWallet?: string;
+                    /** @description The wallet address of the payer (alias for payerWallet) */
+                    payerAddress?: string;
                     /** @description Optional customer information for merchant receipt tracking */
                     customerInfo?: {
                         /** @description Customer's first name */
@@ -3569,7 +3698,7 @@ export interface operations {
                 "application/json": {
                     /** @description A list of payment requests to be created andprocessed in batch. All requests must be on the same network and contain payment/invoice currency information. Either `requests` or `requestIds` must be provided, but not both. */
                     requests?: {
-                        /** @description The wallet address of the payee */
+                        /** @description The wallet address of the payee (Ethereum 0x... or TRON T...) */
                         payee: string;
                         /** @description The payable amount of the invoice, in human readable format */
                         amount: string;
@@ -3582,6 +3711,10 @@ export interface operations {
                     requestIds?: string[];
                     /** @description The wallet address of the payer, user to check if approval is needed or not. */
                     payer?: string;
+                    /** @description Fee percentage to apply at payment time (e.g., '2.5' for 2.5%) */
+                    feePercentage?: string;
+                    /** @description Address to receive the fee */
+                    feeAddress?: string;
                 };
             };
         };
@@ -3804,6 +3937,200 @@ export interface operations {
             };
             /** @description Recurring payment not found */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Too Many Requests */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    PayeeDestinationController_getSigningData_v2: {
+        parameters: {
+            query: {
+                /** @description The wallet address that will sign the message */
+                walletAddress: string;
+                /** @description The action to perform (add or deactivate) */
+                action: "add" | "deactivate";
+                /** @description The ERC20 token address for the payee destination */
+                tokenAddress: string;
+                /** @description The chain ID where the token is deployed */
+                chainId: string;
+            };
+            header: {
+                /** @description Client ID for frontend authentication */
+                "x-client-id": string;
+                /** @description Origin header (automatically set by browser) */
+                Origin: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description EIP-712 signing data with nonce */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Too Many Requests */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    PayeeDestinationController_getActivePayeeDestination_v2: {
+        parameters: {
+            query: {
+                /** @description The wallet address to filter payee destinations */
+                walletAddress: string;
+            };
+            header: {
+                /** @description Client ID for frontend authentication */
+                "x-client-id": string;
+                /** @description Origin header (automatically set by browser) */
+                Origin: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Active payee destination retrieved successfully (or null if none exists) */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Too Many Requests */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    PayeeDestinationController_createPayeeDestination_v2: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description Client ID for frontend authentication */
+                "x-client-id": string;
+                /** @description Origin header (automatically set by browser) */
+                Origin: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @description The EIP-712 signature from the payee */
+                    signature: string;
+                    /** @description The signing session nonce from /signing-data endpoint */
+                    nonce: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Payee destination created successfully */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Too Many Requests */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    PayeeDestinationController_getPayeeDestination_v2: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description Client ID for frontend authentication */
+                "x-client-id": string;
+                /** @description Origin header (automatically set by browser) */
+                Origin: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Payee destination retrieved successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Payee destination not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Too Many Requests */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    PayeeDestinationController_deactivatePayeeDestination_v2: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description Client ID for frontend authentication */
+                "x-client-id": string;
+                /** @description Origin header (automatically set by browser) */
+                Origin: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @description The EIP-712 signature from the payee */
+                    signature: string;
+                    /** @description The signing session nonce from /signing-data endpoint */
+                    nonce: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Payee destination deactivated successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Destination not found or validation failed */
+            400: {
                 headers: {
                     [name: string]: unknown;
                 };

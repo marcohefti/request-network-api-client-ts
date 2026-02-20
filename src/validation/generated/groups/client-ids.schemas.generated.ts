@@ -55,11 +55,11 @@ export const ClientIdV2Controller_findAll_v2_429 = ErrorEnvelopeSchema;
 schemaRegistry.register({ key: { operationId: 'ClientIdV2Controller_findAll_v2', kind: 'response', status: 429 }, schema: ClientIdV2Controller_findAll_v2_429 });
 
 // POST /v2/client-ids -> ClientIdV2Controller_create_v2 request (application/json)
-export const ClientIdV2Controller_create_v2_Request = z.object({ "label": z.string(), "allowedDomains": z.array(z.string()), "feePercentage": (z.string()).optional(), "feeAddress": (z.string()).optional() }).passthrough();
+export const ClientIdV2Controller_create_v2_Request = z.object({ "label": z.string(), "allowedDomains": z.array(z.string()), "feePercentage": (z.string()).optional(), "feeAddress": (z.string()).optional(), "operatorWalletAddress": (z.string()).optional(), "defaultPreApprovalExpiry": (z.number()).optional(), "defaultAuthorizationExpiry": (z.number()).optional() }).passthrough();
 schemaRegistry.register({ key: { operationId: 'ClientIdV2Controller_create_v2', kind: 'request', variant: 'application/json' }, schema: ClientIdV2Controller_create_v2_Request });
 
 // POST /v2/client-ids -> ClientIdV2Controller_create_v2 (201)
-export const ClientIdV2Controller_create_v2_201 = z.object({ "id": (z.string()).optional(), "clientId": (z.string()).optional(), "label": (z.string()).optional(), "allowedDomains": (z.array(z.string())).optional(), "feePercentage": (z.string().nullable()).optional(), "feeAddress": (z.string().nullable()).optional(), "status": (z.string()).optional(), "createdAt": (z.string()).optional() }).passthrough();
+export const ClientIdV2Controller_create_v2_201 = z.object({ "id": (z.string()).optional(), "clientId": (z.string()).optional(), "label": (z.string()).optional(), "allowedDomains": (z.array(z.string())).optional(), "feePercentage": (z.string().nullable()).optional(), "feeAddress": (z.string().nullable()).optional(), "operatorWalletAddress": (z.string().nullable()).optional(), "defaultPreApprovalExpiry": (z.number().nullable()).optional(), "defaultAuthorizationExpiry": (z.number().nullable()).optional(), "status": (z.string()).optional(), "createdAt": (z.string()).optional() }).passthrough();
 schemaRegistry.register({ key: { operationId: 'ClientIdV2Controller_create_v2', kind: 'response', status: 201 }, schema: ClientIdV2Controller_create_v2_201 });
 
 // POST /v2/client-ids -> ClientIdV2Controller_create_v2 (400)
@@ -75,7 +75,7 @@ export const ClientIdV2Controller_create_v2_429 = ErrorEnvelopeSchema;
 schemaRegistry.register({ key: { operationId: 'ClientIdV2Controller_create_v2', kind: 'response', status: 429 }, schema: ClientIdV2Controller_create_v2_429 });
 
 // GET /v2/client-ids/{id} -> ClientIdV2Controller_findOne_v2 (200)
-export const ClientIdV2Controller_findOne_v2_200 = z.object({ "id": (z.string()).optional(), "clientId": (z.string()).optional(), "label": (z.string()).optional(), "allowedDomains": (z.array(z.string())).optional(), "feePercentage": (z.string().nullable()).optional(), "feeAddress": (z.string().nullable()).optional(), "status": (z.string()).optional(), "createdAt": (z.string()).optional(), "updatedAt": (z.string()).optional(), "lastUsedAt": (z.string().nullable()).optional() }).passthrough();
+export const ClientIdV2Controller_findOne_v2_200 = z.object({ "id": (z.string()).optional(), "clientId": (z.string()).optional(), "label": (z.string()).optional(), "allowedDomains": (z.array(z.string())).optional(), "feePercentage": (z.string().nullable()).optional(), "feeAddress": (z.string().nullable()).optional(), "operatorWalletAddress": (z.string().nullable()).optional(), "defaultPreApprovalExpiry": (z.number().nullable()).optional(), "defaultAuthorizationExpiry": (z.number().nullable()).optional(), "status": (z.string()).optional(), "createdAt": (z.string()).optional(), "updatedAt": (z.string()).optional(), "lastUsedAt": (z.string().nullable()).optional() }).passthrough();
 schemaRegistry.register({ key: { operationId: 'ClientIdV2Controller_findOne_v2', kind: 'response', status: 200 }, schema: ClientIdV2Controller_findOne_v2_200 });
 
 // GET /v2/client-ids/{id} -> ClientIdV2Controller_findOne_v2 (401)
@@ -91,11 +91,11 @@ export const ClientIdV2Controller_findOne_v2_429 = ErrorEnvelopeSchema;
 schemaRegistry.register({ key: { operationId: 'ClientIdV2Controller_findOne_v2', kind: 'response', status: 429 }, schema: ClientIdV2Controller_findOne_v2_429 });
 
 // PUT /v2/client-ids/{id} -> ClientIdV2Controller_update_v2 request (application/json)
-export const ClientIdV2Controller_update_v2_Request = z.object({ "label": (z.string()).optional(), "allowedDomains": (z.array(z.string())).optional(), "feePercentage": (z.string().nullable()).optional(), "feeAddress": (z.string().nullable()).optional(), "status": (z.enum(['active', 'inactive', 'revoked'])).optional() }).passthrough();
+export const ClientIdV2Controller_update_v2_Request = z.object({ "label": (z.string()).optional(), "allowedDomains": (z.array(z.string())).optional(), "feePercentage": (z.string().nullable()).optional(), "feeAddress": (z.string().nullable()).optional(), "operatorWalletAddress": (z.string().nullable()).optional(), "defaultPreApprovalExpiry": (z.number().nullable()).optional(), "defaultAuthorizationExpiry": (z.number().nullable()).optional(), "status": (z.enum(['active', 'inactive', 'revoked'])).optional() }).passthrough();
 schemaRegistry.register({ key: { operationId: 'ClientIdV2Controller_update_v2', kind: 'request', variant: 'application/json' }, schema: ClientIdV2Controller_update_v2_Request });
 
 // PUT /v2/client-ids/{id} -> ClientIdV2Controller_update_v2 (200)
-export const ClientIdV2Controller_update_v2_200 = z.object({ "id": (z.string()).optional(), "clientId": (z.string()).optional(), "label": (z.string()).optional(), "allowedDomains": (z.array(z.string())).optional(), "feePercentage": (z.string().nullable()).optional(), "feeAddress": (z.string().nullable()).optional(), "status": (z.string()).optional(), "updatedAt": (z.string()).optional() }).passthrough();
+export const ClientIdV2Controller_update_v2_200 = z.object({ "id": (z.string()).optional(), "clientId": (z.string()).optional(), "label": (z.string()).optional(), "allowedDomains": (z.array(z.string())).optional(), "feePercentage": (z.string().nullable()).optional(), "feeAddress": (z.string().nullable()).optional(), "operatorWalletAddress": (z.string().nullable()).optional(), "defaultPreApprovalExpiry": (z.number().nullable()).optional(), "defaultAuthorizationExpiry": (z.number().nullable()).optional(), "status": (z.string()).optional(), "updatedAt": (z.string()).optional() }).passthrough();
 schemaRegistry.register({ key: { operationId: 'ClientIdV2Controller_update_v2', kind: 'response', status: 200 }, schema: ClientIdV2Controller_update_v2_200 });
 
 // PUT /v2/client-ids/{id} -> ClientIdV2Controller_update_v2 (400)

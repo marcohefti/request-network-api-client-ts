@@ -8,7 +8,7 @@
 [![Bundle Size](https://img.shields.io/bundlephobia/minzip/@marcohefti/request-network-api-client?style=flat-square)](https://bundlephobia.com/package/@marcohefti/request-network-api-client)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue?style=flat-square&logo=typescript)](https://www.typescriptlang.org/)
 
-TypeScript client for the Request Network hosted REST API. Provides typed, ergonomic helpers for requests, payouts, payer/compliance, client IDs, currencies, and payments, with runtime validation and webhook utilities built in.
+TypeScript client for the Request Network hosted REST API. Provides typed, ergonomic helpers for requests, payouts, payer/compliance, payee destination, client IDs, currencies, and payments, with runtime validation and webhook utilities built in.
 
 **Note**: This targets the hosted REST API, not the protocol SDK. See [SCOPE.md](docs/SCOPE.md) for when to use which.
 
@@ -66,7 +66,7 @@ try {
 ## Documentation
 
 - **[Quick Start](docs/QUICK-START.md)** - Installation, environment setup, common recipes
-- **[Domains](docs/DOMAINS.md)** - API reference for all domains (requests, payouts, payer, payments, currencies, client IDs)
+- **[Domains](docs/DOMAINS.md)** - API reference for all domains (requests, payouts, payer, payee destination, payments, currencies, client IDs)
 - **[HTTP & Errors](docs/HTTP-AND-ERRORS.md)** - HTTP client configuration, error handling, retry behavior
 - **[Webhooks](docs/WEBHOOKS.md)** - Signature verification, middleware, event handlers, local dev setup
 - **[Scope](docs/SCOPE.md)** - When to use this client vs the protocol SDK

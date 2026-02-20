@@ -3,6 +3,10 @@ import type { HttpClient } from "./core/http/http.types";
 import { createClientIdsApi, type ClientIdsApi } from "./domains/client-ids";
 import { createCurrenciesApi, type CurrenciesApi } from "./domains/currencies";
 import { createPayApi, type PayApi } from "./domains/pay";
+import {
+  createPayeeDestinationApi,
+  type PayeeDestinationApi,
+} from "./domains/payee-destination";
 import { createPayerApi, type PayerApi } from "./domains/payer";
 import { createPaymentsApi, type PaymentsApi } from "./domains/payments";
 import { createPayoutsApi, type PayoutsApi } from "./domains/payouts";
@@ -23,6 +27,8 @@ export interface RequestClient {
   payments: PaymentsApi;
   /** Payer/compliance endpoints */
   payer: PayerApi;
+  /** Payee destination endpoints */
+  payeeDestination: PayeeDestinationApi;
   /** Legacy pay endpoints */
   pay: PayApi;
 }
@@ -67,7 +73,7 @@ export function createRequestClient(options?: CreateClientOptions): RequestClien
     payouts: createPayoutsApi(http),
     payments: createPaymentsApi(http),
     payer: createPayerApi(http),
+    payeeDestination: createPayeeDestinationApi(http),
     pay: createPayApi(http),
   };
 }
-

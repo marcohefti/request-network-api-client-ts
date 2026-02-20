@@ -7,6 +7,7 @@ const entryPoints = {
   "domains/requests/index": "src/domains/requests/index.ts",
   "domains/payouts/index": "src/domains/payouts/index.ts",
   "domains/payer/index": "src/domains/payer/index.ts",
+  "domains/payee-destination/index": "src/domains/payee-destination/index.ts",
 };
 
 const shared = {

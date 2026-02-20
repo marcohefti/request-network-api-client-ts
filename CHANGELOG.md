@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.11] - 2026-02-20
+
+### Added
+- Added `payeeDestination` domain facade with support for:
+  - `GET /v2/payee-destination/signing-data`
+  - `GET /v2/payee-destination`
+  - `POST /v2/payee-destination`
+  - `GET /v2/payee-destination/{destinationId}`
+  - `DELETE /v2/payee-destination/{destinationId}`
+
+### Changed
+- Synced generated OpenAPI and runtime validation artifacts with the latest Request API spec.
+- Updated package exports and build entrypoints for the new payee-destination domain.
+
+### Documentation
+- Updated `README.md`, `docs/DOMAINS.md`, and `docs/ENDPOINTS.md` for new endpoint coverage.
+
 ## [0.5.10] - 2026-01-20
 
 ### Added
@@ -138,6 +155,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Integration and unit test suites
 - MSW-based testing infrastructure
 
+[0.5.11]: https://github.com/marcohefti/request-network-api-client-ts/compare/v0.5.10...v0.5.11
+[0.5.10]: https://github.com/marcohefti/request-network-api-client-ts/compare/v0.5.9...v0.5.10
+[0.5.9]: https://github.com/marcohefti/request-network-api-client-ts/compare/v0.5.8...v0.5.9
+[0.5.8]: https://github.com/marcohefti/request-network-api-client-ts/compare/v0.5.7...v0.5.8
 [0.5.7]: https://github.com/marcohefti/request-network-api-client-ts/compare/v0.5.6...v0.5.7
 [0.5.6]: https://github.com/marcohefti/request-network-api-client-ts/compare/v0.5.5...v0.5.6
 [0.5.5]: https://github.com/marcohefti/request-network-api-client-ts/compare/v0.5.4...v0.5.5

@@ -87,6 +87,72 @@ console.log('Client ID revoked');
 
 ---
 
+## Payee Destination
+
+Manage payee destinations through Client ID authenticated endpoints.
+
+### `GET /v2/payee-destination/signing-data`
+
+Generate EIP-712 signing payload data and nonce.
+
+**Example:**
+```typescript
+const signingData = await client.payeeDestination.getSigningData({
+  walletAddress: '0xabc',
+  action: 'add',
+  tokenAddress: '0xdef',
+  chainId: '8453',
+});
+```
+
+### `GET /v2/payee-destination`
+
+Get the active destination for a wallet.
+
+**Example:**
+```typescript
+const active = await client.payeeDestination.getActive('0xabc');
+```
+
+### `POST /v2/payee-destination`
+
+Create a payee destination using a signature and nonce.
+
+**Example:**
+```typescript
+await client.payeeDestination.create({
+  signature: '0x...',
+  nonce: 'nonce-1',
+});
+```
+
+### `GET /v2/payee-destination/{destinationId}`
+
+Fetch a destination by ID.
+
+**Example:**
+```typescript
+const destination = await client.payeeDestination.getById('base:0xabc:0xdef');
+```
+
+### `DELETE /v2/payee-destination/{destinationId}`
+
+Deactivate an existing destination.
+
+**Example:**
+```typescript
+await client.payeeDestination.deactivate('base:0xabc:0xdef', {
+  signature: '0x...',
+  nonce: 'nonce-2',
+});
+```
+
+**Notes:**
+- These endpoints require Client ID + Origin auth at the API layer.
+- Upstream OpenAPI currently omits response schemas, so facade return types are `unknown`.
+
+---
+
 ## Currencies
 
 List supported payment currencies and conversion routes.

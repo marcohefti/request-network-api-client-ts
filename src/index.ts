@@ -50,6 +50,7 @@ export * as payments from "./domains/payments";
 export * as pay from "./domains/pay";
 export * as payV1 from "./domains/pay/v1";
 export * as payer from "./domains/payer";
+export * as payeeDestination from "./domains/payee-destination";
 export * as payerV1 from "./domains/payer/v1";
 export * as payerV2 from "./domains/payer/v2";
 export * as webhooks from "./webhooks";
