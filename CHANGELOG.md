@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.12] - 2026-02-24
+
+### Fixed
+- Added a deterministic OpenAPI drift patch flow for fee payload mismatches (`type: "protocol"` and nullable fee amounts) so generated types and validators match observed API responses.
+- Updated spec tooling to resolve the workspace contracts source first, preventing stale contract generation from a pnpm-installed copy.
+- Hardened local Node matrix tooling to run consistently across Node 20/22/24/25 even when `pnpm`/`corepack` availability differs per runtime.
+
+### Changed
+- Regenerated OpenAPI TypeScript and Zod artifacts after applying the fee drift patch.
+- Expanded request/payment facade tests to cover protocol fee type and nullable fee amounts.
+
 ## [0.5.11] - 2026-02-20
 
 ### Added

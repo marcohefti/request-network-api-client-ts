@@ -1,20 +1,17 @@
 #!/usr/bin/env node
 
 import { writeFile } from "node:fs/promises";
-import { createRequire } from "node:module";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import openapiTS, { astToString } from "openapi-typescript";
+import { resolveContractsOpenApiPaths } from "./contracts-openapi-paths.mjs";
 
-const require = createRequire(import.meta.url);
 const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(SCRIPT_DIR, "..");
 const OUTPUT_PATH = path.join(ROOT, "src/generated/openapi-types.ts");
 
 async function main() {
-  const specPath = require.resolve(
-    "@marcohefti/request-network-api-contracts/specs/openapi/request-network-openapi.json"
-  );
+  const { specPath, source } = resolveContractsOpenApiPaths();
   const specUrl = pathToFileURL(specPath).href;
   const ast = await openapiTS(specUrl, {
     exportType: true,
@@ -39,7 +36,7 @@ async function main() {
     " */\n\n";
 
   await writeFile(OUTPUT_PATH, `${header}${output}\n`);
-  console.log(`✅ Generated TypeScript definitions from ${specPath}`);
+  console.log(`✅ Generated TypeScript definitions from ${specPath} (${source})`);
 }
 
 main().catch((error) => {

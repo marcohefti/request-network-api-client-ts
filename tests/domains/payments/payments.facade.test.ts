@@ -42,7 +42,7 @@ describe("Payments search facade", () => {
               paymentCurrency: PAYMENT_CURRENCY,
               fees: [
                 { type: "gas", stage: "sending", amount: null, currency: PAYMENT_CURRENCY },
-                { type: "platform", stage: "receiving", amountInUSD: null, currency: "USD" },
+                { type: "protocol", stage: "receiving", amountInUSD: null, currency: "USD" },
               ],
               request: { requestId: "req-paid", paymentReference: "0xabc", hasBeenPaid: true },
             },
@@ -55,6 +55,7 @@ describe("Payments search facade", () => {
     const result = await client.payments.search({ limit: "1", offset: "0" });
     expect(result.payments).toHaveLength(1);
     expect(result.payments[0]?.fees?.[0]?.amount).toBeNull();
+    expect(result.payments[0]?.fees?.[1]?.type).toBe("protocol");
   });
 
   it("maps 429 responses to RequestApiError with retry metadata", async () => {

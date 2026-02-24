@@ -1,9 +1,10 @@
 #!/usr/bin/env node
 
 import { mkdir, writeFile } from "node:fs/promises";
-import { createRequire } from "node:module";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
+import { applyOpenApiDriftPatches } from "./openapi-drift-patches.mjs";
+import { resolveContractsOpenApiPaths } from "./contracts-openapi-paths.mjs";
 
 const SPEC_URL = "https://api.request.network/open-api/openapi.json";
 
@@ -11,12 +12,7 @@ const pkgDir = path.join(
   fileURLToPath(new URL(".", import.meta.url)),
   ".."
 );
-const require = createRequire(import.meta.url);
-const contractsPackagePath = require.resolve("@marcohefti/request-network-api-contracts/package.json");
-const contractsDir = path.dirname(contractsPackagePath);
-const openapiDir = path.join(contractsDir, "specs", "openapi");
-const specPath = path.join(openapiDir, "request-network-openapi.json");
-const metaPath = path.join(openapiDir, "request-network-openapi.meta.json");
+const { openapiDir, specPath, metaPath, source } = resolveContractsOpenApiPaths();
 
 async function main() {
   await mkdir(openapiDir, { recursive: true });
@@ -34,7 +30,9 @@ async function main() {
   }
 
   const body = await response.text();
-  await writeFile(specPath, `${body}\n`);
+  const spec = JSON.parse(body);
+  const patchSummary = applyOpenApiDriftPatches(spec);
+  await writeFile(specPath, `${JSON.stringify(spec)}\n`);
 
   const meta = {
     url: SPEC_URL,
@@ -45,7 +43,11 @@ async function main() {
 
   await writeFile(metaPath, `${JSON.stringify(meta, null, 2)}\n`);
 
-  console.log(`✅ OpenAPI spec saved to ${path.relative(pkgDir, specPath)}`);
+  const relativeSpecPath = path.relative(pkgDir, specPath);
+  console.log(`✅ OpenAPI spec saved to ${relativeSpecPath} (${source})`);
+  console.log(
+    `✅ OpenAPI drift patch status: ${patchSummary.enumPatchedCount} enum updates, ${patchSummary.nullablePatchedCount} nullable updates`,
+  );
 }
 
 main().catch((error) => {

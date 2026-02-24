@@ -1570,7 +1570,7 @@ export interface operations {
                                  * @description Type of fee
                                  * @enum {string}
                                  */
-                                type?: "gas" | "platform" | "crosschain" | "crypto-to-fiat" | "offramp";
+                                type?: "gas" | "platform" | "crosschain" | "crypto-to-fiat" | "offramp" | "protocol";
                                 /**
                                  * @description Stage when the fee is applied
                                  * @enum {string}
@@ -1579,9 +1579,9 @@ export interface operations {
                                 /** @description Provider that charged the fee */
                                 provider?: string;
                                 /** @description Fee amount in human-readable format (formatted with token decimals) */
-                                amount?: string;
+                                amount?: string | null;
                                 /** @description Fee amount in USD */
-                                amountInUSD?: string;
+                                amountInUSD?: string | null;
                                 /** @description Fee currency */
                                 currency?: string;
                                 /** @description Address that received the fee */
@@ -1918,11 +1918,11 @@ export interface operations {
                              * @description Type of fee
                              * @enum {string}
                              */
-                            type?: "gas" | "platform" | "crosschain" | "crypto-to-fiat" | "offramp";
+                            type?: "gas" | "platform" | "crosschain" | "crypto-to-fiat" | "offramp" | "protocol";
                             /** @description Fee provider */
                             provider?: string;
                             /** @description Fee amount in human-readable format (formatted with token decimals) */
-                            amount?: string;
+                            amount?: string | null;
                             /** @description Fee currency */
                             currency?: string;
                         }[] | null;
@@ -2160,7 +2160,7 @@ export interface operations {
                                  * @description Type of fee
                                  * @enum {string}
                                  */
-                                type?: "gas" | "platform" | "crosschain" | "crypto-to-fiat" | "offramp";
+                                type?: "gas" | "platform" | "crosschain" | "crypto-to-fiat" | "offramp" | "protocol";
                                 /**
                                  * @description Stage when the fee is applied
                                  * @enum {string}
@@ -2169,9 +2169,9 @@ export interface operations {
                                 /** @description Provider that charged the fee */
                                 provider?: string;
                                 /** @description Fee amount in human-readable format (formatted with token decimals) */
-                                amount?: string;
+                                amount?: string | null;
                                 /** @description Fee amount in USD */
-                                amountInUSD?: string;
+                                amountInUSD?: string | null;
                                 /** @description Fee currency */
                                 currency?: string;
                                 /** @description Address that received the fee */
@@ -3450,7 +3450,7 @@ export interface operations {
                                  * @description Type of fee
                                  * @enum {string}
                                  */
-                                type?: "gas" | "platform" | "crosschain" | "crypto-to-fiat" | "offramp";
+                                type?: "gas" | "platform" | "crosschain" | "crypto-to-fiat" | "offramp" | "protocol";
                                 /**
                                  * @description Stage when the fee is applied
                                  * @enum {string}
@@ -3459,9 +3459,9 @@ export interface operations {
                                 /** @description Provider that charged the fee */
                                 provider?: string;
                                 /** @description Fee amount in human-readable format (formatted with token decimals) */
-                                amount?: string;
+                                amount?: string | null;
                                 /** @description Fee amount in USD */
-                                amountInUSD?: string;
+                                amountInUSD?: string | null;
                                 /** @description Fee currency */
                                 currency?: string;
                                 /** @description Address that received the fee */

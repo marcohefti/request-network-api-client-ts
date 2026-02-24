@@ -51,8 +51,35 @@ case "$MODE_ARG" in
 esac
 
 PNPM_SCRIPT="$MODE_ARG"
+PNPM_VERSION="${PNPM_VERSION:-10.27.0}"
 
 echo "🧪 Running request-api-client ${PNPM_SCRIPT} suite across Node versions: ${NODE_MATRIX[*]}"
+
+declare -a PNPM_RUNNER
+
+select_pnpm_runner() {
+  local node_version="$1"
+  PNPM_RUNNER=()
+
+  if nvm exec "$node_version" command -v pnpm >/dev/null 2>&1; then
+    PNPM_RUNNER=(pnpm)
+    return 0
+  fi
+
+  if nvm exec "$node_version" command -v corepack >/dev/null 2>&1; then
+    PNPM_RUNNER=(corepack pnpm)
+    return 0
+  fi
+
+  echo "⚠️  pnpm/corepack missing under ${node_version}; installing pnpm@${PNPM_VERSION}." >&2
+  if ! nvm exec "$node_version" npm install --global "pnpm@${PNPM_VERSION}" >/dev/null; then
+    echo "❌ Failed to install pnpm@${PNPM_VERSION} under ${node_version}." >&2
+    return 1
+  fi
+
+  PNPM_RUNNER=(pnpm)
+  return 0
+}
 
 FAILED=0
 for version in "${NODE_MATRIX[@]}"; do
@@ -63,9 +90,15 @@ for version in "${NODE_MATRIX[@]}"; do
     break
   fi
 
+  if ! select_pnpm_runner "$resolved"; then
+    FAILED=1
+    break
+  fi
+
+  runner_label="${PNPM_RUNNER[*]}"
   echo ""
-  echo "=== 🚀 Node ${version} (resolved: ${resolved}) — pnpm run ${PNPM_SCRIPT} ==="
-  if ! PNPM_WORKSPACE_ROOT="$REPO_ROOT" nvm exec "$resolved" pnpm run "$PNPM_SCRIPT"; then
+  echo "=== 🚀 Node ${version} (resolved: ${resolved}) — ${runner_label} run ${PNPM_SCRIPT} ==="
+  if ! PNPM_WORKSPACE_ROOT="$REPO_ROOT" nvm exec "$resolved" "${PNPM_RUNNER[@]}" run "$PNPM_SCRIPT"; then
     echo "❌ Matrix run failed under Node ${resolved} (${PNPM_SCRIPT} suite)." >&2
     FAILED=1
     break

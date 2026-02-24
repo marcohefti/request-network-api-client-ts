@@ -1,6 +1,6 @@
 {
   "name": "@marcohefti/request-network-api-client",
-  "version": "0.5.11",
+  "version": "0.5.12",
   "private": false,
   "description": "Request Network API client for Node and Browser.",
   "publishConfig": {
@@ -44,9 +44,10 @@
     "tsc": "tsc --project tsconfig.build.json --noEmit && tsc --project tsconfig.vitest.json --noEmit && tsc --project tsconfig.configs.json --noEmit",
     "typecheck": "pnpm run tsc",
     "fetch:openapi": "node scripts/fetch-openapi.mjs",
+    "patch:openapi": "node scripts/patch-openapi.mjs",
     "generate:types": "node scripts/generate-types.mjs",
     "generate:zod": "node scripts/generate-zod.mjs",
-    "prepare:spec": "pnpm run fetch:openapi && pnpm run generate:types && pnpm run generate:zod"
+    "prepare:spec": "pnpm run fetch:openapi && pnpm run patch:openapi && pnpm run generate:types && pnpm run generate:zod"
   },
   "main": "./dist/cjs/index.js",
   "module": "./dist/esm/index.js",

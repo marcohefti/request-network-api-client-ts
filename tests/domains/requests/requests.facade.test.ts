@@ -256,4 +256,32 @@ describe("Requests facade", () => {
     expect(status.isListening).toBe(true);
     expect(status.isCryptoToFiatAvailable).toBe(true);
   });
+
+  it("accepts fee payloads with protocol type and nullable amount", async () => {
+    const requestId = "req-fee-drift";
+    const paymentCurrency = "ETH-sepolia-sepolia";
+
+    server.use(
+      http.get(`${TEST_BASE_URL}/v2/request/:requestId`, () =>
+        HttpResponse.json(
+          {
+            requestId,
+            paymentReference: "ref-fee-drift",
+            hasBeenPaid: true,
+            status: "paid",
+            txHash: "0xfee",
+            fees: [
+              { type: "platform", amount: null, currency: paymentCurrency },
+              { type: "protocol", amount: "0.0001", currency: paymentCurrency },
+            ],
+          },
+          { status: 200 },
+        ),
+      ),
+    );
+
+    const status = await client.requests.getRequestStatus(requestId);
+    expect(status.kind).toBe("paid");
+    expect(status.hasBeenPaid).toBe(true);
+  });
 });

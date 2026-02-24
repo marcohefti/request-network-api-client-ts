@@ -26,7 +26,7 @@ export const CustomerInfoSchema = z
 
 export const FeeSchema = z
   .object({
-    type: z.enum(["gas", "platform", "crosschain", "crypto-to-fiat", "offramp"]).optional(),
+    type: z.enum(["gas", "platform", "crosschain", "crypto-to-fiat", "offramp", "protocol"]).optional(),
     stage: z.enum(["sending", "receiving", "proxying", "refunding"]).optional(),
     provider: z.string().optional(),
     amount: z.string().nullable().optional(),

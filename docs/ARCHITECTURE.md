@@ -119,6 +119,7 @@ Core request options include `signal`, `timeoutMs`, and `querySerializer` (comma
 - Runtime validation is **enabled by default** at the HTTP boundary. Consumers can toggle it globally with `createRequestClient({ runtimeValidation: true | false | { requests?, responses?, errors? } })` and per call via `RequestOptions.meta.validation` (domain facades will surface this through optional `options` bags as they expand).
 - Normalised errors expose `RequestApiError#toJSON()` so structured logging stays consistent across runtimes without manually selecting fields.
 - When the spec updates, run `pnpm run prepare:spec`, inspect both the raw JSON diff and the generated type diff, regenerate Zod (`pnpm run generate:zod`), then update validation and module mappers accordingly.
+- `prepare:spec` applies a local drift patch (`pnpm run patch:openapi`) so known runtime/schema mismatches are captured in the contracts package before type/schema generation.
 
 ## 6. Module Boundaries & Dependency Rules
 

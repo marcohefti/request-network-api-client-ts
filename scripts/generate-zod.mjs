@@ -1,13 +1,12 @@
 #!/usr/bin/env node
 import fs from 'node:fs';
 import path from 'node:path';
-import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
+import { resolveContractsOpenApiPaths } from './contracts-openapi-paths.mjs';
 
 const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(SCRIPT_DIR, '..');
-const require = createRequire(import.meta.url);
-const SPEC_PATH = require.resolve('@marcohefti/request-network-api-contracts/specs/openapi/request-network-openapi.json');
+const { specPath: SPEC_PATH, source: SPEC_SOURCE } = resolveContractsOpenApiPaths();
 const OUT_DIR = path.join(ROOT, 'src/validation/generated');
 const OUT_FILE = path.join(OUT_DIR, 'openapi.schemas.generated.ts');
 const GROUP_DIR = path.join(OUT_DIR, 'groups');
@@ -303,7 +302,9 @@ function emit() {
   const out = header.concat(supportLines, bodyLines).join('\n');
   fs.writeFileSync(OUT_FILE, out);
   const totalLines = header.length + supportLines.length + bodyLines.length;
-  console.log(`[generate-zod] Wrote ${path.relative(ROOT, OUT_FILE)} with ${totalLines} lines`);
+  console.log(
+    `[generate-zod] Wrote ${path.relative(ROOT, OUT_FILE)} with ${totalLines} lines (source=${SPEC_SOURCE})`
+  );
 
   ensureDir(GROUP_DIR);
   for (const [groupName, groupEntry] of groups.entries()) {
