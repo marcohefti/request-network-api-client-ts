@@ -16,8 +16,8 @@ importers:
         specifier: ^9.38.0
         version: 9.39.1
       '@marcohefti/request-network-api-contracts':
-        specifier: ^0.5.0
-        version: 0.5.2
+        specifier: ^0.6.0
+        version: 0.6.0
       '@types/express':
         specifier: ^4.17.25
         version: 4.17.25
@@ -542,8 +542,8 @@ packages:
   '@jridgewell/trace-mapping@0.3.31':
     resolution: {integrity: sha512-zzNR+SdQSDJzc8joaeP8QQoCQr8NuYx2dIIytl1QeBEZHJ9uW6hebsrYgbz8hJwUQao3TWCMtmfV8Nu1twOLAw==}
 
-  '@marcohefti/request-network-api-contracts@0.5.2':
-    resolution: {integrity: sha512-9x9U6PiNE4Z/Ra27w8/R6W+pwGD2jfO6kj1LMiOLDZ6zZGJOcceJLV7Z6hmpgtZhqrES7eQ9u1TRfA9dn0rG+g==}
+  '@marcohefti/request-network-api-contracts@0.6.0':
+    resolution: {integrity: sha512-gbAT6dFw8uW9dhR4NGe0KtiAtR0lShhVlGU6aUe7ICzNlVh86qdi00OPanS4Ne1vhmLCsWPBaRwgFcy9edQuBQ==}
 
   '@mswjs/interceptors@0.40.0':
     resolution: {integrity: sha512-EFd6cVbHsgLa6wa4RljGj6Wk75qoHxUSyc5asLyyPSyuhIcdS2Q3Phw6ImS1q+CkALthJRShiYfKANcQMuMqsQ==}
@@ -2904,7 +2904,7 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.5
 
-  '@marcohefti/request-network-api-contracts@0.5.2': {}
+  '@marcohefti/request-network-api-contracts@0.6.0': {}
 
   '@mswjs/interceptors@0.40.0':
     dependencies:
