@@ -87,69 +87,56 @@ console.log('Client ID revoked');
 
 ---
 
-## Payee Destination
+## Secure Payments
 
-Manage payee destinations through Client ID authenticated endpoints.
+Create secure payment links and resolve tokenized payment execution data.
 
-### `GET /v2/payee-destination/signing-data`
+### `POST /v2/secure-payments`
 
-Generate EIP-712 signing payload data and nonce.
+Create a secure payment entry from one or more destination IDs.
 
 **Example:**
 ```typescript
-const signingData = await client.payeeDestination.getSigningData({
-  walletAddress: '0xabc',
-  action: 'add',
-  tokenAddress: '0xdef',
-  chainId: '8453',
+const securePayment = await client.securePayments.create({
+  requests: [
+    {
+      destinationId: '0x6923831ACf5c327260D7ac7C9DfF5b1c3cB3C7D7@eip155:11155111#A1B2C3D4:0x370DE27fdb7D1Ff1e1BaA7D11c5820a324Cf623C',
+      amount: '10',
+    },
+  ],
 });
+
+console.log(securePayment.token);
+console.log(securePayment.securePaymentUrl);
 ```
 
-### `GET /v2/payee-destination`
+### `GET /v2/secure-payments`
 
-Get the active destination for a wallet.
+Find a secure payment by request ID.
 
 **Example:**
 ```typescript
-const active = await client.payeeDestination.getActive('0xabc');
+const found = await client.securePayments.findByRequestId('req-secure-1');
+console.log(found.status);
 ```
 
-### `POST /v2/payee-destination`
+### `GET /v2/secure-payments/{token}`
 
-Create a payee destination using a signature and nonce.
+Get secure payment execution details for a token.
 
 **Example:**
 ```typescript
-await client.payeeDestination.create({
-  signature: '0x...',
-  nonce: 'nonce-1',
+const tokenData = await client.securePayments.getByToken('01SECUREPAYMENTTOKEN', {
+  wallet: '0xpayer',
 });
-```
 
-### `GET /v2/payee-destination/{destinationId}`
-
-Fetch a destination by ID.
-
-**Example:**
-```typescript
-const destination = await client.payeeDestination.getById('base:0xabc:0xdef');
-```
-
-### `DELETE /v2/payee-destination/{destinationId}`
-
-Deactivate an existing destination.
-
-**Example:**
-```typescript
-await client.payeeDestination.deactivate('base:0xabc:0xdef', {
-  signature: '0x...',
-  nonce: 'nonce-2',
-});
+console.log(tokenData.paymentCurrency);
+console.log(tokenData.transactions.length);
 ```
 
 **Notes:**
-- These endpoints require Client ID + Origin auth at the API layer.
-- Upstream OpenAPI currently omits response schemas, so facade return types are `unknown`.
+- `GET /v2/secure-payments` requires a session-style Authorization header at the API layer.
+- `GET /v2/secure-payments/{token}` can return `403`, `404`, or `409` depending on token state.
 
 ---
 
@@ -230,6 +217,22 @@ const legacyCurrencies = await client.currencies.legacy.list({
 ## Requests
 
 Create and manage payment requests.
+
+### `GET /v2/request`
+
+List requests for a wallet with pagination.
+
+**Example:**
+```typescript
+const list = await client.requests.list({
+  walletAddress: '0xPayeeWalletAddress',
+  limit: '20',
+  offset: '0',
+});
+
+console.log('Total:', list.pagination.total);
+console.log('Rows:', list.requests.length);
+```
 
 ### `POST /v2/request`
 
@@ -354,12 +357,12 @@ await client.requests.sendPaymentIntent(payment.paymentIntentId, {
 
 ### `PATCH /v2/request/{requestId}`
 
-Update request metadata or cancel recurring requests.
+Update recurrence status for a request.
 
 **Example:**
 ```typescript
 await client.requests.update(request.requestId, {
-  action: 'cancel',
+  isRecurrenceStopped: true,
 });
 ```
 

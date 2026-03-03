@@ -2,6 +2,8 @@ export {
   createRequestsApi,
   type RequestsApi,
   type RequestOperationOptions,
+  type ListRequestsOptions,
+  type ListRequestsResponse,
   type GetPaymentRoutesOptions,
   type PaymentRoutesResponse,
   type PaymentRoute,

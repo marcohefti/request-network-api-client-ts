@@ -171,6 +171,7 @@ The package publishes tree‑shakeable subpaths that line up with domain facades
 | `@marcohefti/request-network-api-client/currencies` | Currency listing and conversion routes |
 | `@marcohefti/request-network-api-client/client-ids` | Client ID lifecycle management |
 | `@marcohefti/request-network-api-client/payments` | Payment search facade with pagination helpers |
+| `@marcohefti/request-network-api-client/secure-payments` | Secure payment link creation and token resolution |
 | `@marcohefti/request-network-api-client/pay` | Legacy pay execution facade (mirrors `/v1/pay`) and exposes `.legacy` |
 | `@marcohefti/request-network-api-client/v1/requests` | Legacy request endpoints and status helpers |
 | `@marcohefti/request-network-api-client/v1/payer` | Legacy payer/compliance endpoints |
@@ -184,12 +185,13 @@ Each subpath re-exports its typed factory (`create<Domain>Api`) and related type
 
 | Module | Endpoints | Notes |
 | --- | --- | --- |
-| `requests` | v2: `POST /v2/request`, `GET /v2/request/{id}`, `GET /v2/request/{id}/pay`, `GET /v2/request/{id}/routes`, `PATCH /v2/request/{id}`, `POST /v2/request/payment-intents/{paymentIntent}`. Legacy v1: `POST /v1/request`, `GET /v1/request/{paymentReference}`, `GET /v1/request/{paymentReference}/pay`, `GET /v1/request/{paymentReference}/routes`, `POST /v1/request/{paymentIntentId}/send`, `PATCH /v1/request/{paymentReference}/stop-recurrence` | Provides discriminated unions for payment calldata and request status across versions. Legacy helpers remain available via `client.requestsV1` or `client.requests`'s shared status mappers. |
+| `requests` | v2: `GET /v2/request`, `POST /v2/request`, `GET /v2/request/{id}`, `GET /v2/request/{id}/pay`, `GET /v2/request/{id}/routes`, `PATCH /v2/request/{id}`, `POST /v2/request/payment-intents/{paymentIntent}`. Legacy v1: `POST /v1/request`, `GET /v1/request/{paymentReference}`, `GET /v1/request/{paymentReference}/pay`, `GET /v1/request/{paymentReference}/routes`, `POST /v1/request/{paymentIntentId}/send`, `PATCH /v1/request/{paymentReference}/stop-recurrence` | Provides discriminated unions for payment calldata and request status across versions. Legacy helpers remain available via `client.requestsV1` or `client.requests`'s shared status mappers. |
 | `payouts` | `POST /v2/payouts`, `POST /v2/payouts/batch`, `GET /v2/payouts/recurring/{id}`, `POST /v2/payouts/recurring/{id}`, `PATCH /v2/payouts/recurring/{id}` | Covers single, batch, and recurring payouts, returning typed transaction metadata. |
 | `payer` | v2: `POST /v2/payer`, `GET /v2/payer/{clientUserId}`, `PATCH /v2/payer/{clientUserId}`, `POST /v2/payer/{clientUserId}/payment-details`, `GET /v2/payer/{clientUserId}/payment-details`. Legacy v1 equivalents under `/v1/payer` | Encapsulates compliance onboarding, status polling, and payment detail collection. Access legacy routes via `client.payer.legacy` or the `/v1/payer` barrel. |
 | `clientIds` | `POST /v2/client-ids`, `PUT /v2/client-ids/{id}`, `DELETE /v2/client-ids/{id}` | Used for e-commerce client provisioning. Exposes typed responses. |
 | `currencies` | v2: `GET /v2/currencies`, `GET /v2/currencies/{currencyId}/conversion-routes`. Legacy v1: `GET /v1/currencies`, `GET /v1/currencies/{currencyId}/conversion-routes` | Returns strongly typed token metadata and conversion routes. Legacy endpoints remain accessible via `client.currencies.legacy` or the `/v1/currencies` barrel. |
 | `payments` | `GET /v2/payments` | Provides typed payment search with pagination, fee breakdowns, and request metadata. |
+| `securePayments` | `POST /v2/secure-payments`, `GET /v2/secure-payments`, `GET /v2/secure-payments/{token}` | Manages secure payment link creation and token lookups. |
 | `pay` | `POST /v1/pay` | Initiates the legacy pay-without-request flow. Exposed via `client.pay.payRequest` and the `/pay` or `/v1/pay` barrels. |
 
 Each module:

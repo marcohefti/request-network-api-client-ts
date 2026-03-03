@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.0] - 2026-03-03
+
+### Added
+- Added `securePayments` domain facade with support for:
+  - `POST /v2/secure-payments`
+  - `GET /v2/secure-payments`
+  - `GET /v2/secure-payments/{token}`
+- Added `client.requests.list(...)` for `GET /v2/request`.
+
+### Changed
+- Updated `client.requests.update(...)` to accept the required request payload shape:
+  - `{ isRecurrenceStopped: boolean }`
+- Regenerated OpenAPI TypeScript and Zod artifacts from `@marcohefti/request-network-api-contracts@0.6.0`.
+- Updated docs and MSW/test coverage for secure payments and request listing.
+
+### Removed
+- Removed the `payeeDestination` facade and `./payee-destination` subpath export after upstream contract removal.
+
 ## [0.5.12] - 2026-02-24
 
 ### Fixed
@@ -166,6 +184,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Integration and unit test suites
 - MSW-based testing infrastructure
 
+[0.6.0]: https://github.com/marcohefti/request-network-api-client-ts/compare/v0.5.12...v0.6.0
+[0.5.12]: https://github.com/marcohefti/request-network-api-client-ts/compare/v0.5.11...v0.5.12
 [0.5.11]: https://github.com/marcohefti/request-network-api-client-ts/compare/v0.5.10...v0.5.11
 [0.5.10]: https://github.com/marcohefti/request-network-api-client-ts/compare/v0.5.9...v0.5.10
 [0.5.9]: https://github.com/marcohefti/request-network-api-client-ts/compare/v0.5.8...v0.5.9

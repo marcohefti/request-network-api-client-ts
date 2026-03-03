@@ -3,14 +3,11 @@ import type { HttpClient } from "./core/http/http.types";
 import { createClientIdsApi, type ClientIdsApi } from "./domains/client-ids";
 import { createCurrenciesApi, type CurrenciesApi } from "./domains/currencies";
 import { createPayApi, type PayApi } from "./domains/pay";
-import {
-  createPayeeDestinationApi,
-  type PayeeDestinationApi,
-} from "./domains/payee-destination";
 import { createPayerApi, type PayerApi } from "./domains/payer";
 import { createPaymentsApi, type PaymentsApi } from "./domains/payments";
 import { createPayoutsApi, type PayoutsApi } from "./domains/payouts";
 import { createRequestsApi, type RequestsApi } from "./domains/requests";
+import { createSecurePaymentsApi, type SecurePaymentsApi } from "./domains/secure-payments";
 
 export interface RequestClient {
   /** Low-level HTTP client (useful for custom modules) */
@@ -27,8 +24,8 @@ export interface RequestClient {
   payments: PaymentsApi;
   /** Payer/compliance endpoints */
   payer: PayerApi;
-  /** Payee destination endpoints */
-  payeeDestination: PayeeDestinationApi;
+  /** Secure payment token endpoints */
+  securePayments: SecurePaymentsApi;
   /** Legacy pay endpoints */
   pay: PayApi;
 }
@@ -73,7 +70,7 @@ export function createRequestClient(options?: CreateClientOptions): RequestClien
     payouts: createPayoutsApi(http),
     payments: createPaymentsApi(http),
     payer: createPayerApi(http),
-    payeeDestination: createPayeeDestinationApi(http),
+    securePayments: createSecurePaymentsApi(http),
     pay: createPayApi(http),
   };
 }

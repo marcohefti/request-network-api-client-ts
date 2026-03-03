@@ -1,6 +1,6 @@
 # Domain API Reference
 
-This document covers all domain APIs exposed by the client: requests, payouts, payer/compliance, payee destination, payments, currencies, and client IDs.
+This document covers all domain APIs exposed by the client: requests, secure payments, payouts, payer/compliance, payments, currencies, and client IDs.
 
 ## Requests
 
@@ -63,6 +63,19 @@ const routes = await client.requests.getPaymentRoutes(request.requestId!, {
 });
 
 console.log('Available routes:', routes.length);
+```
+
+### List Requests
+
+```ts
+const result = await client.requests.list({
+  walletAddress: '0xpayee',
+  limit: '25',
+  offset: '0',
+});
+
+console.log('Total:', result.pagination.total);
+console.log('First request:', result.requests[0]?.requestId);
 ```
 
 ### Notes
@@ -335,45 +348,51 @@ await client.clientIds.revoke(created.id!);
 - Uses type-safe inputs from the OpenAPI types.
 - Validates responses using operationId-mapped Zod schemas.
 
-## Payee Destination
+## Secure Payments
 
-Manage payee destinations using Client ID + Origin authenticated flows.
+Create secure payment links and resolve tokenized payment data.
 
-### Get Signing Data
+### Create a Secure Payment
 
 ```ts
-const signingData = await client.payeeDestination.getSigningData({
-  walletAddress: '0xabc',
-  action: 'add',
-  tokenAddress: '0xdef',
-  chainId: '8453',
+const securePayment = await client.securePayments.create({
+  requests: [
+    {
+      destinationId:
+        '0x6923831ACf5c327260D7ac7C9DfF5b1c3cB3C7D7@eip155:11155111#A1B2C3D4:0x370DE27fdb7D1Ff1e1BaA7D11c5820a324Cf623C',
+      amount: '10',
+    },
+  ],
 });
+
+console.log('Token:', securePayment.token);
+console.log('URL:', securePayment.securePaymentUrl);
 ```
 
-### Get Active Destination
+### Find by Request ID
 
 ```ts
-const active = await client.payeeDestination.getActive('0xabc');
+const found = await client.securePayments.findByRequestId('req-secure-1');
+console.log('Status:', found.status);
+console.log('Payment type:', found.paymentType);
 ```
 
-### Create and Deactivate
+### Get by Token
 
 ```ts
-await client.payeeDestination.create({
-  signature: '0x...',
-  nonce: 'nonce-1',
+const tokenData = await client.securePayments.getByToken('01SECUREPAYMENTTOKEN', {
+  wallet: '0xpayer',
 });
 
-await client.payeeDestination.deactivate('base:0xabc:0xdef', {
-  signature: '0x...',
-  nonce: 'nonce-2',
-});
+console.log('Network:', tokenData.network);
+console.log('Currency:', tokenData.paymentCurrency);
+console.log('Transactions:', tokenData.transactions.length);
 ```
 
 ### Notes
 
-- Responses currently use `unknown` because the upstream OpenAPI documents these response bodies without schemas.
-- Request payloads are still validated at runtime (`signature`, `nonce`) before dispatch.
+- `create` validates request payloads before dispatch.
+- `findByRequestId` and `getByToken` return typed responses generated from OpenAPI.
 
 ## Transport Overrides
 

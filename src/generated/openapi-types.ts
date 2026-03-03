@@ -263,7 +263,11 @@ export type paths = {
             path?: never;
             cookie?: never;
         };
-        get?: never;
+        /**
+         * List requests
+         * @description List payment requests filtered by payee wallet address, with pagination
+         */
+        get: operations["RequestControllerV2_listRequests_v2"];
         put?: never;
         /**
          * Create a new request
@@ -604,7 +608,7 @@ export type paths = {
         patch: operations["PayoutV2Controller_updateRecurringPayment_v2"];
         trace?: never;
     };
-    "/v2/payee-destination/signing-data": {
+    "/v2/secure-payments": {
         parameters: {
             query?: never;
             header?: never;
@@ -612,19 +616,23 @@ export type paths = {
             cookie?: never;
         };
         /**
-         * Get EIP-712 signing data with nonce
-         * @description Generate a nonce and return the complete EIP-712 signing data structure for payee destination creation or deactivation
+         * Find secure payment by request ID
+         * @description Looks up the secure payment associated with a given request ID. Returns the payment link URL, status, and metadata. Requires a SIWE session.
          */
-        get: operations["PayeeDestinationController_getSigningData_v2"];
+        get: operations["SecurePaymentController_findSecurePayment_v2"];
         put?: never;
-        post?: never;
+        /**
+         * Create a secure payment entry
+         * @description Creates a secure payment entry with a token. Accepts an array of payment requests using destination IDs (composite ERC-7828 payee address + token address). The server resolves chain, wallet, and currency from each destination ID. Single item creates a single payment, multiple items create a batch payment. All requests must resolve to the same network. Returns a secure payment URL.
+         */
+        post: operations["SecurePaymentController_createSecurePayment_v2"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/v2/payee-destination": {
+    "/v2/secure-payments/{token}": {
         parameters: {
             query?: never;
             header?: never;
@@ -632,41 +640,13 @@ export type paths = {
             cookie?: never;
         };
         /**
-         * Get active payee destination for wallet
-         * @description Retrieve the active payee destination for a specific wallet address. Returns null if no active destination exists.
+         * Get secure payment data by token
+         * @description Retrieves secure payment data including calldata for payment execution and resolved destination info. The token must be valid, not expired, and the payment must be in 'pending' status.
          */
-        get: operations["PayeeDestinationController_getActivePayeeDestination_v2"];
-        put?: never;
-        /**
-         * Create payee destination
-         * @description Create a payee destination with EIP-712 signature verification
-         */
-        post: operations["PayeeDestinationController_createPayeeDestination_v2"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v2/payee-destination/{destinationId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Get payee destination by ID
-         * @description Retrieve a payee destination using the format network:walletAddress:tokenAddress
-         */
-        get: operations["PayeeDestinationController_getPayeeDestination_v2"];
+        get: operations["SecurePaymentController_getSecurePaymentByToken_v2"];
         put?: never;
         post?: never;
-        /**
-         * Deactivate payee destination
-         * @description Deactivate a payee destination with EIP-712 signature verification. Sets active=false without deleting the record.
-         */
-        delete: operations["PayeeDestinationController_deactivatePayeeDestination_v2"];
+        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
@@ -697,9 +677,9 @@ export interface operations {
                 id?: string;
             };
             header?: {
-                /** @description API key for authentication (optional if using Client ID) */
+                /** @description API key for authentication (optional if using Client ID or session) */
                 "x-api-key"?: string;
-                /** @description Client ID for frontend authentication (optional if using API key) */
+                /** @description Client ID for frontend authentication (optional if using API key or session) */
                 "x-client-id"?: string;
                 /** @description Origin header (required for Client ID auth, automatically set by browser) */
                 Origin?: string;
@@ -754,9 +734,9 @@ export interface operations {
                 networks?: string;
             };
             header?: {
-                /** @description API key for authentication (optional if using Client ID) */
+                /** @description API key for authentication (optional if using Client ID or session) */
                 "x-api-key"?: string;
-                /** @description Client ID for frontend authentication (optional if using API key) */
+                /** @description Client ID for frontend authentication (optional if using API key or session) */
                 "x-client-id"?: string;
                 /** @description Origin header (required for Client ID auth, automatically set by browser) */
                 Origin?: string;
@@ -808,9 +788,9 @@ export interface operations {
                 id?: string;
             };
             header?: {
-                /** @description API key for authentication (optional if using Client ID) */
+                /** @description API key for authentication (optional if using Client ID or session) */
                 "x-api-key"?: string;
-                /** @description Client ID for frontend authentication (optional if using API key) */
+                /** @description Client ID for frontend authentication (optional if using API key or session) */
                 "x-client-id"?: string;
                 /** @description Origin header (required for Client ID auth, automatically set by browser) */
                 Origin?: string;
@@ -865,9 +845,9 @@ export interface operations {
                 networks?: string;
             };
             header?: {
-                /** @description API key for authentication (optional if using Client ID) */
+                /** @description API key for authentication (optional if using Client ID or session) */
                 "x-api-key"?: string;
-                /** @description Client ID for frontend authentication (optional if using API key) */
+                /** @description Client ID for frontend authentication (optional if using API key or session) */
                 "x-client-id"?: string;
                 /** @description Origin header (required for Client ID auth, automatically set by browser) */
                 Origin?: string;
@@ -1694,6 +1674,94 @@ export interface operations {
             };
         };
     };
+    RequestControllerV2_listRequests_v2: {
+        parameters: {
+            query: {
+                /** @description Payee wallet address to filter requests by */
+                walletAddress: string;
+                /** @description Number of results per page (max 100) */
+                limit?: string;
+                /** @description Pagination offset */
+                offset?: string;
+            };
+            header?: {
+                /** @description API key for authentication (optional if using Client ID or session) */
+                "x-api-key"?: string;
+                /** @description Client ID for frontend authentication (optional if using API key or session) */
+                "x-client-id"?: string;
+                /** @description Origin header (required for Client ID auth, automatically set by browser) */
+                Origin?: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Requests listed successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @description List of requests */
+                        requests: {
+                            /** @description Unique identifier of the request */
+                            requestId?: string;
+                            /** @description Unique payment reference */
+                            paymentReference?: string;
+                            /** @description Request amount in human-readable format */
+                            amount?: string | null;
+                            /** @description Invoice currency symbol (e.g. USD) */
+                            invoiceCurrency?: string;
+                            /** @description Payment currency ID */
+                            paymentCurrency?: string;
+                            /** @description Whether the request has been paid */
+                            hasBeenPaid?: boolean;
+                            /** @description Current status of the request */
+                            status?: string | null;
+                            /** @description Merchant reference */
+                            reference?: string | null;
+                            /**
+                             * Format: date-time
+                             * @description When the request was created
+                             */
+                            createdAt?: string | null;
+                            /** @description Transaction hash of the payment, null if not yet paid */
+                            txHash?: string | null;
+                            /** @description Payee wallet address */
+                            payee?: string | null;
+                            /** @description Payer wallet address */
+                            payer?: string | null;
+                        }[];
+                        /** @description Pagination metadata */
+                        pagination: {
+                            /** @description Total number of matching requests */
+                            total?: number;
+                            /** @description Number of results per page */
+                            limit?: number;
+                            /** @description Current pagination offset */
+                            offset?: number;
+                        };
+                    };
+                };
+            };
+            /** @description Validation failed */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Too Many Requests */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     RequestControllerV2_createRequest_v2: {
         parameters: {
             query?: never;
@@ -1713,7 +1781,7 @@ export interface operations {
                 "application/json": {
                     /** @description The wallet address of the payer */
                     payer?: string;
-                    /** @description The wallet address of the payee (Ethereum 0x... or TRON T...). Required for all requests except crypto-to-fiat */
+                    /** @description The wallet address of the payee (Ethereum 0x... or TRON T...). Optional when using client ID authentication with a configured payee destination. */
                     payee?: string;
                     /** @description The payable amount of the invoice, in human readable format */
                     amount: string;
@@ -1788,15 +1856,15 @@ export interface operations {
                     };
                 };
             };
-            /** @description Validation failed */
+            /** @description Validation failed or no active payee destination for client ID */
             400: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content?: never;
             };
-            /** @description Wallet not found */
-            404: {
+            /** @description Client ID has been revoked */
+            403: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -1815,9 +1883,9 @@ export interface operations {
         parameters: {
             query?: never;
             header?: {
-                /** @description API key for authentication (optional if using Client ID) */
+                /** @description API key for authentication (optional if using Client ID or session) */
                 "x-api-key"?: string;
-                /** @description Client ID for frontend authentication (optional if using API key) */
+                /** @description Client ID for frontend authentication (optional if using API key or session) */
                 "x-client-id"?: string;
                 /** @description Origin header (required for Client ID auth, automatically set by browser) */
                 Origin?: string;
@@ -1843,6 +1911,8 @@ export interface operations {
                         paymentReference?: string;
                         /** @description Unique identifier of the request */
                         requestId?: string;
+                        /** @description The payee wallet address for this request */
+                        payee?: string | null;
                         /** @description Whether the system is actively listening for payments on this request */
                         isListening?: boolean;
                         /** @description Transaction hash of the payment, null if not yet paid */
@@ -3951,139 +4021,59 @@ export interface operations {
             };
         };
     };
-    PayeeDestinationController_getSigningData_v2: {
+    SecurePaymentController_findSecurePayment_v2: {
         parameters: {
             query: {
-                /** @description The wallet address that will sign the message */
-                walletAddress: string;
-                /** @description The action to perform (add or deactivate) */
-                action: "add" | "deactivate";
-                /** @description The ERC20 token address for the payee destination */
-                tokenAddress: string;
-                /** @description The chain ID where the token is deployed */
-                chainId: string;
+                /** @description Request ID to look up the associated secure payment */
+                requestId: string;
             };
             header: {
-                /** @description Client ID for frontend authentication */
-                "x-client-id": string;
-                /** @description Origin header (automatically set by browser) */
-                Origin: string;
+                /** @description Bearer token for session authentication (or use session_token cookie) */
+                Authorization: string;
             };
             path?: never;
             cookie?: never;
         };
         requestBody?: never;
         responses: {
-            /** @description EIP-712 signing data with nonce */
+            /** @description Secure payment found */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
-            };
-            /** @description Too Many Requests */
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    PayeeDestinationController_getActivePayeeDestination_v2: {
-        parameters: {
-            query: {
-                /** @description The wallet address to filter payee destinations */
-                walletAddress: string;
-            };
-            header: {
-                /** @description Client ID for frontend authentication */
-                "x-client-id": string;
-                /** @description Origin header (automatically set by browser) */
-                Origin: string;
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Active payee destination retrieved successfully (or null if none exists) */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Too Many Requests */
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    PayeeDestinationController_createPayeeDestination_v2: {
-        parameters: {
-            query?: never;
-            header: {
-                /** @description Client ID for frontend authentication */
-                "x-client-id": string;
-                /** @description Origin header (automatically set by browser) */
-                Origin: string;
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": {
-                    /** @description The EIP-712 signature from the payee */
-                    signature: string;
-                    /** @description The signing session nonce from /signing-data endpoint */
-                    nonce: string;
+                content: {
+                    "application/json": {
+                        /** @description Secure payment token */
+                        token: string;
+                        /**
+                         * Format: uri
+                         * @description URL to the secure payment page
+                         */
+                        securePaymentUrl: string;
+                        /**
+                         * @description Current status of the secure payment
+                         * @enum {string}
+                         */
+                        status: "pending" | "completed" | "expired" | "invalidated";
+                        /**
+                         * @description Type of payment: single or batch
+                         * @enum {string}
+                         */
+                        paymentType: "single" | "batch";
+                        /**
+                         * Format: date-time
+                         * @description When the secure payment was created
+                         */
+                        createdAt: string | null;
+                        /**
+                         * Format: date-time
+                         * @description When the secure payment token expires
+                         */
+                        expiresAt: string;
+                    };
                 };
             };
-        };
-        responses: {
-            /** @description Payee destination created successfully */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Too Many Requests */
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    PayeeDestinationController_getPayeeDestination_v2: {
-        parameters: {
-            query?: never;
-            header: {
-                /** @description Client ID for frontend authentication */
-                "x-client-id": string;
-                /** @description Origin header (automatically set by browser) */
-                Origin: string;
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Payee destination retrieved successfully */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Payee destination not found */
+            /** @description No secure payment found for this request ID */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -4099,14 +4089,16 @@ export interface operations {
             };
         };
     };
-    PayeeDestinationController_deactivatePayeeDestination_v2: {
+    SecurePaymentController_createSecurePayment_v2: {
         parameters: {
             query?: never;
-            header: {
-                /** @description Client ID for frontend authentication */
-                "x-client-id": string;
-                /** @description Origin header (automatically set by browser) */
-                Origin: string;
+            header?: {
+                /** @description API key for authentication (optional if using Client ID or session) */
+                "x-api-key"?: string;
+                /** @description Client ID for frontend authentication (optional if using API key or session) */
+                "x-client-id"?: string;
+                /** @description Origin header (required for Client ID auth, automatically set by browser) */
+                Origin?: string;
             };
             path?: never;
             cookie?: never;
@@ -4114,27 +4106,150 @@ export interface operations {
         requestBody: {
             content: {
                 "application/json": {
-                    /** @description The EIP-712 signature from the payee */
-                    signature: string;
-                    /** @description The signing session nonce from /signing-data endpoint */
-                    nonce: string;
+                    /** @description Array of payment requests. Single item = single payment, multiple items = batch payment. All requests must resolve to the same network. */
+                    requests: {
+                        /** @description Destination ID in composite format: ERC-7828 payee address + token address, separated by ':' (e.g., '0x742d...bEb0@eip155:11155111#80B12379:0x370D...623C') */
+                        destinationId: string;
+                        /** @description The payable amount, in human readable format */
+                        amount: string;
+                    }[];
+                    /** @description Fee percentage to apply at payment time (e.g., '2.5' for 2.5%) */
+                    feePercentage?: string;
+                    /** @description Address to receive the fee (Ethereum 0x... or TRON T...) */
+                    feeAddress?: string;
                 };
             };
         };
         responses: {
-            /** @description Payee destination deactivated successfully */
-            200: {
+            /** @description Secure payment entry created successfully */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @description Array of request IDs created for this secure payment */
+                        requestIds: string[];
+                        /**
+                         * Format: uri
+                         * @description URL to the secure payment page
+                         */
+                        securePaymentUrl: string;
+                        /** @description Secure payment token */
+                        token: string;
+                    };
+                };
+            };
+            /** @description Too Many Requests */
+            429: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content?: never;
             };
-            /** @description Destination not found or validation failed */
-            400: {
+        };
+    };
+    SecurePaymentController_getSecurePaymentByToken_v2: {
+        parameters: {
+            query?: {
+                /** @description The wallet address of the payer (optional, used to check existing approvals) */
+                wallet?: string;
+            };
+            header?: {
+                /** @description API key for authentication (optional if using Client ID) */
+                "x-api-key"?: string;
+                /** @description Client ID for frontend authentication (optional if using API key) */
+                "x-client-id"?: string;
+                /** @description Origin header (required for Client ID auth, automatically set by browser) */
+                Origin?: string;
+            };
+            path: {
+                token: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Secure payment data retrieved successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /**
+                         * @description Type of payment: single or batch
+                         * @enum {string}
+                         */
+                        paymentType: "single";
+                        /** @description Payee wallet address */
+                        payee: string;
+                        /** @description Blockchain network */
+                        network: string;
+                        /** @description Payment amount */
+                        amount: string;
+                        /** @description Payment currency ID */
+                        paymentCurrency: string;
+                        /** @description Whether the payment currency is the native currency (e.g., ETH) */
+                        isNativeCurrency: boolean;
+                        /**
+                         * @description Current status of the secure payment
+                         * @enum {string}
+                         */
+                        status: "pending" | "completed" | "expired" | "invalidated";
+                        /** @description Resolved destination for this payment */
+                        destination: {
+                            /** @description Composite destination ID: ERC-7828 payee address + token address (e.g., '0x742d...bEb0@eip155:11155111#80B12379:0x370D...623C') */
+                            destinationId: string;
+                            /** @description Payee address in ERC-7828 human-readable format */
+                            payeeAddress: string;
+                            /** @description ERC20 token contract address */
+                            tokenAddress: string;
+                            /** @description Raw wallet address */
+                            walletAddress: string;
+                            /** @description Blockchain network name */
+                            network: string;
+                        };
+                        /** @description Array of prepared transactions (includes approval and payment transactions) */
+                        transactions: unknown[];
+                        /** @description Payment metadata */
+                        metadata?: {
+                            stepsRequired: number;
+                            needsApproval: boolean;
+                            approvalTransactionIndex?: number;
+                            paymentTransactionIndex: number;
+                            hasEnoughBalance?: boolean;
+                            hasEnoughGas?: boolean;
+                            platformFee?: {
+                                percentage: string;
+                                address: string;
+                            };
+                        };
+                    };
+                };
+            };
+            /** @description Secure payment token expired or invalid status */
+            403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+            /** @description Secure payment not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Secure payment has already been completed */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
             };
             /** @description Too Many Requests */
             429: {

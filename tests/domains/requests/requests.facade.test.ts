@@ -29,6 +29,18 @@ describe("Requests facade", () => {
     expect(response.requestId).toBeDefined();
   });
 
+  it("lists requests for a wallet", async () => {
+    const response = await client.requests.list({
+      walletAddress: "0xpayee",
+      limit: "5",
+      offset: "0",
+    });
+
+    expect(response.requests).toHaveLength(1);
+    expect(response.requests[0]?.requestId).toBe("req-list-1");
+    expect(response.pagination.limit).toBe(5);
+  });
+
   it("exposes Request REST shapes for downstream consumers", () => {
     const routes: PaymentRoutesResponse = {
       routes: [
@@ -223,16 +235,21 @@ describe("Requests facade", () => {
 
   it("sends update requests to the v2 endpoint", async () => {
     let capturedMethod: string | undefined;
+    let capturedBody: unknown;
 
     server.use(
-      http.patch(`${TEST_BASE_URL}/v2/request/:requestId`, ({ request }) => {
+      http.patch(`${TEST_BASE_URL}/v2/request/:requestId`, async ({ request }) => {
         capturedMethod = request.method;
+        capturedBody = await request.json();
         return HttpResponse.json({}, { status: 200 });
       }),
     );
 
-    await expect(client.requests.update("req-update")).resolves.toBeUndefined();
+    await expect(
+      client.requests.update("req-update", { isRecurrenceStopped: true }),
+    ).resolves.toBeUndefined();
     expect(capturedMethod).toBe("PATCH");
+    expect(capturedBody).toEqual({ isRecurrenceStopped: true });
   });
 
   it("normalises paid request status responses", async () => {

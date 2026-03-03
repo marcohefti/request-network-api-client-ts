@@ -1,6 +1,6 @@
 {
   "name": "@marcohefti/request-network-api-client",
-  "version": "0.5.12",
+  "version": "0.6.0",
   "private": false,
   "description": "Request Network API client for Node and Browser.",
   "publishConfig": {
@@ -104,10 +104,10 @@
       "import": "./dist/esm/domains/payer/index.js",
       "require": "./dist/cjs/domains/payer/index.js"
     },
-    "./payee-destination": {
-      "types": "./dist/esm/domains/payee-destination/index.d.mts",
-      "import": "./dist/esm/domains/payee-destination/index.js",
-      "require": "./dist/cjs/domains/payee-destination/index.js"
+    "./secure-payments": {
+      "types": "./dist/esm/domains/secure-payments/index.d.mts",
+      "import": "./dist/esm/domains/secure-payments/index.js",
+      "require": "./dist/cjs/domains/secure-payments/index.js"
     },
     "./v1/payer": {
       "types": "./dist/esm/domains/payer/v1/index.d.mts",
@@ -146,7 +146,7 @@
     "./src/validation/overrides/**"
   ],
   "devDependencies": {
-    "@marcohefti/request-network-api-contracts": "^0.5.0",
+    "@marcohefti/request-network-api-contracts": "^0.6.0",
     "@eslint/js": "^9.38.0",
     "@types/express": "^4.17.25",
     "@types/express-serve-static-core": "^4.19.7",

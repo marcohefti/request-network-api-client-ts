@@ -10,6 +10,35 @@ export const requestsHandlers = [
       { status: 201 },
     );
   }),
+  http.get(`${TEST_BASE_URL}/v2/request`, ({ request }) => {
+    const url = new URL(request.url);
+    const walletAddress = url.searchParams.get("walletAddress");
+
+    return HttpResponse.json(
+      {
+        requests: walletAddress
+          ? [
+              {
+                requestId: "req-list-1",
+                paymentReference: "ref-list-1",
+                amount: "15",
+                invoiceCurrency: "USD",
+                paymentCurrency: "ETH-sepolia-sepolia",
+                hasBeenPaid: false,
+                status: "pending",
+                payee: walletAddress,
+              },
+            ]
+          : [],
+        pagination: {
+          total: walletAddress ? 1 : 0,
+          limit: Number(url.searchParams.get("limit") ?? 10),
+          offset: Number(url.searchParams.get("offset") ?? 0),
+        },
+      },
+      { status: 200 },
+    );
+  }),
   http.get(`${TEST_BASE_URL}/v2/request/:requestId/routes`, ({ params }) => {
     const { requestId } = params as { requestId: string };
     return HttpResponse.json({
@@ -56,7 +85,13 @@ export const requestsHandlers = [
       },
     });
   }),
-  http.patch(`${TEST_BASE_URL}/v2/request/:requestId`, () => HttpResponse.json({}, { status: 200 })),
+  http.patch(`${TEST_BASE_URL}/v2/request/:requestId`, async ({ request }) => {
+    const payload = (await request.json()) as { isRecurrenceStopped?: boolean };
+    if (typeof payload.isRecurrenceStopped !== "boolean") {
+      return HttpResponse.json({ message: "Validation failed" }, { status: 400 });
+    }
+    return HttpResponse.json({}, { status: 200 });
+  }),
   http.post(`${TEST_BASE_URL}/v2/request/payment-intents/:paymentIntentId`, () => HttpResponse.json({}, { status: 200 })),
   http.get(`${TEST_BASE_URL}/v2/request/:requestId`, ({ params }) => {
     const { requestId } = params as { requestId: string };
