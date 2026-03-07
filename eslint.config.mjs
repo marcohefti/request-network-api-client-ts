@@ -7,6 +7,22 @@ import eslintComments from "eslint-plugin-eslint-comments";
 import sonarjs from "eslint-plugin-sonarjs";
 
 const tsconfigPath = "./tsconfig.json";
+const configTsconfigPath = "./tsconfig.configs.json";
+const nodeScriptGlobals = {
+  AbortController: "readonly",
+  clearTimeout: "readonly",
+  console: "readonly",
+  fetch: "readonly",
+  process: "readonly",
+  setTimeout: "readonly",
+  URL: "readonly"
+};
+const commonJsGlobals = {
+  __dirname: "readonly",
+  __filename: "readonly",
+  module: "readonly",
+  require: "readonly"
+};
 
 const dotSuffixPlugin = {
   rules: {
@@ -207,6 +223,41 @@ export default tseslint.config(
           skipComments: true
         }
       ]
+    }
+  },
+  {
+    files: ["**/*.mts"],
+    languageOptions: {
+      parserOptions: {
+        project: configTsconfigPath,
+        tsconfigRootDir: import.meta.dirname
+      }
+    },
+    settings: {
+      "import/resolver": {
+        typescript: {
+          project: configTsconfigPath,
+          tsconfigRootDir: import.meta.dirname
+        }
+      }
+    }
+  },
+  {
+    ...tseslint.configs.disableTypeChecked,
+    files: ["**/*.mjs"],
+    languageOptions: {
+      globals: nodeScriptGlobals
+    }
+  },
+  {
+    ...tseslint.configs.disableTypeChecked,
+    files: ["**/*.cjs"],
+    languageOptions: {
+      globals: {
+        ...nodeScriptGlobals,
+        ...commonJsGlobals
+      },
+      sourceType: "commonjs"
     }
   },
   {
