@@ -9,11 +9,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - Adopted `@marcohefti/request-network-api-contracts@0.6.2` after refreshing the upstream OpenAPI fetch metadata. Generated OpenAPI types and Zod schemas remained unchanged because the committed patched contract body still matches upstream after applying the local drift patch.
-
-## [0.6.1] - 2026-03-10
-
-### Changed
-- Adopted `@marcohefti/request-network-api-contracts@0.6.1` after refreshing the upstream OpenAPI fetch metadata. Generated OpenAPI types and Zod schemas remained unchanged because the committed patched contract body still matches upstream after applying the local drift patch.
 - Scoped typed config validation in `eslint.config.mjs` to the intended config files.
 
 ## [0.6.0] - 2026-03-03
