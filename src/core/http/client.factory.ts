@@ -61,6 +61,11 @@ function buildHeaders(credentials: CredentialOptions, defaults?: Record<string, 
   };
 }
 
+function omitClientIdForOrchestratorOperation(headers: Record<string, string>, operationId?: string): Record<string, string> {
+  if (!operationId?.startsWith("OrchestratorController_")) return headers;
+  return Object.fromEntries(Object.entries(headers).filter(([key]) => key.toLowerCase() !== "x-client-id"));
+}
+
 function asRecord(value: unknown): Record<string, unknown> | undefined {
   if ((value && typeof value === "object") || Array.isArray(value)) {
     return value as Record<string, unknown>;
@@ -247,7 +252,10 @@ export function createHttpClient(options: CreateClientOptions = {}): HttpClient 
   async function request(init: RequestOptions): Promise<{ status: number; headers: Record<string, string>; data: unknown }> {
     const serializer = init.querySerializer ?? cfg.querySerializer;
     const url = buildUrl(cfg.baseUrl, init.path, init.query, serializer);
-    const headers = { ...(cfg.defaultHeaders ?? {}), ...(init.headers ?? {}) };
+    const headers = omitClientIdForOrchestratorOperation(
+      { ...(cfg.defaultHeaders ?? {}), ...(init.headers ?? {}) },
+      init.meta?.operationId,
+    );
     const req: HttpRequest = {
       method: init.method,
       url,

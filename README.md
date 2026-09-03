@@ -35,7 +35,9 @@ yarn add @marcohefti/request-network-api-client
 
 For partner integrations, configure `orchestratorKey` with `clientId`. The
 client sends both `x-client-id` and `x-orchestrator-key` for Secure Payment
-creation and redacts credentials and secure-payment bearer tokens from logs.
+creation. Orchestrator-management calls intentionally omit `x-client-id` and
+send only their orchestrator credentials. The client redacts credentials and
+secure-payment bearer tokens from logs.
 `client.orchestrators` covers client linking, fee configuration, branding, and
 webhooks; `client.operations.execute()` provides typed access to all published
 REST operations.
