@@ -1,13 +1,13 @@
 # @marcohefti/request-network-api-client - Testing Guide
 
-The Vitest + MSW suites back every facade and enforce OpenAPI parity so future contributors can extend the client without guessing. Tests run in Node 20.x-24.x (matching the runtime support window).
+The Vitest + MSW suites back every facade and enforce OpenAPI parity so future contributors can extend the client without guessing. Supported Node 20.x, 22.x, and 24.x releases are tested in CI; Node 25.x is also exercised as an experimental compatibility check.
 
 ## Test Suite Structure
 
 | Suite | Tooling | Purpose |
 | --- | --- | --- |
 | Unit | Vitest + MSW (node) | Exercise every client method with mocked Request API responses (success + error). |
-| Integration | Vitest (separate command) | Hit the Request Network API with real credentials (production host by default) and exercise crypto-to-fiat sandbox flows. Skips automatically when env vars are missing. |
+| Integration | Vitest (separate command) | Hit the only Request API host, production, with low-value or testnet inputs. Skips automatically when env vars are missing. |
 | Type contracts | `tsc --noEmit` + `expectTypeOf`/`tsd` helpers | Ensure generated OpenAPI typings and exported module surfaces stay stable. |
 
 ## Commands
@@ -24,6 +24,12 @@ The Vitest + MSW suites back every facade and enforce OpenAPI parity so future c
 When new scripts are introduced, update `package.json`, `docs/TESTING.md`, and the root `AGENTS.md` so automation stays consistent.
 
 ### Webhook suites & utilities
+
+The 0.7.0 parity suite verifies all 82 OpenAPI operations through the generated
+operation catalog and all current webhook event identifiers. Unknown future
+payload fields are intentionally tolerated, while every field currently
+required by the published webhook contract remains validated. Unknown event
+identifiers fail closed until a contract release defines them.
 
 - Unit tests for the webhook module live under `tests/webhooks/*.test.ts`, covering signature verification, middleware behaviour, dispatcher routing, event predicates, and schema parity (`tests/webhooks/event-parity.test.ts`).
 - Import helpers from `webhooks.testing` inside tests (and downstream packages) instead of reimplementing HMAC logic:
@@ -174,12 +180,12 @@ Vitest’s V8 coverage reporter enforces ≥80 % line/function thresholds (bra
 
 | Check | Details |
 | --- | --- |
-| Lint | CI runs `pnpm lint` on Node 20/22/24. |
-| Typecheck | `pnpm typecheck` executes on the same Node matrix. |
-| Unit tests + coverage | `pnpm test` enforces coverage thresholds on Node 20/22/24. |
-| Packaging guard | Node 20 job builds, then runs `pnpm pack --pack-destination tmp/pack --json`. |
-| OpenAPI regen | Guard job runs `pnpm generate:types` + `pnpm generate:zod` and fails on `git diff --exit-code`. |
-| Integration tests | Separate workflow triggered manually or on release branches. Uses the sandbox env vars above. |
+| Lint | CI runs `pnpm lint` on Node 20/22/24 and the experimental Node 25 check. |
+| Typecheck | `pnpm tsc` executes on the same Node matrix. |
+| Unit tests | CI runs `pnpm test` on the same Node matrix. |
+| Coverage | A separate Node 24 job runs `pnpm coverage` and enforces the configured thresholds. |
+| Build | CI runs `pnpm build` on the complete Node matrix. |
+| Integration tests | Live tests remain opt-in and run only when explicitly invoked with production-safe credentials. |
 
 ## Reason Step Checklist
 

@@ -101,6 +101,55 @@ const requestRecurringSchema = webhookBaseSchema.extend({
   originalRequestPaymentReference: z.string(),
 });
 
+// Current contract fields are validated while `.passthrough()` on the base
+// preserves forward compatibility for additive payload fields.
+const clientIdLinkedSchema = webhookBaseSchema.extend({
+  event: z.literal("client_id.linked"),
+  clientId: z.string(),
+  orchestratorId: z.string(),
+  linkId: z.string(),
+  intentId: z.string(),
+  externalId: z.string(),
+  destinationId: z.string(),
+  destinationWalletAddress: z.string(),
+  chain: z.string(),
+  currency: z.string(),
+  timestamp: z.string().datetime({ offset: true }),
+});
+const kytScreeningCompletedSchema = webhookBaseSchema.extend({
+  event: z.literal("kyt.screening.completed"),
+  paymentToken: z.string(),
+  clientId: z.string(),
+  orchestratorId: z.string().optional(),
+  walletAddress: z.string(),
+  eoaAddress: z.string(),
+  smartAccountAddress: z.string().nullable().optional(),
+  status: z.enum(["approved", "rejected"]),
+  provider: z.string(),
+  policyId: z.string().nullable().optional(),
+  timestamp: z.string().datetime({ offset: true }),
+});
+const securePaymentAccessRejectedSchema = webhookBaseSchema.extend({
+  event: z.literal("secure_payment.access_rejected"),
+  requestId: z.string(),
+  clientId: z.string(),
+  orchestratorId: z.string().optional(),
+  attemptedPayerWalletAddress: z.string(),
+  timestamp: z.string().datetime({ offset: true }),
+});
+const securePaymentUserEventSchema = webhookBaseSchema.extend({
+  event: z.literal("secure_payment.user_event"),
+  userEvent: z.enum(["wallet_connected", "payment_sent_to_wallet", "payment_approved_in_wallet"]),
+  securePaymentToken: z.string(),
+  requestId: z.string().optional(),
+  requestIds: z.array(z.string()),
+  clientId: z.string(),
+  orchestratorId: z.string().optional(),
+  occurredAt: z.string().datetime({ offset: true }),
+  timestamp: z.string().datetime({ offset: true }),
+  properties: z.record(z.unknown()),
+});
+
 const webhookEventSchemas = {
   "payment.confirmed": paymentConfirmedSchema,
   "payment.failed": paymentFailedSchema,
@@ -110,6 +159,10 @@ const webhookEventSchemas = {
   "payment.partial": paymentPartialSchema,
   "payment.refunded": paymentRefundedSchema,
   "request.recurring": requestRecurringSchema,
+  "client_id.linked": clientIdLinkedSchema,
+  "kyt.screening.completed": kytScreeningCompletedSchema,
+  "secure_payment.access_rejected": securePaymentAccessRejectedSchema,
+  "secure_payment.user_event": securePaymentUserEventSchema,
 } as const;
 
 export type WebhookEventName = keyof typeof webhookEventSchemas;

@@ -5,6 +5,8 @@ const entryPoints = {
   "domains/currencies/index": "src/domains/currencies/index.ts",
   "domains/currencies/v1/index": "src/domains/currencies/v1/index.ts",
   "domains/client-ids/index": "src/domains/client-ids/index.ts",
+  "domains/operations/index": "src/domains/operations/index.ts",
+  "domains/orchestrators/index": "src/domains/orchestrators/index.ts",
   "domains/requests/index": "src/domains/requests/index.ts",
   "domains/requests/v1/index": "src/domains/requests/v1/index.ts",
   "domains/payouts/index": "src/domains/payouts/index.ts",

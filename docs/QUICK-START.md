@@ -68,6 +68,9 @@ const client = createRequestClient({
 
 ## Runtime Validation
 
+For partner Secure Payment creation, pass both `clientId` and `orchestratorKey`
+to `createRequestClient`. The client preserves both required headers.
+
 Runtime validation is enabled by default. To relax checks globally:
 
 ```ts
@@ -143,7 +146,7 @@ Root exports (`@marcohefti/request-network-api-client`) point at REST v2 endpoin
 ```ts
 const request = await client.requests.create({
   amount: '0.01',
-  paymentNetwork: 'erc20-sepolia',
+  invoiceCurrency: 'USD',
   paymentCurrency: 'ETH-sepolia-sepolia',
 });
 console.log('Request ID:', request.requestId);

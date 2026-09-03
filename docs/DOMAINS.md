@@ -21,26 +21,14 @@ console.log('Payment Reference:', request.paymentReference);
 
 ### Get Payment Calldata
 
-Returns calldata or payment intent depending on the chain and Request configuration.
+Returns current payment calldata. The deleted payment-intent submission API is not exposed.
 
 ```ts
 const payment = await client.requests.getPaymentCalldata(request.requestId!, {
   chain: 'OPTIMISM',
 });
 
-// Typed union distinguishes calldata vs intent workflows
-if (payment.kind === 'paymentIntent') {
-  await client.requests.sendPaymentIntent(payment.paymentIntentId, {
-    signedPaymentIntent: {
-      signature: '0x...',
-      nonce: '1',
-      deadline: '9999999999',
-    },
-  });
-} else {
-  // payment.kind === 'calldata'
-  console.log('Calldata:', payment.calldata);
-}
+console.log('Transactions:', payment.transactions);
 ```
 
 ### Get Request Status

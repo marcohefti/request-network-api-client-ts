@@ -117,8 +117,8 @@ describe("Requests facade", () => {
     expect("transactions" in direct).toBe(true);
 
     const bridged = await client.requests.getPaymentCalldata("req-123", { chain: "OPTIMISM" });
-    expect(bridged.kind).toBe("paymentIntent");
-    expect("paymentIntentId" in bridged).toBe(true);
+    expect(bridged.kind).toBe("calldata");
+    expect("transactions" in bridged).toBe(true);
   });
 
   it("forwards optional query params when fetching payment routes", async () => {
@@ -165,12 +165,7 @@ describe("Requests facade", () => {
       http.get(`${TEST_BASE_URL}/v2/request/:requestId/pay`, ({ request }) => {
         capturedUrl = new URL(request.url);
         return HttpResponse.json(
-          {
-            paymentIntentId: "pi-captured",
-            paymentIntent: "0xintent",
-            approvalPermitPayload: null,
-            metadata: { supportsEIP2612: true },
-          },
+          { transactions: [], metadata: { stepsRequired: 1, needsApproval: false, hasEnoughBalance: true, hasEnoughGas: true } },
           { status: 200 },
         );
       }),
@@ -187,7 +182,7 @@ describe("Requests facade", () => {
       feeAddress,
     });
 
-    expect(result.kind).toBe("paymentIntent");
+    expect(result.kind).toBe("calldata");
     expect(capturedUrl?.searchParams.get("wallet")).toBe("0xwallet");
     expect(capturedUrl?.searchParams.get("amount")).toBe(amount);
     expect(capturedUrl?.searchParams.get("chain")).toBe(chain);
@@ -219,18 +214,6 @@ describe("Requests facade", () => {
       expect(isRequestApiError(err)).toBe(true);
       return true;
     });
-  });
-
-  it("propagates validation overrides for sendPaymentIntent", async () => {
-    await expect(
-      client.requests.sendPaymentIntent(
-        "pi-123",
-        {
-          signedPaymentIntent: { signature: "0x1", nonce: "1", deadline: "999" },
-        },
-        { validation: false },
-      ),
-    ).resolves.toBeUndefined();
   });
 
   it("sends update requests to the v2 endpoint", async () => {

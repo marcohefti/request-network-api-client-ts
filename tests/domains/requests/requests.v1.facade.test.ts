@@ -35,15 +35,8 @@ describe("Requests v1 facade", () => {
   it("returns discriminated union for payment calldata", async () => {
     const calldata = await legacyRequests.getPaymentCalldata(LEGACY_REF);
     expect(calldata.kind).toBe("calldata");
-    if (calldata.kind === "calldata") {
-      expect(calldata.transactions).toHaveLength(1);
-    }
+    expect(calldata.transactions).toHaveLength(1);
 
-    const intent = await legacyRequests.getPaymentCalldata(LEGACY_REF, { chain: "OPTIMISM" });
-    expect(intent.kind).toBe("paymentIntent");
-    if (intent.kind === "paymentIntent") {
-      expect(intent.paymentIntentId).toBe(`legacy-pi-${LEGACY_REF}`);
-    }
   });
 
   it("normalises request status payloads", async () => {
@@ -56,13 +49,7 @@ describe("Requests v1 facade", () => {
     expect(paid.txHash).toBe("0xtx");
   });
 
-  it("sends payment intents and stops recurrence", async () => {
-    await expect(
-      legacyRequests.sendPaymentIntent("legacy-pi-1", {
-        signedPaymentIntent: { signature: "0x1", nonce: "1", deadline: "999" },
-      }),
-    ).resolves.toBeUndefined();
-
+  it("stops recurrence", async () => {
     await expect(legacyRequests.stopRecurrence(LEGACY_REF)).resolves.toBeUndefined();
   });
 

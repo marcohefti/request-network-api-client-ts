@@ -56,19 +56,10 @@ export const requestsHandlers = [
   }),
   http.get(`${TEST_BASE_URL}/v2/request/:requestId/pay`, ({ params, request }) => {
     const { requestId } = params as { requestId: string };
+    void requestId;
     const url = new URL(request.url);
     const chain = url.searchParams.get("chain");
-    if (chain && chain !== "ETHEREUM") {
-      return HttpResponse.json(
-        {
-          paymentIntentId: `pi-${requestId}`,
-          paymentIntent: "0xintent",
-          approvalPermitPayload: null,
-          metadata: { supportsEIP2612: true },
-        },
-        { status: 200 },
-      );
-    }
+    void chain;
     return HttpResponse.json({
       transactions: [
         {
@@ -92,7 +83,6 @@ export const requestsHandlers = [
     }
     return HttpResponse.json({}, { status: 200 });
   }),
-  http.post(`${TEST_BASE_URL}/v2/request/payment-intents/:paymentIntentId`, () => HttpResponse.json({}, { status: 200 })),
   http.get(`${TEST_BASE_URL}/v2/request/:requestId`, ({ params }) => {
     const { requestId } = params as { requestId: string };
 
@@ -172,20 +162,11 @@ export const requestsHandlers = [
   }),
   http.get(`${TEST_BASE_URL}/v1/request/:paymentReference/pay`, ({ params, request }) => {
     const { paymentReference } = params as { paymentReference: string };
+    void paymentReference;
     const url = new URL(request.url);
     const chain = url.searchParams.get("chain");
 
-    if (chain && chain !== "ETHEREUM") {
-      return HttpResponse.json(
-        {
-          paymentIntentId: `legacy-pi-${paymentReference}`,
-          paymentIntent: "0xintent",
-          signedApprovalPermit: null,
-          metadata: { supportsEIP2612: true },
-        },
-        { status: 200 },
-      );
-    }
+    void chain;
 
     return HttpResponse.json(
       {

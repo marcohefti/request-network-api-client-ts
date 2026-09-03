@@ -207,7 +207,7 @@ Optionally, set `REQUEST_WEBHOOK_PUBLIC_URL` to the same URL so tooling and logs
 
 ### 5. Run Live Tests (Optional)
 
-Once the secret is in place (and the listener is running), you can hit staging flows and see real deliveries in the console. When running automated suites, the env vars are enough-no additional commands required.
+Once the secret is in place (and the listener is running), use low-value or testnet production flows to see real deliveries. Request has no staging API host. Payload schemas validate all currently required contract fields and pass through additive future fields. Unknown event identifiers fail closed until a later contracts release defines them.
 
 ### One-Line Scripts Reference
 

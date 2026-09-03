@@ -26,6 +26,8 @@ A typed API client for the Request Network hosted REST API (v2), usable in Node 
 - Runtime validation via Zod schemas
 - Fetch-based HTTP client (works in Node 20+ and modern browsers)
 - Webhook signature verification and event handlers
+- Partner/orchestrator endpoints via `client.orchestrators` and the generated
+  `client.operations` surface; this client never stores merchant or shopper data.
 - Subpath exports for tree-shaking (`@marcohefti/request-network-api-client/requests`)
 - Support for both REST v2 and legacy v1 endpoints
 

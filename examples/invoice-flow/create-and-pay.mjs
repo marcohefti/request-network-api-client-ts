@@ -40,12 +40,11 @@ async function main() {
     console.log('📝 Creating payment request...');
     const request = await client.requests.create({
       amount: '0.01',
-      paymentNetwork: 'erc20-sepolia',
+      invoiceCurrency: 'USD',
       paymentCurrency: 'ETH-sepolia-sepolia',
       payee: process.env.REQUEST_PAYEE_WALLET,
       payer: process.env.REQUEST_PAYER_WALLET,
-      reason: 'Example Invoice #12345',
-      dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 30 days from now
+      reference: 'Example Invoice #12345',
     });
 
     console.log('✅ Request created successfully!');

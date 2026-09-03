@@ -37,8 +37,8 @@ describe("webhooks.payment.failed", () => {
     const [[eventPayload, context]] = handler.mock.calls;
     expect(eventPayload.event).toBe(PAYMENT_FAILED_EVENT);
     expect(eventPayload.subStatus).toBe("insufficient_funds");
-    expect(eventPayload.failureReason).toBe("Insufficient fiat liquidity");
-    expect(eventPayload.retryAfter).toBe("2025-08-29T18:25:45.995Z");
+    expect(eventPayload.failureReason).toBeUndefined();
+    expect(eventPayload.retryAfter).toBeUndefined();
     expect(context.event.signature).toBe(signature);
     expect(context.dispatchContext.req).toBe(req);
 

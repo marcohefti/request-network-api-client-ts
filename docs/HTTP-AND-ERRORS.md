@@ -1,10 +1,16 @@
 # HTTP Client & Error Handling
 
+## Sensitive values
+
+`x-orchestrator-key`, webhook secrets, Authorization values, and Secure Payment
+bearer tokens are redacted from error context and lifecycle logging. Do not put
+credentials in custom URLs or logger metadata.
+
 This document covers HTTP client configuration, error handling patterns, and retry behavior.
 
 ## HTTP Client
 
-The client exposes a fetch-based HTTP client with interceptors for retry and logging. Works in Node 20.x-24.x (built-in `fetch`) and modern browsers/edge runtimes.
+The client exposes a fetch-based HTTP client with interceptors for retry and logging. It supports Node 20.x, 22.x, and 24.x (built-in `fetch`) plus modern browsers and edge runtimes; CI also exercises Node 25.x as an experimental compatibility check.
 
 ### Basic Usage
 

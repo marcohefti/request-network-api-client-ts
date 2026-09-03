@@ -251,8 +251,7 @@ const request = await client.requests.create({
   paymentCurrency: 'ETH-sepolia-sepolia',
   payee: '0xYourWalletAddress',
   payer: '0xPayerWalletAddress', // optional
-  reason: 'Invoice #1234',
-  dueDate: '2024-12-31',
+  reference: 'Invoice #1234',
 });
 
 console.log('Request ID:', request.requestId);
@@ -325,35 +324,17 @@ if (payment.kind === 'calldata') {
   console.log('Data:', payment.transactions[0].data);
   console.log('Value:', payment.transactions[0].value);
 } else if (payment.kind === 'paymentIntent') {
-  // Requires signature
+  // Historical responses may still contain this shape. The current hosted API
+  // publishes no REST endpoint that submits the signed intent.
   console.log('Payment Intent ID:', payment.paymentIntentId);
-  // User signs the intent, then call sendPaymentIntent
 }
 ```
 
 **Notes:**
 - Returns discriminated union: `{ kind: 'calldata' }` or `{ kind: 'paymentIntent' }`
 - Calldata can be used directly with wallet providers
-- Payment intents require user signature before submission
-
-### `POST /v2/request/payment-intents/{paymentIntentId}`
-
-Submit a signed payment intent.
-
-**Prerequisites:**
-- Payment intent ID from `getPaymentCalldata`
-- User signature from wallet
-
-**Example:**
-```typescript
-await client.requests.sendPaymentIntent(payment.paymentIntentId, {
-  signedPaymentIntent: {
-    signature: '0xSignatureFromWallet',
-    nonce: '1',
-    deadline: '9999999999',
-  },
-});
-```
+- The current hosted contract has no payment-intent submission operation. The
+  pre-0.7 client helper for that removed endpoint is no longer exported.
 
 ### `PATCH /v2/request/{requestId}`
 

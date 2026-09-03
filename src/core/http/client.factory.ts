@@ -26,6 +26,8 @@ export interface CreateClientOptions {
   baseUrl?: string;
   apiKey?: string;
   clientId?: string;
+  /** Request Network orchestrator API key for partner/orchestrator endpoints. */
+  orchestratorKey?: string;
   origin?: string;
   headers?: Record<string, string>;
   adapter?: HttpAdapter;
@@ -67,7 +69,8 @@ function asRecord(value: unknown): Record<string, unknown> | undefined {
 }
 
 const REDACTED_VALUE = "<redacted>";
-const REDACTED_HEADERS = new Set(["x-api-key", "authorization", "cookie"]);
+const REDACTED_HEADERS = new Set(["x-api-key", "x-orchestrator-key", "authorization", "cookie", "x-webhook-secret"]);
+const REDACTED_BODY_KEYS = new Set(["token", "securepaymenttoken", "secret", "webhooksecret", "signature", "authorization"]);
 const RESPONSE_HEADER_ALLOWLIST = new Set(["content-type", "content-length", "x-request-id", "x-correlation-id", "retry-after"]);
 
 const LOG_TRUNCATION = {
@@ -85,6 +88,10 @@ function redactHeaders(headers?: Record<string, string>): Record<string, string>
     out[lower] = REDACTED_HEADERS.has(lower) ? REDACTED_VALUE : value;
   }
   return out;
+}
+
+function redactUrl(url: string): string {
+  return url.replace(/(\/secure-payments\/(?:multicall-payouts\/)?)([^/?#]+)/g, "$1<redacted>");
 }
 
 function pickResponseHeaders(headers: Record<string, string>): Record<string, string> {
@@ -112,7 +119,7 @@ function truncateObjectForLogs(value: Record<string, unknown>, depth: number): R
   const sliced = entries.slice(0, LOG_TRUNCATION.maxKeys);
   const out: Record<string, unknown> = {};
   for (const [key, v] of sliced) {
-    out[key] = truncateForLogs(v, depth + 1);
+    out[key] = REDACTED_BODY_KEYS.has(key.toLowerCase()) ? REDACTED_VALUE : truncateForLogs(v, depth + 1);
   }
   if (entries.length > LOG_TRUNCATION.maxKeys) {
     out["__truncated__"] = "max-keys";
@@ -180,7 +187,7 @@ function mapToError(res: HttpResponse, req: HttpRequest, validation: RuntimeVali
       ? {
           request: {
             method: req.method,
-            url: req.url,
+            url: redactUrl(req.url),
             headers: redactHeaders(req.headers),
             hasBody: req.body != null,
           },
@@ -199,7 +206,7 @@ export function createHttpClient(options: CreateClientOptions = {}): HttpClient 
   const baseUrl = options.baseUrl ?? DEFAULT_BASE_URL;
   const adapter = options.adapter ?? nodeFetchAdapter;
   const defaults = { ...buildTelemetryHeaders(options.userAgent, options.sdkInfo), ...(options.headers ?? {}) };
-  const creds: CredentialOptions = { apiKey: options.apiKey, clientId: options.clientId, origin: options.origin };
+  const creds: CredentialOptions = { apiKey: options.apiKey, clientId: options.clientId, orchestratorKey: options.orchestratorKey, origin: options.origin };
 
   const userInterceptors = options.interceptors ?? [];
   const logLevel: LogLevel = options.logLevel ?? (options.logger ? "info" : "silent");

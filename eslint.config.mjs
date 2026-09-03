@@ -79,7 +79,7 @@ const dotSuffixPlugin = {
 
 export default tseslint.config(
   {
-    ignores: ["dist", "coverage", "src/generated/openapi-types.ts", "src/validation/generated/**"]
+    ignores: ["dist", "coverage", "src/generated/openapi-types.ts", "src/generated/openapi-operations.ts", "src/validation/generated/**"]
   },
   eslintJs.configs.recommended,
   ...tseslint.configs.strictTypeChecked,

@@ -13,6 +13,10 @@ const REQUEST_ID_HEADER = "x-request-id";
 const REQUEST_ID = "req-123";
 const PROBLEM_REQUEST_ID = "req-problem-1";
 const DETAIL_HINT = { hint: "wrong value" } as const;
+const REDACTED = "<redacted>";
+const ORCHESTRATOR_SECRET = "orchestrator-secret";
+const RESPONSE_TOKEN = "response-token";
+const RESPONSE_SECRET = "response-secret";
 
 describe("HTTP error mapping", () => {
   it("maps 400 JSON error payload to RequestApiError", async () => {
@@ -99,7 +103,29 @@ describe("HTTP error mapping", () => {
         return false;
       }
       const meta = error.meta as { request?: { headers?: Record<string, string> } } | undefined;
-      expect(meta?.request?.headers?.["x-api-key"]).toBe("<redacted>");
+      expect(meta?.request?.headers?.["x-api-key"]).toBe(REDACTED);
+      return true;
+    });
+  });
+
+  it("redacts secure-payment paths, orchestrator credentials, and secret response fields", async () => {
+    const client = createHttpClient({ baseUrl: TEST_BASE_URL, orchestratorKey: ORCHESTRATOR_SECRET });
+    server.use(
+      http.get(`${TEST_BASE_URL}/v2/secure-payments/:token`, () =>
+        HttpResponse.json({ token: RESPONSE_TOKEN, webhookSecret: RESPONSE_SECRET }, { status: 400 }),
+      ),
+    );
+
+    await expect(
+      client.get("/v2/secure-payments/path-token", { meta: { captureErrorContext: true } }),
+    ).rejects.toSatisfy((error: unknown) => {
+      if (!isRequestApiError(error)) return false;
+      const serialised = JSON.stringify(error.meta);
+      expect(serialised).toContain(REDACTED);
+      expect(serialised).not.toContain("path-token");
+      expect(serialised).not.toContain(ORCHESTRATOR_SECRET);
+      expect(serialised).not.toContain(RESPONSE_TOKEN);
+      expect(serialised).not.toContain(RESPONSE_SECRET);
       return true;
     });
   });

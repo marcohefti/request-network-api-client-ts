@@ -7,11 +7,13 @@ export const payoutsHandlers = [
   http.post(`${TEST_BASE_URL}/v2/payouts/batch`, () =>
     HttpResponse.json(
       {
-        ERC20BatchPaymentTransaction: {
+        ERC20ApprovalTransactions: [],
+        batchPaymentTransaction: {
           to: "0xbridge",
           data: "0xdead",
           value: { type: "BigNumber", hex: "0x0" },
         },
+        requests: [{ requestId: "payout-batch-1", paymentReference: "batch-ref", payee: "0xpayee", amount: "10", invoiceCurrency: "USD", paymentCurrency: "ETH" }],
       },
       { status: 201 },
     ),

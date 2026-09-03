@@ -51,6 +51,8 @@ export * as pay from "./domains/pay";
 export * as payV1 from "./domains/pay/v1";
 export * as payer from "./domains/payer";
 export * as securePayments from "./domains/secure-payments";
+export * as operations from "./domains/operations";
+export * as orchestrators from "./domains/orchestrators";
 export * as payerV1 from "./domains/payer/v1";
 export * as payerV2 from "./domains/payer/v2";
 export * as webhooks from "./webhooks";

@@ -102,9 +102,9 @@ function normalizeCustomerInfo(value: RequestStatusCustomerInfo | null | undefin
   };
 }
 
-function normalizePayments(payments: StatusApiResponseV2["payments"]): Array<Record<string, unknown>> | undefined {
+function normalizePayments(payments: unknown): Array<Record<string, unknown>> | undefined {
   if (!payments) return undefined;
-  return payments.map((payment) => ({ ...payment })) as Array<Record<string, unknown>>;
+  return Array.isArray(payments) ? payments.map((payment) => ({ ...(payment as Record<string, unknown>) })) : undefined;
 }
 
 function buildStatusBase(
@@ -115,7 +115,7 @@ function buildStatusBase(
     paymentReference: raw.paymentReference ?? undefined,
     requestId: raw.requestId ?? undefined,
     isListening: "isListening" in raw ? raw.isListening ?? undefined : undefined,
-    txHash: raw.txHash ?? null,
+    txHash: "txHash" in raw ? raw.txHash ?? null : null,
     hasBeenPaid: raw.hasBeenPaid ?? false,
     status: "status" in raw ? (raw).status ?? undefined : undefined,
     recurrence:

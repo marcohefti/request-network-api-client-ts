@@ -2,6 +2,8 @@ import { createHttpClient, type CreateClientOptions } from "./core/http/client.f
 import type { HttpClient } from "./core/http/http.types";
 import { createClientIdsApi, type ClientIdsApi } from "./domains/client-ids";
 import { createCurrenciesApi, type CurrenciesApi } from "./domains/currencies";
+import { createOperationsApi, type OperationsApi } from "./domains/operations";
+import { createOrchestratorsApi, type OrchestratorsApi } from "./domains/orchestrators";
 import { createPayApi, type PayApi } from "./domains/pay";
 import { createPayerApi, type PayerApi } from "./domains/payer";
 import { createPaymentsApi, type PaymentsApi } from "./domains/payments";
@@ -28,6 +30,10 @@ export interface RequestClient {
   securePayments: SecurePaymentsApi;
   /** Legacy pay endpoints */
   pay: PayApi;
+  /** Every operation in the released Request API contract. */
+  operations: OperationsApi;
+  /** Orchestrator linking, fees, branding, and webhook endpoints. */
+  orchestrators: OrchestratorsApi;
 }
 
 /**
@@ -72,5 +78,7 @@ export function createRequestClient(options?: CreateClientOptions): RequestClien
     payer: createPayerApi(http),
     securePayments: createSecurePaymentsApi(http),
     pay: createPayApi(http),
+    operations: createOperationsApi(http),
+    orchestrators: createOrchestratorsApi(http),
   };
 }

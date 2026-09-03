@@ -33,6 +33,13 @@ yarn add @marcohefti/request-network-api-client
 
 ## Quick Start
 
+For partner integrations, configure `orchestratorKey` with `clientId`. The
+client sends both `x-client-id` and `x-orchestrator-key` for Secure Payment
+creation and redacts credentials and secure-payment bearer tokens from logs.
+`client.orchestrators` covers client linking, fee configuration, branding, and
+webhooks; `client.operations.execute()` provides typed access to all published
+REST operations.
+
 ```ts
 import {
   createRequestClient,
@@ -46,7 +53,7 @@ const client = createRequestClient({
 // Create a request
 const request = await client.requests.create({
   amount: '0.01',
-  paymentNetwork: 'erc20-sepolia',
+  invoiceCurrency: 'USD',
   paymentCurrency: 'ETH-sepolia-sepolia',
 });
 

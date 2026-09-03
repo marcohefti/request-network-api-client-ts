@@ -59,6 +59,7 @@ function toZod(schema, components) {
   }
   if (schema.enum && Array.isArray(schema.enum)) {
     const lits = schema.enum.map(aLiteral).join(', ');
+    if (schema.enum.length === 1) return aLiteral(schema.enum[0]);
     return schema.enum.every((v) => typeof v === 'string') ? `z.enum([${schema.enum.map((s) => `'${String(s)}'`).join(', ')}])` : `z.union([${lits}])`;
   }
   if (schema.const !== undefined) {

@@ -6,6 +6,7 @@ import type { HttpAdapter, HttpRequest, HttpResponse } from "../../src/core/http
 const BASE_URL = "https://api.request.network" as const;
 const API_KEY = "api-123";
 const CLIENT_ID = "client-xyz";
+const ORCHESTRATOR_KEY = "orchestrator-secret";
 const ORIGIN = "https://app.example";
 const USER_AGENT = "request-api-client-tests";
 const SDK_NAME = "request-sdk";
@@ -28,6 +29,7 @@ describe("HTTP client headers", () => {
       adapter,
       apiKey: API_KEY,
       clientId: CLIENT_ID,
+      orchestratorKey: ORCHESTRATOR_KEY,
       origin: ORIGIN,
       userAgent: USER_AGENT,
       sdkInfo: { name: SDK_NAME, version: SDK_VERSION },
@@ -40,6 +42,7 @@ describe("HTTP client headers", () => {
     expect(captured?.headers).toMatchObject({
       "x-api-key": API_KEY,
       "x-client-id": CLIENT_ID,
+      "x-orchestrator-key": ORCHESTRATOR_KEY,
       Origin: ORIGIN,
       "user-agent": USER_AGENT,
       "x-sdk": `${SDK_NAME}/${SDK_VERSION}`,

@@ -5,7 +5,6 @@ export {
   type GetPaymentRoutesOptions,
   type GetPaymentCalldataOptions,
   type RequestStatusResult,
-  type SendPaymentIntentBody,
 } from "./requests.v1.facade";
 
 import "../../../validation/generated/groups/request.schemas.generated";

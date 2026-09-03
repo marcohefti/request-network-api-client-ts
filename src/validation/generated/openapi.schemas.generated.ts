@@ -42,6 +42,10 @@ const ErrorEnvelopeSchema = z
   })
   .passthrough();
 
+// GET /v2/health -> HealthController_check_v2 (200)
+export const HealthController_check_v2_200 = z.unknown();
+schemaRegistry.register({ key: { operationId: 'HealthController_check_v2', kind: 'response', status: 200 }, schema: HealthController_check_v2_200 });
+
 // GET /v1/currencies -> CurrenciesV1Controller_getNetworkTokens_v1 (200)
 export const CurrenciesV1Controller_getNetworkTokens_v1_200 = z.unknown();
 schemaRegistry.register({ key: { operationId: 'CurrenciesV1Controller_getNetworkTokens_v1', kind: 'response', status: 200 }, schema: CurrenciesV1Controller_getNetworkTokens_v1_200 });
@@ -211,7 +215,7 @@ export const RequestControllerV1_createRequest_v1_429 = ErrorEnvelopeSchema;
 schemaRegistry.register({ key: { operationId: 'RequestControllerV1_createRequest_v1', kind: 'response', status: 429 }, schema: RequestControllerV1_createRequest_v1_429 });
 
 // GET /v1/request/{paymentReference} -> RequestControllerV1_getRequestStatus_v1 (200)
-export const RequestControllerV1_getRequestStatus_v1_200 = z.object({ "hasBeenPaid": (z.boolean()).optional(), "paymentReference": (z.string()).optional(), "requestId": (z.string()).optional(), "isListening": (z.boolean()).optional(), "txHash": (z.string().nullable()).optional() }).passthrough();
+export const RequestControllerV1_getRequestStatus_v1_200 = z.object({ "hasBeenPaid": (z.boolean()).optional(), "paymentReference": (z.string()).optional(), "requestId": (z.string()).optional(), "requestAmount": (z.string().nullable()).optional(), "isListening": (z.boolean()).optional(), "payments": (z.array(z.object({ "sourceTxHash": (z.string().nullable()).optional(), "destinationTxHash": (z.string().nullable()).optional(), "detectionSource": (z.string().nullable()).optional(), "note": (z.string().nullable()).optional() }).passthrough())).optional() }).passthrough();
 schemaRegistry.register({ key: { operationId: 'RequestControllerV1_getRequestStatus_v1', kind: 'response', status: 200 }, schema: RequestControllerV1_getRequestStatus_v1_200 });
 
 // GET /v1/request/{paymentReference} -> RequestControllerV1_getRequestStatus_v1 (401)
@@ -243,7 +247,7 @@ export const RequestControllerV1_stopRecurrenceRequest_v1_429 = ErrorEnvelopeSch
 schemaRegistry.register({ key: { operationId: 'RequestControllerV1_stopRecurrenceRequest_v1', kind: 'response', status: 429 }, schema: RequestControllerV1_stopRecurrenceRequest_v1_429 });
 
 // GET /v1/request/{paymentReference}/pay -> RequestControllerV1_getPaymentCalldata_v1 (200)
-export const RequestControllerV1_getPaymentCalldata_v1_200 = z.union([z.object({ "transactions": z.array(z.object({ "data": z.string(), "to": z.string(), "value": z.object({ "type": (z.enum(['BigNumber'])).optional(), "hex": (z.string()).optional() }).passthrough() }).passthrough()), "metadata": z.object({ "stepsRequired": z.number(), "needsApproval": z.boolean(), "approvalTransactionIndex": (z.number().nullable()).optional(), "hasEnoughBalance": z.boolean(), "hasEnoughGas": z.boolean() }).passthrough() }).passthrough(), z.object({ "paymentIntentId": z.string(), "paymentIntent": z.string(), "approvalPermitPayload": (z.string().nullable()).optional(), "approvalCalldata": (z.object({ "to": (z.string()).optional(), "data": (z.string()).optional(), "value": (z.string()).optional() }).passthrough().nullable()).optional(), "metadata": z.object({ "supportsEIP2612": z.boolean() }).passthrough() }).passthrough()]);
+export const RequestControllerV1_getPaymentCalldata_v1_200 = z.union([z.object({ "transactions": z.array(z.object({ "data": z.string(), "to": z.string(), "value": z.object({ "type": (z.literal('BigNumber')).optional(), "hex": (z.string()).optional() }).passthrough() }).passthrough()), "metadata": z.object({ "stepsRequired": z.number(), "needsApproval": z.boolean(), "approvalTransactionIndex": (z.number().nullable()).optional(), "hasEnoughBalance": z.boolean(), "hasEnoughGas": z.boolean() }).passthrough() }).passthrough(), z.object({ "transactions": z.array(z.object({ "data": z.string(), "to": z.string(), "value": z.union([z.string(), z.object({ "type": (z.literal('BigNumber')).optional(), "hex": (z.string()).optional() }).passthrough()]), "chainType": (z.enum(['evm', 'tron'])).optional() }).passthrough()), "metadata": z.object({ "stepsRequired": z.number(), "needsApproval": z.boolean(), "approvalTransactionIndex": (z.number().nullable()).optional(), "paymentTransactionIndex": z.number(), "hasEnoughBalance": z.boolean(), "routeType": z.enum(['crosschain', 'samechain']), "quoteExpiresAt": (z.union([z.number(), z.string()])).optional(), "executionDeadline": (z.number()).optional(), "executionDeadlineBreakdown": (z.object({  }).passthrough()).optional() }).passthrough() }).passthrough()]);
 schemaRegistry.register({ key: { operationId: 'RequestControllerV1_getPaymentCalldata_v1', kind: 'response', status: 200 }, schema: RequestControllerV1_getPaymentCalldata_v1_200 });
 
 // GET /v1/request/{paymentReference}/pay -> RequestControllerV1_getPaymentCalldata_v1 (400)
@@ -282,24 +286,8 @@ schemaRegistry.register({ key: { operationId: 'RequestControllerV1_getRequestPay
 export const RequestControllerV1_getRequestPaymentRoutes_v1_429 = ErrorEnvelopeSchema;
 schemaRegistry.register({ key: { operationId: 'RequestControllerV1_getRequestPaymentRoutes_v1', kind: 'response', status: 429 }, schema: RequestControllerV1_getRequestPaymentRoutes_v1_429 });
 
-// POST /v1/request/{paymentIntentId}/send -> RequestControllerV1_sendPaymentIntent_v1 request (application/json)
-export const RequestControllerV1_sendPaymentIntent_v1_Request = z.object({ "signedPaymentIntent": z.object({ "signature": z.string(), "nonce": z.string(), "deadline": z.string() }).passthrough(), "signedApprovalPermit": (z.object({ "signature": z.string(), "nonce": z.string(), "deadline": z.string() }).passthrough()).optional() }).passthrough();
-schemaRegistry.register({ key: { operationId: 'RequestControllerV1_sendPaymentIntent_v1', kind: 'request', variant: 'application/json' }, schema: RequestControllerV1_sendPaymentIntent_v1_Request });
-
-// POST /v1/request/{paymentIntentId}/send -> RequestControllerV1_sendPaymentIntent_v1 (401)
-export const RequestControllerV1_sendPaymentIntent_v1_401 = ErrorEnvelopeSchema;
-schemaRegistry.register({ key: { operationId: 'RequestControllerV1_sendPaymentIntent_v1', kind: 'response', status: 401 }, schema: RequestControllerV1_sendPaymentIntent_v1_401 });
-
-// POST /v1/request/{paymentIntentId}/send -> RequestControllerV1_sendPaymentIntent_v1 (404)
-export const RequestControllerV1_sendPaymentIntent_v1_404 = ErrorEnvelopeSchema;
-schemaRegistry.register({ key: { operationId: 'RequestControllerV1_sendPaymentIntent_v1', kind: 'response', status: 404 }, schema: RequestControllerV1_sendPaymentIntent_v1_404 });
-
-// POST /v1/request/{paymentIntentId}/send -> RequestControllerV1_sendPaymentIntent_v1 (429)
-export const RequestControllerV1_sendPaymentIntent_v1_429 = ErrorEnvelopeSchema;
-schemaRegistry.register({ key: { operationId: 'RequestControllerV1_sendPaymentIntent_v1', kind: 'response', status: 429 }, schema: RequestControllerV1_sendPaymentIntent_v1_429 });
-
 // GET /v2/request -> RequestControllerV2_listRequests_v2 (200)
-export const RequestControllerV2_listRequests_v2_200 = z.object({ "requests": z.array(z.object({ "requestId": (z.string()).optional(), "paymentReference": (z.string()).optional(), "amount": (z.string().nullable()).optional(), "invoiceCurrency": (z.string()).optional(), "paymentCurrency": (z.string()).optional(), "hasBeenPaid": (z.boolean()).optional(), "status": (z.string().nullable()).optional(), "reference": (z.string().nullable()).optional(), "createdAt": (z.string().nullable()).optional(), "txHash": (z.string().nullable()).optional(), "payee": (z.string().nullable()).optional(), "payer": (z.string().nullable()).optional() }).passthrough()), "pagination": z.object({ "total": (z.number()).optional(), "limit": (z.number()).optional(), "offset": (z.number()).optional() }).passthrough() }).passthrough();
+export const RequestControllerV2_listRequests_v2_200 = z.object({ "requests": z.array(z.object({ "requestId": (z.string()).optional(), "paymentReference": (z.string()).optional(), "amount": (z.string().nullable()).optional(), "invoiceCurrency": (z.string()).optional(), "paymentCurrency": (z.string()).optional(), "hasBeenPaid": (z.boolean()).optional(), "status": (z.string().nullable()).optional(), "securePaymentStatus": (z.string().nullable()).optional(), "reference": (z.string().nullable()).optional(), "createdAt": (z.string().nullable()).optional(), "txHash": (z.string().nullable()).optional(), "payee": (z.string().nullable()).optional(), "payer": (z.string().nullable()).optional(), "clientId": (z.string().nullable()).optional() }).passthrough()), "pagination": z.object({ "total": (z.number()).optional(), "limit": (z.number()).optional(), "offset": (z.number()).optional() }).passthrough() }).passthrough();
 schemaRegistry.register({ key: { operationId: 'RequestControllerV2_listRequests_v2', kind: 'response', status: 200 }, schema: RequestControllerV2_listRequests_v2_200 });
 
 // GET /v2/request -> RequestControllerV2_listRequests_v2 (400)
@@ -331,7 +319,7 @@ export const RequestControllerV2_createRequest_v2_429 = ErrorEnvelopeSchema;
 schemaRegistry.register({ key: { operationId: 'RequestControllerV2_createRequest_v2', kind: 'response', status: 429 }, schema: RequestControllerV2_createRequest_v2_429 });
 
 // GET /v2/request/{requestId} -> RequestControllerV2_getRequestStatus_v2 (200)
-export const RequestControllerV2_getRequestStatus_v2_200 = z.object({ "hasBeenPaid": (z.boolean()).optional(), "paymentReference": (z.string()).optional(), "requestId": (z.string()).optional(), "payee": (z.string().nullable()).optional(), "isListening": (z.boolean()).optional(), "txHash": (z.string().nullable()).optional(), "recurrence": (z.object({  }).passthrough()).optional(), "originalRequestId": (z.string()).optional(), "status": (z.string()).optional(), "isCryptoToFiatAvailable": (z.boolean()).optional(), "originalRequestPaymentReference": (z.string()).optional(), "payments": (z.array(z.object({  }).passthrough())).optional(), "isRecurrenceStopped": (z.boolean()).optional(), "customerInfo": (z.object({ "firstName": (z.string()).optional(), "lastName": (z.string()).optional(), "email": (z.string()).optional(), "address": (z.object({ "street": (z.string()).optional(), "city": (z.string()).optional(), "state": (z.string()).optional(), "postalCode": (z.string()).optional(), "country": (z.string()).optional() }).passthrough()).optional() }).passthrough().nullable()).optional(), "reference": (z.string().nullable()).optional(), "amountInUsd": (z.string().nullable()).optional(), "conversionRate": (z.string().nullable()).optional(), "rateSource": (z.enum(['lifi', 'chainlink', 'coingecko', 'unknown', 'mixed'])).optional(), "conversionBreakdown": (z.object({ "paidAmount": (z.string()).optional(), "paidAmountInUsd": (z.string()).optional(), "remainingAmount": (z.string()).optional(), "remainingAmountInUsd": (z.string()).optional(), "currentMarketRate": (z.string().nullable()).optional(), "currentMarketRateSource": (z.enum(['lifi', 'chainlink', 'coingecko', 'unknown'])).optional(), "payments": (z.array(z.object({ "amount": (z.string()).optional(), "amountInUsd": (z.string()).optional(), "conversionRate": (z.string()).optional(), "rateSource": (z.enum(['lifi', 'chainlink', 'coingecko', 'unknown'])).optional(), "timestamp": (z.string()).optional() }).passthrough())).optional() }).passthrough().nullable()).optional(), "fees": (z.array(z.object({ "type": (z.enum(['gas', 'platform', 'crosschain', 'crypto-to-fiat', 'offramp', 'protocol'])).optional(), "provider": (z.string()).optional(), "amount": (z.string().nullable()).optional(), "currency": (z.string()).optional() }).passthrough()).nullable()).optional() }).passthrough();
+export const RequestControllerV2_getRequestStatus_v2_200 = z.object({ "hasBeenPaid": (z.boolean()).optional(), "paymentReference": (z.string()).optional(), "requestId": (z.string()).optional(), "payee": (z.string().nullable()).optional(), "isListening": (z.boolean()).optional(), "recurrence": (z.object({  }).passthrough()).optional(), "originalRequestId": (z.string()).optional(), "status": (z.string()).optional(), "isCryptoToFiatAvailable": (z.boolean()).optional(), "originalRequestPaymentReference": (z.string()).optional(), "payments": (z.array(z.object({ "id": (z.string()).optional(), "amount": (z.string()).optional(), "sourceNetwork": (z.string()).optional(), "destinationNetwork": (z.string()).optional(), "sourceTxHash": (z.string().nullable()).optional(), "destinationTxHash": (z.string().nullable()).optional(), "payerAddress": (z.string().nullable()).optional(), "payerEoaAddress": (z.string().nullable()).optional(), "timestamp": (z.string()).optional(), "type": (z.string()).optional(), "conversionRateSource": (z.string().nullable()).optional(), "conversionRateDestination": (z.string().nullable()).optional(), "convertedAmountSource": (z.string().nullable()).optional(), "convertedAmountDestination": (z.string().nullable()).optional(), "paidAmount": (z.string().nullable()).optional(), "paidCurrency": (z.string().nullable()).optional(), "paidNetwork": (z.string().nullable()).optional(), "receivedAmount": (z.string().nullable()).optional(), "receivedCurrency": (z.string().nullable()).optional(), "receivedNetwork": (z.string().nullable()).optional(), "excessAmount": (z.string().nullable()).optional(), "excessCurrency": (z.string().nullable()).optional(), "currency": (z.string()).optional(), "paymentCurrency": (z.string()).optional(), "detectionSource": (z.enum(['lifi', 'request-network'])).optional(), "note": (z.string().nullable()).optional() }).passthrough())).optional(), "isRecurrenceStopped": (z.boolean()).optional(), "reference": (z.string().nullable()).optional(), "requestAmount": (z.string().nullable()).optional(), "invoiceCurrency": (z.string().nullable()).optional(), "paymentCurrency": (z.string().nullable()).optional(), "amountInUsd": (z.string().nullable()).optional(), "conversionRate": (z.string().nullable()).optional(), "rateSource": (z.enum(['lifi', 'chainlink', 'coingecko', 'unknown', 'mixed'])).optional(), "conversionBreakdown": (z.object({ "paidAmount": (z.string()).optional(), "paidAmountInUsd": (z.string()).optional(), "remainingAmount": (z.string()).optional(), "remainingAmountInUsd": (z.string()).optional(), "currentMarketRate": (z.string().nullable()).optional(), "currentMarketRateSource": (z.enum(['lifi', 'chainlink', 'coingecko', 'unknown'])).optional(), "payments": (z.array(z.object({ "amount": (z.string()).optional(), "amountInUsd": (z.string()).optional(), "conversionRate": (z.string()).optional(), "rateSource": (z.enum(['lifi', 'chainlink', 'coingecko', 'unknown'])).optional(), "timestamp": (z.string()).optional() }).passthrough())).optional() }).passthrough().nullable()).optional(), "fees": (z.array(z.object({ "type": (z.enum(['gas', 'platform', 'crosschain', 'crypto-to-fiat', 'offramp', 'protocol'])).optional(), "provider": (z.string()).optional(), "amount": (z.string().nullable()).optional(), "currency": (z.string()).optional() }).passthrough()).nullable()).optional(), "txHash": (z.string().nullable()).optional() }).passthrough();
 schemaRegistry.register({ key: { operationId: 'RequestControllerV2_getRequestStatus_v2', kind: 'response', status: 200 }, schema: RequestControllerV2_getRequestStatus_v2_200 });
 
 // GET /v2/request/{requestId} -> RequestControllerV2_getRequestStatus_v2 (404)
@@ -359,7 +347,7 @@ export const RequestControllerV2_updateRequest_v2_429 = ErrorEnvelopeSchema;
 schemaRegistry.register({ key: { operationId: 'RequestControllerV2_updateRequest_v2', kind: 'response', status: 429 }, schema: RequestControllerV2_updateRequest_v2_429 });
 
 // GET /v2/request/{requestId}/pay -> RequestControllerV2_getPaymentCalldata_v2 (200)
-export const RequestControllerV2_getPaymentCalldata_v2_200 = z.union([z.object({ "transactions": z.array(z.object({ "data": z.string(), "to": z.string(), "value": z.object({ "type": (z.enum(['BigNumber'])).optional(), "hex": (z.string()).optional() }).passthrough() }).passthrough()), "metadata": z.object({ "stepsRequired": z.number(), "needsApproval": z.boolean(), "approvalTransactionIndex": (z.number().nullable()).optional(), "hasEnoughBalance": z.boolean(), "hasEnoughGas": z.boolean() }).passthrough() }).passthrough(), z.object({ "paymentIntentId": z.string(), "paymentIntent": z.string(), "approvalPermitPayload": (z.string().nullable()).optional(), "approvalCalldata": (z.object({ "to": (z.string()).optional(), "data": (z.string()).optional(), "value": (z.string()).optional() }).passthrough().nullable()).optional(), "metadata": z.object({ "supportsEIP2612": z.boolean() }).passthrough() }).passthrough()]);
+export const RequestControllerV2_getPaymentCalldata_v2_200 = z.union([z.object({ "transactions": z.array(z.object({ "data": z.string(), "to": z.string(), "value": z.object({ "type": (z.literal('BigNumber')).optional(), "hex": (z.string()).optional() }).passthrough() }).passthrough()), "metadata": z.object({ "stepsRequired": z.number(), "needsApproval": z.boolean(), "approvalTransactionIndex": (z.number().nullable()).optional(), "hasEnoughBalance": z.boolean(), "hasEnoughGas": z.boolean() }).passthrough() }).passthrough(), z.object({ "transactions": z.array(z.object({ "data": z.string(), "to": z.string(), "value": z.union([z.string(), z.object({ "type": (z.literal('BigNumber')).optional(), "hex": (z.string()).optional() }).passthrough()]), "chainType": (z.enum(['evm', 'tron'])).optional() }).passthrough()), "metadata": z.object({ "stepsRequired": z.number(), "needsApproval": z.boolean(), "approvalTransactionIndex": (z.number().nullable()).optional(), "paymentTransactionIndex": z.number(), "hasEnoughBalance": z.boolean(), "routeType": z.enum(['crosschain', 'samechain']), "quoteExpiresAt": (z.union([z.number(), z.string()])).optional(), "executionDeadline": (z.number()).optional(), "executionDeadlineBreakdown": (z.object({  }).passthrough()).optional() }).passthrough() }).passthrough()]);
 schemaRegistry.register({ key: { operationId: 'RequestControllerV2_getPaymentCalldata_v2', kind: 'response', status: 200 }, schema: RequestControllerV2_getPaymentCalldata_v2_200 });
 
 // GET /v2/request/{requestId}/pay -> RequestControllerV2_getPaymentCalldata_v2 (400)
@@ -389,22 +377,6 @@ schemaRegistry.register({ key: { operationId: 'RequestControllerV2_getRequestPay
 // GET /v2/request/{requestId}/routes -> RequestControllerV2_getRequestPaymentRoutes_v2 (429)
 export const RequestControllerV2_getRequestPaymentRoutes_v2_429 = ErrorEnvelopeSchema;
 schemaRegistry.register({ key: { operationId: 'RequestControllerV2_getRequestPaymentRoutes_v2', kind: 'response', status: 429 }, schema: RequestControllerV2_getRequestPaymentRoutes_v2_429 });
-
-// POST /v2/request/payment-intents/{paymentIntentId} -> RequestControllerV2_sendPaymentIntent_v2 request (application/json)
-export const RequestControllerV2_sendPaymentIntent_v2_Request = z.object({ "signedPaymentIntent": z.object({ "signature": z.string(), "nonce": z.string(), "deadline": z.string() }).passthrough(), "signedApprovalPermit": (z.object({ "signature": z.string(), "nonce": z.string(), "deadline": z.string() }).passthrough()).optional() }).passthrough();
-schemaRegistry.register({ key: { operationId: 'RequestControllerV2_sendPaymentIntent_v2', kind: 'request', variant: 'application/json' }, schema: RequestControllerV2_sendPaymentIntent_v2_Request });
-
-// POST /v2/request/payment-intents/{paymentIntentId} -> RequestControllerV2_sendPaymentIntent_v2 (200)
-export const RequestControllerV2_sendPaymentIntent_v2_200 = z.unknown();
-schemaRegistry.register({ key: { operationId: 'RequestControllerV2_sendPaymentIntent_v2', kind: 'response', status: 200 }, schema: RequestControllerV2_sendPaymentIntent_v2_200 });
-
-// POST /v2/request/payment-intents/{paymentIntentId} -> RequestControllerV2_sendPaymentIntent_v2 (404)
-export const RequestControllerV2_sendPaymentIntent_v2_404 = ErrorEnvelopeSchema;
-schemaRegistry.register({ key: { operationId: 'RequestControllerV2_sendPaymentIntent_v2', kind: 'response', status: 404 }, schema: RequestControllerV2_sendPaymentIntent_v2_404 });
-
-// POST /v2/request/payment-intents/{paymentIntentId} -> RequestControllerV2_sendPaymentIntent_v2 (429)
-export const RequestControllerV2_sendPaymentIntent_v2_429 = ErrorEnvelopeSchema;
-schemaRegistry.register({ key: { operationId: 'RequestControllerV2_sendPaymentIntent_v2', kind: 'response', status: 429 }, schema: RequestControllerV2_sendPaymentIntent_v2_429 });
 
 // POST /v1/payer -> PayerV1Controller_getComplianceData_v1 request (application/json)
 export const PayerV1Controller_getComplianceData_v1_Request = z.object({ "clientUserId": z.string(), "email": z.string(), "firstName": z.string(), "lastName": z.string(), "beneficiaryType": z.enum(['individual', 'business']), "companyName": (z.string()).optional(), "dateOfBirth": z.string(), "addressLine1": z.string(), "addressLine2": (z.string()).optional(), "city": z.string(), "state": z.string(), "postcode": z.string(), "country": z.string(), "nationality": z.string(), "phone": z.string(), "ssn": z.string(), "sourceOfFunds": (z.string()).optional(), "businessActivity": (z.string()).optional() }).passthrough();
@@ -614,6 +586,286 @@ schemaRegistry.register({ key: { operationId: 'PayerV2Controller_createPaymentDe
 export const PayerV2Controller_createPaymentDetails_v2_429 = ErrorEnvelopeSchema;
 schemaRegistry.register({ key: { operationId: 'PayerV2Controller_createPaymentDetails_v2', kind: 'response', status: 429 }, schema: PayerV2Controller_createPaymentDetails_v2_429 });
 
+// GET /v2/secure-payments -> SecurePaymentController_findSecurePayment_v2 (200)
+export const SecurePaymentController_findSecurePayment_v2_200 = z.object({ "token": z.string(), "securePaymentUrl": z.string(), "status": z.enum(['pending', 'completed', 'expired', 'invalidated']), "paymentType": z.enum(['single', 'batch']), "createdAt": (z.string().nullable()).optional(), "expiresAt": z.string(), "feePlan": (z.object({ "version": z.literal(1), "flow": z.enum(['get_paid', 'pay']), "defaultFeeBearer": z.enum(['payer', 'payee']), "grossAmountUsd": z.string(), "netRecipientAmountUsd": z.string(), "payerTotalAmountUsd": z.string(), "totalFeesUsd": z.string(), "payeeBorneFeesUsd": z.string(), "payerBorneFeesUsd": z.string(), "fees": z.array(z.object({ "type": z.string(), "label": z.string(), "feeBearer": z.enum(['payer', 'payee']), "feeBearerSource": z.enum(['fee_config', 'payment_default_override', 'flow_default', 'forced_fee_policy']), "percentageBps": z.number(), "capUsd": z.string().nullable(), "fixedAmountUsd": (z.string().nullable()).optional(), "calculatedAmountUsd": z.string(), "destinationResolver": z.string(), "destinationRef": z.object({ "evmAddress": (z.string()).optional(), "tronAddress": (z.string()).optional() }).passthrough(), "configSource": z.string() }).passthrough()) }).passthrough().nullable()).optional() }).passthrough().catchall(z.unknown());
+schemaRegistry.register({ key: { operationId: 'SecurePaymentController_findSecurePayment_v2', kind: 'response', status: 200 }, schema: SecurePaymentController_findSecurePayment_v2_200 });
+
+// GET /v2/secure-payments -> SecurePaymentController_findSecurePayment_v2 (404)
+export const SecurePaymentController_findSecurePayment_v2_404 = ErrorEnvelopeSchema;
+schemaRegistry.register({ key: { operationId: 'SecurePaymentController_findSecurePayment_v2', kind: 'response', status: 404 }, schema: SecurePaymentController_findSecurePayment_v2_404 });
+
+// GET /v2/secure-payments -> SecurePaymentController_findSecurePayment_v2 (429)
+export const SecurePaymentController_findSecurePayment_v2_429 = ErrorEnvelopeSchema;
+schemaRegistry.register({ key: { operationId: 'SecurePaymentController_findSecurePayment_v2', kind: 'response', status: 429 }, schema: SecurePaymentController_findSecurePayment_v2_429 });
+
+// POST /v2/secure-payments -> SecurePaymentController_createSecurePayment_v2 request (application/json)
+export const SecurePaymentController_createSecurePayment_v2_Request = z.object({ "requests": z.array(z.object({ "destinationId": (z.string()).optional(), "amount": z.string() }).passthrough()), "feePercentage": (z.string()).optional(), "feeAddress": (z.string()).optional(), "reference": (z.string()).optional(), "payerIdentifier": (z.string()).optional(), "redirectUrl": (z.string()).optional(), "redirectLabel": (z.string()).optional(), "accessPolicy": (z.object({ "mode": (z.enum(['inherit', 'off', 'kyt_all_wallets'])).optional(), "screeningProvider": (z.enum(['hypernative', 'merklescience'])).optional(), "hideUntilApproved": (z.boolean()).optional(), "hidePayeeAddress": (z.boolean()).optional(), "allowedPayerAddresses": (z.array(z.string())).optional() }).passthrough()).optional() }).passthrough();
+schemaRegistry.register({ key: { operationId: 'SecurePaymentController_createSecurePayment_v2', kind: 'request', variant: 'application/json' }, schema: SecurePaymentController_createSecurePayment_v2_Request });
+
+// POST /v2/secure-payments -> SecurePaymentController_createSecurePayment_v2 (201)
+export const SecurePaymentController_createSecurePayment_v2_201 = z.object({ "requestIds": z.array(z.string()), "securePaymentUrl": z.string(), "token": z.string(), "feePlan": (z.object({ "version": z.literal(1), "flow": z.enum(['get_paid', 'pay']), "defaultFeeBearer": z.enum(['payer', 'payee']), "grossAmountUsd": z.string(), "netRecipientAmountUsd": z.string(), "payerTotalAmountUsd": z.string(), "totalFeesUsd": z.string(), "payeeBorneFeesUsd": z.string(), "payerBorneFeesUsd": z.string(), "fees": z.array(z.object({ "type": z.string(), "label": z.string(), "feeBearer": z.enum(['payer', 'payee']), "feeBearerSource": z.enum(['fee_config', 'payment_default_override', 'flow_default', 'forced_fee_policy']), "percentageBps": z.number(), "capUsd": z.string().nullable(), "fixedAmountUsd": (z.string().nullable()).optional(), "calculatedAmountUsd": z.string(), "destinationResolver": z.string(), "destinationRef": z.object({ "evmAddress": (z.string()).optional(), "tronAddress": (z.string()).optional() }).passthrough(), "configSource": z.string() }).passthrough()) }).passthrough().nullable()).optional() }).passthrough().catchall(z.unknown());
+schemaRegistry.register({ key: { operationId: 'SecurePaymentController_createSecurePayment_v2', kind: 'response', status: 201 }, schema: SecurePaymentController_createSecurePayment_v2_201 });
+
+// POST /v2/secure-payments -> SecurePaymentController_createSecurePayment_v2 (429)
+export const SecurePaymentController_createSecurePayment_v2_429 = ErrorEnvelopeSchema;
+schemaRegistry.register({ key: { operationId: 'SecurePaymentController_createSecurePayment_v2', kind: 'response', status: 429 }, schema: SecurePaymentController_createSecurePayment_v2_429 });
+
+// POST /v2/secure-payments/payouts -> SecurePaymentController_createPayoutSecurePayment_v2 request (application/json)
+export const SecurePaymentController_createPayoutSecurePayment_v2_Request = z.object({ "recipient": z.string(), "creatorWalletAddress": z.string(), "network": z.string(), "currency": z.string(), "amount": z.string(), "reference": (z.string()).optional(), "recipientIdentifier": (z.string()).optional(), "feePercentage": (z.string()).optional(), "feeAddress": (z.string()).optional(), "redirectUrl": (z.string()).optional(), "redirectLabel": (z.string()).optional(), "accessPolicy": (z.object({ "mode": (z.enum(['inherit', 'off', 'kyt_all_wallets'])).optional(), "screeningProvider": (z.enum(['hypernative', 'merklescience'])).optional(), "hideUntilApproved": (z.boolean()).optional(), "hidePayeeAddress": (z.boolean()).optional(), "allowedPayerAddresses": (z.array(z.string())).optional() }).passthrough()).optional() }).passthrough();
+schemaRegistry.register({ key: { operationId: 'SecurePaymentController_createPayoutSecurePayment_v2', kind: 'request', variant: 'application/json' }, schema: SecurePaymentController_createPayoutSecurePayment_v2_Request });
+
+// POST /v2/secure-payments/payouts -> SecurePaymentController_createPayoutSecurePayment_v2 (201)
+export const SecurePaymentController_createPayoutSecurePayment_v2_201 = z.object({ "requestIds": z.array(z.string()), "securePaymentUrl": z.string(), "token": z.string(), "feePlan": (z.object({ "version": z.literal(1), "flow": z.enum(['get_paid', 'pay']), "defaultFeeBearer": z.enum(['payer', 'payee']), "grossAmountUsd": z.string(), "netRecipientAmountUsd": z.string(), "payerTotalAmountUsd": z.string(), "totalFeesUsd": z.string(), "payeeBorneFeesUsd": z.string(), "payerBorneFeesUsd": z.string(), "fees": z.array(z.object({ "type": z.string(), "label": z.string(), "feeBearer": z.enum(['payer', 'payee']), "feeBearerSource": z.enum(['fee_config', 'payment_default_override', 'flow_default', 'forced_fee_policy']), "percentageBps": z.number(), "capUsd": z.string().nullable(), "fixedAmountUsd": (z.string().nullable()).optional(), "calculatedAmountUsd": z.string(), "destinationResolver": z.string(), "destinationRef": z.object({ "evmAddress": (z.string()).optional(), "tronAddress": (z.string()).optional() }).passthrough(), "configSource": z.string() }).passthrough()) }).passthrough().nullable()).optional() }).passthrough().catchall(z.unknown());
+schemaRegistry.register({ key: { operationId: 'SecurePaymentController_createPayoutSecurePayment_v2', kind: 'response', status: 201 }, schema: SecurePaymentController_createPayoutSecurePayment_v2_201 });
+
+// POST /v2/secure-payments/payouts -> SecurePaymentController_createPayoutSecurePayment_v2 (400)
+export const SecurePaymentController_createPayoutSecurePayment_v2_400 = ErrorEnvelopeSchema;
+schemaRegistry.register({ key: { operationId: 'SecurePaymentController_createPayoutSecurePayment_v2', kind: 'response', status: 400 }, schema: SecurePaymentController_createPayoutSecurePayment_v2_400 });
+
+// POST /v2/secure-payments/payouts -> SecurePaymentController_createPayoutSecurePayment_v2 (403)
+export const SecurePaymentController_createPayoutSecurePayment_v2_403 = ErrorEnvelopeSchema;
+schemaRegistry.register({ key: { operationId: 'SecurePaymentController_createPayoutSecurePayment_v2', kind: 'response', status: 403 }, schema: SecurePaymentController_createPayoutSecurePayment_v2_403 });
+
+// POST /v2/secure-payments/payouts -> SecurePaymentController_createPayoutSecurePayment_v2 (429)
+export const SecurePaymentController_createPayoutSecurePayment_v2_429 = ErrorEnvelopeSchema;
+schemaRegistry.register({ key: { operationId: 'SecurePaymentController_createPayoutSecurePayment_v2', kind: 'response', status: 429 }, schema: SecurePaymentController_createPayoutSecurePayment_v2_429 });
+
+// POST /v2/secure-payments/fees/preview -> SecurePaymentController_previewFees_v2 request (application/json)
+export const SecurePaymentController_previewFees_v2_Request = z.object({ "amount": z.string(), "currency": z.string(), "flow": z.enum(['get_paid', 'pay']), "defaultFeeBearer": (z.enum(['payer', 'payee'])).optional() }).passthrough();
+schemaRegistry.register({ key: { operationId: 'SecurePaymentController_previewFees_v2', kind: 'request', variant: 'application/json' }, schema: SecurePaymentController_previewFees_v2_Request });
+
+// POST /v2/secure-payments/fees/preview -> SecurePaymentController_previewFees_v2 (200)
+export const SecurePaymentController_previewFees_v2_200 = z.object({ "version": z.literal(1), "flow": z.enum(['get_paid', 'pay']), "defaultFeeBearer": z.enum(['payer', 'payee']), "grossAmountUsd": z.string(), "netRecipientAmountUsd": z.string(), "payerTotalAmountUsd": z.string(), "totalFeesUsd": z.string(), "payeeBorneFeesUsd": z.string(), "payerBorneFeesUsd": z.string(), "fees": z.array(z.object({ "type": z.string(), "label": z.string(), "feeBearer": z.enum(['payer', 'payee']), "feeBearerSource": z.enum(['fee_config', 'payment_default_override', 'flow_default', 'forced_fee_policy']), "percentageBps": z.number(), "capUsd": z.string().nullable(), "fixedAmountUsd": (z.string().nullable()).optional(), "calculatedAmountUsd": z.string(), "destinationResolver": z.string(), "destinationRef": z.object({ "evmAddress": (z.string()).optional(), "tronAddress": (z.string()).optional() }).passthrough(), "configSource": z.string() }).passthrough()) }).passthrough();
+schemaRegistry.register({ key: { operationId: 'SecurePaymentController_previewFees_v2', kind: 'response', status: 200 }, schema: SecurePaymentController_previewFees_v2_200 });
+
+// POST /v2/secure-payments/fees/preview -> SecurePaymentController_previewFees_v2 (400)
+export const SecurePaymentController_previewFees_v2_400 = ErrorEnvelopeSchema;
+schemaRegistry.register({ key: { operationId: 'SecurePaymentController_previewFees_v2', kind: 'response', status: 400 }, schema: SecurePaymentController_previewFees_v2_400 });
+
+// POST /v2/secure-payments/fees/preview -> SecurePaymentController_previewFees_v2 (429)
+export const SecurePaymentController_previewFees_v2_429 = ErrorEnvelopeSchema;
+schemaRegistry.register({ key: { operationId: 'SecurePaymentController_previewFees_v2', kind: 'response', status: 429 }, schema: SecurePaymentController_previewFees_v2_429 });
+
+// POST /v2/secure-payments/batch-payouts -> SecurePaymentController_createBatchPayoutSecurePayment_v2 request (application/json)
+export const SecurePaymentController_createBatchPayoutSecurePayment_v2_Request = z.object({ "tokens": z.array(z.string()), "redirectUrl": (z.string()).optional(), "redirectLabel": (z.string()).optional() }).passthrough();
+schemaRegistry.register({ key: { operationId: 'SecurePaymentController_createBatchPayoutSecurePayment_v2', kind: 'request', variant: 'application/json' }, schema: SecurePaymentController_createBatchPayoutSecurePayment_v2_Request });
+
+// POST /v2/secure-payments/batch-payouts -> SecurePaymentController_createBatchPayoutSecurePayment_v2 (201)
+export const SecurePaymentController_createBatchPayoutSecurePayment_v2_201 = z.object({ "requestIds": z.array(z.string()), "securePaymentUrl": z.string(), "token": z.string(), "feePlan": (z.object({ "version": z.literal(1), "flow": z.enum(['get_paid', 'pay']), "defaultFeeBearer": z.enum(['payer', 'payee']), "grossAmountUsd": z.string(), "netRecipientAmountUsd": z.string(), "payerTotalAmountUsd": z.string(), "totalFeesUsd": z.string(), "payeeBorneFeesUsd": z.string(), "payerBorneFeesUsd": z.string(), "fees": z.array(z.object({ "type": z.string(), "label": z.string(), "feeBearer": z.enum(['payer', 'payee']), "feeBearerSource": z.enum(['fee_config', 'payment_default_override', 'flow_default', 'forced_fee_policy']), "percentageBps": z.number(), "capUsd": z.string().nullable(), "fixedAmountUsd": (z.string().nullable()).optional(), "calculatedAmountUsd": z.string(), "destinationResolver": z.string(), "destinationRef": z.object({ "evmAddress": (z.string()).optional(), "tronAddress": (z.string()).optional() }).passthrough(), "configSource": z.string() }).passthrough()) }).passthrough().nullable()).optional() }).passthrough().catchall(z.unknown());
+schemaRegistry.register({ key: { operationId: 'SecurePaymentController_createBatchPayoutSecurePayment_v2', kind: 'response', status: 201 }, schema: SecurePaymentController_createBatchPayoutSecurePayment_v2_201 });
+
+// POST /v2/secure-payments/batch-payouts -> SecurePaymentController_createBatchPayoutSecurePayment_v2 (400)
+export const SecurePaymentController_createBatchPayoutSecurePayment_v2_400 = ErrorEnvelopeSchema;
+schemaRegistry.register({ key: { operationId: 'SecurePaymentController_createBatchPayoutSecurePayment_v2', kind: 'response', status: 400 }, schema: SecurePaymentController_createBatchPayoutSecurePayment_v2_400 });
+
+// POST /v2/secure-payments/batch-payouts -> SecurePaymentController_createBatchPayoutSecurePayment_v2 (403)
+export const SecurePaymentController_createBatchPayoutSecurePayment_v2_403 = ErrorEnvelopeSchema;
+schemaRegistry.register({ key: { operationId: 'SecurePaymentController_createBatchPayoutSecurePayment_v2', kind: 'response', status: 403 }, schema: SecurePaymentController_createBatchPayoutSecurePayment_v2_403 });
+
+// POST /v2/secure-payments/batch-payouts -> SecurePaymentController_createBatchPayoutSecurePayment_v2 (429)
+export const SecurePaymentController_createBatchPayoutSecurePayment_v2_429 = ErrorEnvelopeSchema;
+schemaRegistry.register({ key: { operationId: 'SecurePaymentController_createBatchPayoutSecurePayment_v2', kind: 'response', status: 429 }, schema: SecurePaymentController_createBatchPayoutSecurePayment_v2_429 });
+
+// GET /v2/secure-payments/{token} -> SecurePaymentController_getSecurePaymentByToken_v2 (200)
+export const SecurePaymentController_getSecurePaymentByToken_v2_200 = z.object({ "paymentType": z.enum(['single', 'batch']), "payee": (z.string()).optional(), "payees": (z.array(z.string())).optional(), "network": z.string(), "amount": (z.string()).optional(), "amounts": (z.array(z.string())).optional(), "paymentCurrency": (z.string()).optional(), "paymentCurrencies": (z.array(z.string())).optional(), "isNativeCurrency": (z.union([z.boolean(), z.array(z.boolean())])).optional(), "status": z.enum(['pending', 'completed', 'expired', 'invalidated']), "destination": (z.object({  }).passthrough().catchall(z.unknown())).optional(), "destinations": (z.array(z.object({  }).passthrough().catchall(z.unknown()))).optional(), "reference": (z.string().nullable()).optional(), "paymentOptions": (z.object({  }).passthrough().catchall(z.unknown())).optional(), "feePlan": (z.object({ "version": z.literal(1), "flow": z.enum(['get_paid', 'pay']), "defaultFeeBearer": z.enum(['payer', 'payee']), "grossAmountUsd": z.string(), "netRecipientAmountUsd": z.string(), "payerTotalAmountUsd": z.string(), "totalFeesUsd": z.string(), "payeeBorneFeesUsd": z.string(), "payerBorneFeesUsd": z.string(), "fees": z.array(z.object({ "type": z.string(), "label": z.string(), "feeBearer": z.enum(['payer', 'payee']), "feeBearerSource": z.enum(['fee_config', 'payment_default_override', 'flow_default', 'forced_fee_policy']), "percentageBps": z.number(), "capUsd": z.string().nullable(), "fixedAmountUsd": (z.string().nullable()).optional(), "calculatedAmountUsd": z.string(), "destinationResolver": z.string(), "destinationRef": z.object({ "evmAddress": (z.string()).optional(), "tronAddress": (z.string()).optional() }).passthrough(), "configSource": z.string() }).passthrough()) }).passthrough().nullable()).optional() }).passthrough().catchall(z.unknown());
+schemaRegistry.register({ key: { operationId: 'SecurePaymentController_getSecurePaymentByToken_v2', kind: 'response', status: 200 }, schema: SecurePaymentController_getSecurePaymentByToken_v2_200 });
+
+// GET /v2/secure-payments/{token} -> SecurePaymentController_getSecurePaymentByToken_v2 (403)
+export const SecurePaymentController_getSecurePaymentByToken_v2_403 = ErrorEnvelopeSchema;
+schemaRegistry.register({ key: { operationId: 'SecurePaymentController_getSecurePaymentByToken_v2', kind: 'response', status: 403 }, schema: SecurePaymentController_getSecurePaymentByToken_v2_403 });
+
+// GET /v2/secure-payments/{token} -> SecurePaymentController_getSecurePaymentByToken_v2 (404)
+export const SecurePaymentController_getSecurePaymentByToken_v2_404 = ErrorEnvelopeSchema;
+schemaRegistry.register({ key: { operationId: 'SecurePaymentController_getSecurePaymentByToken_v2', kind: 'response', status: 404 }, schema: SecurePaymentController_getSecurePaymentByToken_v2_404 });
+
+// GET /v2/secure-payments/{token} -> SecurePaymentController_getSecurePaymentByToken_v2 (409)
+export const SecurePaymentController_getSecurePaymentByToken_v2_409 = ErrorEnvelopeSchema;
+schemaRegistry.register({ key: { operationId: 'SecurePaymentController_getSecurePaymentByToken_v2', kind: 'response', status: 409 }, schema: SecurePaymentController_getSecurePaymentByToken_v2_409 });
+
+// GET /v2/secure-payments/{token} -> SecurePaymentController_getSecurePaymentByToken_v2 (423)
+export const SecurePaymentController_getSecurePaymentByToken_v2_423 = ErrorEnvelopeSchema;
+schemaRegistry.register({ key: { operationId: 'SecurePaymentController_getSecurePaymentByToken_v2', kind: 'response', status: 423 }, schema: SecurePaymentController_getSecurePaymentByToken_v2_423 });
+
+// GET /v2/secure-payments/{token} -> SecurePaymentController_getSecurePaymentByToken_v2 (429)
+export const SecurePaymentController_getSecurePaymentByToken_v2_429 = ErrorEnvelopeSchema;
+schemaRegistry.register({ key: { operationId: 'SecurePaymentController_getSecurePaymentByToken_v2', kind: 'response', status: 429 }, schema: SecurePaymentController_getSecurePaymentByToken_v2_429 });
+
+// GET /v2/secure-payments/{token}/pay -> SecurePaymentController_getSecurePaymentCalldataByToken_v2 (200)
+export const SecurePaymentController_getSecurePaymentCalldataByToken_v2_200 = z.object({ "paymentType": z.literal('single'), "transactions": z.array(z.unknown()), "eoaApprovalTransactions": (z.array(z.unknown())).optional(), "feeBundle": z.object({ "bundleId": z.string().nullable(), "defaultFeeBearer": z.enum(['payer', 'payee']), "amountSummary": z.object({ "grossAmount": z.string(), "netRecipientAmount": z.string(), "totalFees": z.string(), "payeeBorneFees": z.string(), "payerBorneFees": z.string(), "payerTotal": z.string() }).passthrough().nullable(), "fees": z.array(z.object({ "requestId": z.string(), "feeComponentId": z.string().nullable(), "feeType": z.string().nullable(), "feeLabel": z.string().nullable(), "feeBearer": z.enum(['payer', 'payee']), "amount": z.string(), "paymentCurrencyId": z.string(), "network": z.string(), "chainId": z.string(), "recipient": z.string(), "paymentReference": z.string().nullable() }).passthrough()) }).passthrough().nullable(), "metadata": z.object({ "stepsRequired": z.number(), "needsApproval": z.boolean(), "transactionSponsorshipFeeUsd": (z.string().nullable()).optional(), "approvalTransactionIndex": (z.number()).optional(), "approvalTransactionsCount": (z.number()).optional(), "paymentTransactionIndex": z.number(), "hasEnoughBalance": (z.boolean()).optional(), "hasEnoughGas": (z.boolean()).optional(), "hasEnoughAllowance": (z.boolean()).optional(), "platformFee": (z.object({ "percentage": z.string(), "address": z.string() }).passthrough()).optional(), "protocolFee": (z.object({ "percentage": z.string(), "address": z.string() }).passthrough()).optional(), "eoaApprovalRequired": (z.boolean()).optional(), "eoaApproval": (z.object({ "owner": z.string(), "spender": z.string(), "tokenAddress": z.string(), "currency": z.string(), "amount": z.string(), "approvalType": z.literal('unlimited') }).passthrough()).optional(), "balance": (z.string()).optional(), "allowance": (z.string()).optional(), "requiredAmount": (z.string()).optional(), "nativeBalance": (z.string()).optional(), "estimatedNetworkFee": (z.string()).optional(), "estimatedNetworkFeeUsd": (z.string()).optional(), "estimatedApprovalNetworkFee": (z.string()).optional(), "estimatedApprovalNetworkFeeUsd": (z.string()).optional(), "estimatedPaymentNetworkFee": (z.string()).optional(), "estimatedPaymentNetworkFeeUsd": (z.string()).optional(), "approvalFeeLimit": (z.string()).optional(), "paymentFeeLimit": (z.string()).optional(), "sourceAmount": (z.string()).optional(), "routeType": (z.enum(['crosschain', 'samechain'])).optional(), "quoteFetchedAt": (z.string()).optional(), "quoteExpiresAt": (z.union([z.number(), z.string()])).optional(), "executionDeadline": (z.number()).optional(), "executionDeadlineBreakdown": (z.object({ "bridge": (z.object({ "deadline": z.number(), "source": z.enum(['decoded', 'fallback']) }).passthrough()).optional(), "swap": (z.object({ "deadline": z.number(), "tool": (z.string()).optional(), "source": z.enum(['decoded', 'fallback']) }).passthrough()).optional() }).passthrough()).optional(), "safePaymentDeadline": (z.number()).optional(), "rawStep": (z.object({  }).passthrough().catchall(z.unknown())).optional(), "costBreakdown": (z.object({ "approvalFee": (z.object({ "required": z.boolean(), "currency": z.string(), "amountNative": z.string(), "amountUsd": (z.string()).optional(), "hasEnoughBalance": z.boolean() }).passthrough()).optional(), "paymentGasFee": (z.object({ "required": z.boolean(), "currency": z.string(), "amountNative": z.string(), "amountUsd": (z.string()).optional(), "hasEnoughBalance": z.boolean() }).passthrough()).optional(), "totalGasFee": (z.object({ "required": z.boolean(), "currency": z.string(), "amountNative": z.string(), "amountUsd": (z.string()).optional(), "hasEnoughBalance": z.boolean() }).passthrough()).optional(), "bridgeFee": (z.object({ "required": z.boolean(), "currency": z.string(), "amount": z.string(), "amountUsd": (z.string()).optional(), "hasEnoughBalance": z.boolean() }).passthrough()).optional(), "fundingStatus": z.object({ "hasEnoughPaymentToken": z.boolean(), "hasEnoughApprovalGas": z.boolean(), "hasEnoughOverall": z.boolean() }).passthrough(), "totals": (z.object({ "paymentAmount": z.string(), "paymentCurrency": z.string(), "sourceAmount": z.string() }).passthrough()).optional() }).passthrough()).optional() }).passthrough(), "paymentReference": z.string().nullable(), "flow": z.enum(['incoming', 'outgoing']) }).passthrough();
+schemaRegistry.register({ key: { operationId: 'SecurePaymentController_getSecurePaymentCalldataByToken_v2', kind: 'response', status: 200 }, schema: SecurePaymentController_getSecurePaymentCalldataByToken_v2_200 });
+
+// GET /v2/secure-payments/{token}/pay -> SecurePaymentController_getSecurePaymentCalldataByToken_v2 (400)
+export const SecurePaymentController_getSecurePaymentCalldataByToken_v2_400 = ErrorEnvelopeSchema;
+schemaRegistry.register({ key: { operationId: 'SecurePaymentController_getSecurePaymentCalldataByToken_v2', kind: 'response', status: 400 }, schema: SecurePaymentController_getSecurePaymentCalldataByToken_v2_400 });
+
+// GET /v2/secure-payments/{token}/pay -> SecurePaymentController_getSecurePaymentCalldataByToken_v2 (403)
+export const SecurePaymentController_getSecurePaymentCalldataByToken_v2_403 = ErrorEnvelopeSchema;
+schemaRegistry.register({ key: { operationId: 'SecurePaymentController_getSecurePaymentCalldataByToken_v2', kind: 'response', status: 403 }, schema: SecurePaymentController_getSecurePaymentCalldataByToken_v2_403 });
+
+// GET /v2/secure-payments/{token}/pay -> SecurePaymentController_getSecurePaymentCalldataByToken_v2 (404)
+export const SecurePaymentController_getSecurePaymentCalldataByToken_v2_404 = ErrorEnvelopeSchema;
+schemaRegistry.register({ key: { operationId: 'SecurePaymentController_getSecurePaymentCalldataByToken_v2', kind: 'response', status: 404 }, schema: SecurePaymentController_getSecurePaymentCalldataByToken_v2_404 });
+
+// GET /v2/secure-payments/{token}/pay -> SecurePaymentController_getSecurePaymentCalldataByToken_v2 (409)
+export const SecurePaymentController_getSecurePaymentCalldataByToken_v2_409 = ErrorEnvelopeSchema;
+schemaRegistry.register({ key: { operationId: 'SecurePaymentController_getSecurePaymentCalldataByToken_v2', kind: 'response', status: 409 }, schema: SecurePaymentController_getSecurePaymentCalldataByToken_v2_409 });
+
+// GET /v2/secure-payments/{token}/pay -> SecurePaymentController_getSecurePaymentCalldataByToken_v2 (423)
+export const SecurePaymentController_getSecurePaymentCalldataByToken_v2_423 = ErrorEnvelopeSchema;
+schemaRegistry.register({ key: { operationId: 'SecurePaymentController_getSecurePaymentCalldataByToken_v2', kind: 'response', status: 423 }, schema: SecurePaymentController_getSecurePaymentCalldataByToken_v2_423 });
+
+// GET /v2/secure-payments/{token}/pay -> SecurePaymentController_getSecurePaymentCalldataByToken_v2 (429)
+export const SecurePaymentController_getSecurePaymentCalldataByToken_v2_429 = ErrorEnvelopeSchema;
+schemaRegistry.register({ key: { operationId: 'SecurePaymentController_getSecurePaymentCalldataByToken_v2', kind: 'response', status: 429 }, schema: SecurePaymentController_getSecurePaymentCalldataByToken_v2_429 });
+
+// POST /v2/secure-payments/{token}/tron/broadcast -> SecurePaymentController_broadcastTronTransaction_v2 request (application/json)
+export const SecurePaymentController_broadcastTronTransaction_v2_Request = z.object({ "raw_data_hex": z.string(), "signature": z.array(z.string()), "txID": (z.string()).optional(), "raw_data": z.object({ "contract": z.array(z.unknown()), "fee_limit": (z.number()).optional() }).passthrough() }).passthrough();
+schemaRegistry.register({ key: { operationId: 'SecurePaymentController_broadcastTronTransaction_v2', kind: 'request', variant: 'application/json' }, schema: SecurePaymentController_broadcastTronTransaction_v2_Request });
+
+// POST /v2/secure-payments/{token}/tron/broadcast -> SecurePaymentController_broadcastTronTransaction_v2 (200)
+export const SecurePaymentController_broadcastTronTransaction_v2_200 = z.object({ "result": (z.boolean()).optional(), "txid": (z.string()).optional(), "code": (z.string()).optional(), "message": (z.string()).optional() }).passthrough();
+schemaRegistry.register({ key: { operationId: 'SecurePaymentController_broadcastTronTransaction_v2', kind: 'response', status: 200 }, schema: SecurePaymentController_broadcastTronTransaction_v2_200 });
+
+// POST /v2/secure-payments/{token}/tron/broadcast -> SecurePaymentController_broadcastTronTransaction_v2 (400)
+export const SecurePaymentController_broadcastTronTransaction_v2_400 = ErrorEnvelopeSchema;
+schemaRegistry.register({ key: { operationId: 'SecurePaymentController_broadcastTronTransaction_v2', kind: 'response', status: 400 }, schema: SecurePaymentController_broadcastTronTransaction_v2_400 });
+
+// POST /v2/secure-payments/{token}/tron/broadcast -> SecurePaymentController_broadcastTronTransaction_v2 (403)
+export const SecurePaymentController_broadcastTronTransaction_v2_403 = ErrorEnvelopeSchema;
+schemaRegistry.register({ key: { operationId: 'SecurePaymentController_broadcastTronTransaction_v2', kind: 'response', status: 403 }, schema: SecurePaymentController_broadcastTronTransaction_v2_403 });
+
+// POST /v2/secure-payments/{token}/tron/broadcast -> SecurePaymentController_broadcastTronTransaction_v2 (404)
+export const SecurePaymentController_broadcastTronTransaction_v2_404 = ErrorEnvelopeSchema;
+schemaRegistry.register({ key: { operationId: 'SecurePaymentController_broadcastTronTransaction_v2', kind: 'response', status: 404 }, schema: SecurePaymentController_broadcastTronTransaction_v2_404 });
+
+// POST /v2/secure-payments/{token}/tron/broadcast -> SecurePaymentController_broadcastTronTransaction_v2 (429)
+export const SecurePaymentController_broadcastTronTransaction_v2_429 = ErrorEnvelopeSchema;
+schemaRegistry.register({ key: { operationId: 'SecurePaymentController_broadcastTronTransaction_v2', kind: 'response', status: 429 }, schema: SecurePaymentController_broadcastTronTransaction_v2_429 });
+
+// POST /v2/secure-payments/{token}/tron/broadcast -> SecurePaymentController_broadcastTronTransaction_v2 (502)
+export const SecurePaymentController_broadcastTronTransaction_v2_502 = ErrorEnvelopeSchema;
+schemaRegistry.register({ key: { operationId: 'SecurePaymentController_broadcastTronTransaction_v2', kind: 'response', status: 502 }, schema: SecurePaymentController_broadcastTronTransaction_v2_502 });
+
+// POST /v2/secure-payments/{token}/refresh-step-transaction -> SecurePaymentController_refreshStepTransaction_v2 request (application/json)
+export const SecurePaymentController_refreshStepTransaction_v2_Request = z.string();
+schemaRegistry.register({ key: { operationId: 'SecurePaymentController_refreshStepTransaction_v2', kind: 'request', variant: 'application/json' }, schema: SecurePaymentController_refreshStepTransaction_v2_Request });
+
+// POST /v2/secure-payments/{token}/refresh-step-transaction -> SecurePaymentController_refreshStepTransaction_v2 (200)
+export const SecurePaymentController_refreshStepTransaction_v2_200 = z.unknown();
+schemaRegistry.register({ key: { operationId: 'SecurePaymentController_refreshStepTransaction_v2', kind: 'response', status: 200 }, schema: SecurePaymentController_refreshStepTransaction_v2_200 });
+
+// POST /v2/secure-payments/{token}/refresh-step-transaction -> SecurePaymentController_refreshStepTransaction_v2 (400)
+export const SecurePaymentController_refreshStepTransaction_v2_400 = ErrorEnvelopeSchema;
+schemaRegistry.register({ key: { operationId: 'SecurePaymentController_refreshStepTransaction_v2', kind: 'response', status: 400 }, schema: SecurePaymentController_refreshStepTransaction_v2_400 });
+
+// POST /v2/secure-payments/{token}/refresh-step-transaction -> SecurePaymentController_refreshStepTransaction_v2 (403)
+export const SecurePaymentController_refreshStepTransaction_v2_403 = ErrorEnvelopeSchema;
+schemaRegistry.register({ key: { operationId: 'SecurePaymentController_refreshStepTransaction_v2', kind: 'response', status: 403 }, schema: SecurePaymentController_refreshStepTransaction_v2_403 });
+
+// POST /v2/secure-payments/{token}/refresh-step-transaction -> SecurePaymentController_refreshStepTransaction_v2 (429)
+export const SecurePaymentController_refreshStepTransaction_v2_429 = ErrorEnvelopeSchema;
+schemaRegistry.register({ key: { operationId: 'SecurePaymentController_refreshStepTransaction_v2', kind: 'response', status: 429 }, schema: SecurePaymentController_refreshStepTransaction_v2_429 });
+
+// POST /v2/secure-payments/{token}/intent -> SecurePaymentController_recordIntent_v2 request (application/json)
+export const SecurePaymentController_recordIntent_v2_Request = z.object({ "txHash": (z.string()).optional(), "safeTxHash": (z.string()).optional(), "chain": z.enum(['BASE', 'OPTIMISM', 'ARBITRUM', 'ETHEREUM', 'POLYGON', 'BNB']), "token": z.enum(['USDC', 'USDT', 'EURC', 'USDT0']), "executionKind": (z.enum(['evm_same_chain', 'evm_cross_chain'])).optional(), "safePaymentDeadline": (z.number()).optional(), "payerAddress": (z.string()).optional(), "payerEoaAddress": (z.string()).optional(), "sourceNetwork": (z.enum(['mainnet', 'optimism', 'bsc', 'xdai', 'fuse', 'matic', 'fantom', 'zksynceratestnet', 'zksyncera', 'core', 'moonbeam', 'mantle', 'mantle-testnet', 'tombchain', 'base', 'arbitrum-one', 'avalanche', 'base-sepolia', 'sepolia', 'tron', 'nile'])).optional(), "sourceToken": (z.string()).optional(), "sourceAmount": (z.string()).optional(), "routeKind": (z.enum(['same_chain', 'same_chain_conversion', 'crosschain'])).optional(), "bridgeTool": (z.enum(['across', 'stargate'])).optional() }).passthrough();
+schemaRegistry.register({ key: { operationId: 'SecurePaymentController_recordIntent_v2', kind: 'request', variant: 'application/json' }, schema: SecurePaymentController_recordIntent_v2_Request });
+
+// POST /v2/secure-payments/{token}/intent -> SecurePaymentController_recordIntent_v2 (200)
+export const SecurePaymentController_recordIntent_v2_200 = z.object({ "intentId": z.string(), "paymentReference": z.string(), "txHash": (z.string()).optional(), "safeTxHash": (z.string()).optional(), "safePaymentDeadline": (z.number()).optional(), "isListening": z.boolean(), "payerAddress": (z.string()).optional() }).passthrough();
+schemaRegistry.register({ key: { operationId: 'SecurePaymentController_recordIntent_v2', kind: 'response', status: 200 }, schema: SecurePaymentController_recordIntent_v2_200 });
+
+// POST /v2/secure-payments/{token}/intent -> SecurePaymentController_recordIntent_v2 (400)
+export const SecurePaymentController_recordIntent_v2_400 = ErrorEnvelopeSchema;
+schemaRegistry.register({ key: { operationId: 'SecurePaymentController_recordIntent_v2', kind: 'response', status: 400 }, schema: SecurePaymentController_recordIntent_v2_400 });
+
+// POST /v2/secure-payments/{token}/intent -> SecurePaymentController_recordIntent_v2 (403)
+export const SecurePaymentController_recordIntent_v2_403 = ErrorEnvelopeSchema;
+schemaRegistry.register({ key: { operationId: 'SecurePaymentController_recordIntent_v2', kind: 'response', status: 403 }, schema: SecurePaymentController_recordIntent_v2_403 });
+
+// POST /v2/secure-payments/{token}/intent -> SecurePaymentController_recordIntent_v2 (404)
+export const SecurePaymentController_recordIntent_v2_404 = ErrorEnvelopeSchema;
+schemaRegistry.register({ key: { operationId: 'SecurePaymentController_recordIntent_v2', kind: 'response', status: 404 }, schema: SecurePaymentController_recordIntent_v2_404 });
+
+// POST /v2/secure-payments/{token}/intent -> SecurePaymentController_recordIntent_v2 (409)
+export const SecurePaymentController_recordIntent_v2_409 = ErrorEnvelopeSchema;
+schemaRegistry.register({ key: { operationId: 'SecurePaymentController_recordIntent_v2', kind: 'response', status: 409 }, schema: SecurePaymentController_recordIntent_v2_409 });
+
+// POST /v2/secure-payments/{token}/intent -> SecurePaymentController_recordIntent_v2 (429)
+export const SecurePaymentController_recordIntent_v2_429 = ErrorEnvelopeSchema;
+schemaRegistry.register({ key: { operationId: 'SecurePaymentController_recordIntent_v2', kind: 'response', status: 429 }, schema: SecurePaymentController_recordIntent_v2_429 });
+
+// POST /v2/secure-payments/{token}/multicall-intent -> SecurePaymentController_recordMulticallIntent_v2 request (application/json)
+export const SecurePaymentController_recordMulticallIntent_v2_Request = z.object({ "chain": z.enum(['BASE', 'OPTIMISM', 'ARBITRUM', 'ETHEREUM', 'POLYGON', 'BNB']), "smartAccountAddress": (z.string()).optional(), "payerEoaAddress": (z.string()).optional(), "transactionIndices": z.array(z.object({ "childPosition": z.number(), "transactionIndex": z.number(), "routeTool": (z.string().nullable()).optional(), "sourceToken": (z.string()).optional(), "sourceAmount": (z.string()).optional(), "routeKind": (z.enum(['same_chain', 'same_chain_conversion', 'crosschain'])).optional(), "bridgeTool": (z.enum(['across', 'stargate'])).optional() }).passthrough()) }).passthrough();
+schemaRegistry.register({ key: { operationId: 'SecurePaymentController_recordMulticallIntent_v2', kind: 'request', variant: 'application/json' }, schema: SecurePaymentController_recordMulticallIntent_v2_Request });
+
+// POST /v2/secure-payments/{token}/multicall-intent -> SecurePaymentController_recordMulticallIntent_v2 (200)
+export const SecurePaymentController_recordMulticallIntent_v2_200 = z.object({ "recorded": z.number() }).passthrough();
+schemaRegistry.register({ key: { operationId: 'SecurePaymentController_recordMulticallIntent_v2', kind: 'response', status: 200 }, schema: SecurePaymentController_recordMulticallIntent_v2_200 });
+
+// POST /v2/secure-payments/{token}/multicall-intent -> SecurePaymentController_recordMulticallIntent_v2 (400)
+export const SecurePaymentController_recordMulticallIntent_v2_400 = ErrorEnvelopeSchema;
+schemaRegistry.register({ key: { operationId: 'SecurePaymentController_recordMulticallIntent_v2', kind: 'response', status: 400 }, schema: SecurePaymentController_recordMulticallIntent_v2_400 });
+
+// POST /v2/secure-payments/{token}/multicall-intent -> SecurePaymentController_recordMulticallIntent_v2 (401)
+export const SecurePaymentController_recordMulticallIntent_v2_401 = ErrorEnvelopeSchema;
+schemaRegistry.register({ key: { operationId: 'SecurePaymentController_recordMulticallIntent_v2', kind: 'response', status: 401 }, schema: SecurePaymentController_recordMulticallIntent_v2_401 });
+
+// POST /v2/secure-payments/{token}/multicall-intent -> SecurePaymentController_recordMulticallIntent_v2 (404)
+export const SecurePaymentController_recordMulticallIntent_v2_404 = ErrorEnvelopeSchema;
+schemaRegistry.register({ key: { operationId: 'SecurePaymentController_recordMulticallIntent_v2', kind: 'response', status: 404 }, schema: SecurePaymentController_recordMulticallIntent_v2_404 });
+
+// POST /v2/secure-payments/{token}/multicall-intent -> SecurePaymentController_recordMulticallIntent_v2 (429)
+export const SecurePaymentController_recordMulticallIntent_v2_429 = ErrorEnvelopeSchema;
+schemaRegistry.register({ key: { operationId: 'SecurePaymentController_recordMulticallIntent_v2', kind: 'response', status: 429 }, schema: SecurePaymentController_recordMulticallIntent_v2_429 });
+
+// POST /v2/secure-payments/{token}/events -> SecurePaymentController_recordUserEvent_v2 request (application/json)
+export const SecurePaymentController_recordUserEvent_v2_Request = z.object({ "userEvent": z.enum(['wallet_connected', 'payment_sent_to_wallet', 'payment_approved_in_wallet']), "occurredAt": (z.string()).optional(), "properties": (z.object({  }).passthrough().catchall(z.union([z.string(), z.number(), z.boolean(), z.array(z.string()), z.unknown(), z.unknown()]))).optional() }).passthrough();
+schemaRegistry.register({ key: { operationId: 'SecurePaymentController_recordUserEvent_v2', kind: 'request', variant: 'application/json' }, schema: SecurePaymentController_recordUserEvent_v2_Request });
+
+// POST /v2/secure-payments/{token}/events -> SecurePaymentController_recordUserEvent_v2 (400)
+export const SecurePaymentController_recordUserEvent_v2_400 = ErrorEnvelopeSchema;
+schemaRegistry.register({ key: { operationId: 'SecurePaymentController_recordUserEvent_v2', kind: 'response', status: 400 }, schema: SecurePaymentController_recordUserEvent_v2_400 });
+
+// POST /v2/secure-payments/{token}/events -> SecurePaymentController_recordUserEvent_v2 (401)
+export const SecurePaymentController_recordUserEvent_v2_401 = ErrorEnvelopeSchema;
+schemaRegistry.register({ key: { operationId: 'SecurePaymentController_recordUserEvent_v2', kind: 'response', status: 401 }, schema: SecurePaymentController_recordUserEvent_v2_401 });
+
+// POST /v2/secure-payments/{token}/events -> SecurePaymentController_recordUserEvent_v2 (404)
+export const SecurePaymentController_recordUserEvent_v2_404 = ErrorEnvelopeSchema;
+schemaRegistry.register({ key: { operationId: 'SecurePaymentController_recordUserEvent_v2', kind: 'response', status: 404 }, schema: SecurePaymentController_recordUserEvent_v2_404 });
+
+// POST /v2/secure-payments/{token}/events -> SecurePaymentController_recordUserEvent_v2 (429)
+export const SecurePaymentController_recordUserEvent_v2_429 = ErrorEnvelopeSchema;
+schemaRegistry.register({ key: { operationId: 'SecurePaymentController_recordUserEvent_v2', kind: 'response', status: 429 }, schema: SecurePaymentController_recordUserEvent_v2_429 });
+
+// POST /v2/secure-payments/multicall-payouts -> SecurePaymentMulticallController_createMulticallPayout_v2 request (application/json)
+export const SecurePaymentMulticallController_createMulticallPayout_v2_Request = z.object({ "childTokens": z.array(z.string()), "requestedExecutionKind": (z.enum(['evm_same_chain', 'evm_cross_chain', 'tron_batch'])).optional() }).passthrough();
+schemaRegistry.register({ key: { operationId: 'SecurePaymentMulticallController_createMulticallPayout_v2', kind: 'request', variant: 'application/json' }, schema: SecurePaymentMulticallController_createMulticallPayout_v2_Request });
+
+// POST /v2/secure-payments/multicall-payouts -> SecurePaymentMulticallController_createMulticallPayout_v2 (201)
+export const SecurePaymentMulticallController_createMulticallPayout_v2_201 = z.object({ "type": z.literal('multicall'), "token": z.string(), "securePaymentUrl": (z.string()).optional(), "status": z.enum(['pending', 'expired']), "expiresAt": z.string(), "createdAt": z.string(), "items": z.array(z.object({ "securePaymentToken": z.string(), "requestId": z.string(), "position": z.number(), "eligibility": (z.enum(['eligible', 'stale'])).optional(), "staleReason": (z.enum(['secure_payment_expired', 'secure_payment_not_pending', 'already_paid', 'request_processing', 'not_payable_child'])).optional() }).passthrough()) }).passthrough();
+schemaRegistry.register({ key: { operationId: 'SecurePaymentMulticallController_createMulticallPayout_v2', kind: 'response', status: 201 }, schema: SecurePaymentMulticallController_createMulticallPayout_v2_201 });
+
+// POST /v2/secure-payments/multicall-payouts -> SecurePaymentMulticallController_createMulticallPayout_v2 (400)
+export const SecurePaymentMulticallController_createMulticallPayout_v2_400 = ErrorEnvelopeSchema;
+schemaRegistry.register({ key: { operationId: 'SecurePaymentMulticallController_createMulticallPayout_v2', kind: 'response', status: 400 }, schema: SecurePaymentMulticallController_createMulticallPayout_v2_400 });
+
+// POST /v2/secure-payments/multicall-payouts -> SecurePaymentMulticallController_createMulticallPayout_v2 (429)
+export const SecurePaymentMulticallController_createMulticallPayout_v2_429 = ErrorEnvelopeSchema;
+schemaRegistry.register({ key: { operationId: 'SecurePaymentMulticallController_createMulticallPayout_v2', kind: 'response', status: 429 }, schema: SecurePaymentMulticallController_createMulticallPayout_v2_429 });
+
+// GET /v2/secure-payments/multicall-payouts/{token} -> SecurePaymentMulticallController_getMulticallPayout_v2 (200)
+export const SecurePaymentMulticallController_getMulticallPayout_v2_200 = z.object({ "version": z.literal(1), "flow": z.enum(['get_paid', 'pay']), "defaultFeeBearer": z.enum(['payer', 'payee']), "grossAmountUsd": z.string(), "netRecipientAmountUsd": z.string(), "payerTotalAmountUsd": z.string(), "totalFeesUsd": z.string(), "payeeBorneFeesUsd": z.string(), "payerBorneFeesUsd": z.string(), "fees": z.array(z.object({ "type": z.string(), "label": z.string(), "feeBearer": z.enum(['payer', 'payee']), "feeBearerSource": z.enum(['fee_config', 'payment_default_override', 'flow_default', 'forced_fee_policy']), "percentageBps": z.number(), "capUsd": z.string().nullable(), "fixedAmountUsd": (z.string().nullable()).optional(), "calculatedAmountUsd": z.string(), "destinationResolver": z.string(), "destinationRef": z.object({ "evmAddress": (z.string()).optional(), "tronAddress": (z.string()).optional() }).passthrough(), "configSource": z.string() }).passthrough()) }).passthrough().nullable();
+schemaRegistry.register({ key: { operationId: 'SecurePaymentMulticallController_getMulticallPayout_v2', kind: 'response', status: 200 }, schema: SecurePaymentMulticallController_getMulticallPayout_v2_200 });
+
+// GET /v2/secure-payments/multicall-payouts/{token} -> SecurePaymentMulticallController_getMulticallPayout_v2 (404)
+export const SecurePaymentMulticallController_getMulticallPayout_v2_404 = ErrorEnvelopeSchema;
+schemaRegistry.register({ key: { operationId: 'SecurePaymentMulticallController_getMulticallPayout_v2', kind: 'response', status: 404 }, schema: SecurePaymentMulticallController_getMulticallPayout_v2_404 });
+
+// GET /v2/secure-payments/multicall-payouts/{token} -> SecurePaymentMulticallController_getMulticallPayout_v2 (429)
+export const SecurePaymentMulticallController_getMulticallPayout_v2_429 = ErrorEnvelopeSchema;
+schemaRegistry.register({ key: { operationId: 'SecurePaymentMulticallController_getMulticallPayout_v2', kind: 'response', status: 429 }, schema: SecurePaymentMulticallController_getMulticallPayout_v2_429 });
+
 // POST /v1/pay -> PayV1Controller_payRequest_v1 request (application/json)
 export const PayV1Controller_payRequest_v1_Request = z.object({ "payee": z.string(), "amount": z.string(), "invoiceCurrency": z.string(), "paymentCurrency": z.string() }).passthrough();
 schemaRegistry.register({ key: { operationId: 'PayV1Controller_payRequest_v1', kind: 'request', variant: 'application/json' }, schema: PayV1Controller_payRequest_v1_Request });
@@ -635,7 +887,7 @@ export const PayV1Controller_payRequest_v1_429 = ErrorEnvelopeSchema;
 schemaRegistry.register({ key: { operationId: 'PayV1Controller_payRequest_v1', kind: 'response', status: 429 }, schema: PayV1Controller_payRequest_v1_429 });
 
 // GET /v2/payments -> PaymentV2Controller_searchPayments_v2 (200)
-export const PaymentV2Controller_searchPayments_v2_200 = z.object({ "payments": z.array(z.object({ "id": z.string(), "amount": z.string(), "sourceNetwork": z.string(), "destinationNetwork": z.string(), "sourceTxHash": (z.string().nullable()).optional(), "destinationTxHash": (z.string().nullable()).optional(), "timestamp": z.string(), "type": z.enum(['direct', 'conversion', 'crosschain', 'recurring']), "conversionRateSource": (z.string().nullable()).optional(), "conversionRateDestination": (z.string().nullable()).optional(), "convertedAmountSource": (z.string().nullable()).optional(), "convertedAmountDestination": (z.string().nullable()).optional(), "currency": z.string(), "paymentCurrency": z.string(), "fees": (z.array(z.object({ "type": (z.enum(['gas', 'platform', 'crosschain', 'crypto-to-fiat', 'offramp', 'protocol'])).optional(), "stage": (z.enum(['sending', 'receiving', 'proxying', 'refunding'])).optional(), "provider": (z.string()).optional(), "amount": (z.string().nullable()).optional(), "amountInUSD": (z.string().nullable()).optional(), "currency": (z.string()).optional(), "receiverAddress": (z.string()).optional(), "network": (z.string()).optional(), "rateProvider": (z.string()).optional() }).passthrough()).nullable()).optional(), "recurringPaymentId": (z.string().nullable()).optional(), "rateProvider": (z.enum(['lifi', 'chainlink', 'coingecko', 'unknown'])).optional(), "request": (z.object({ "requestId": (z.string()).optional(), "paymentReference": (z.string()).optional(), "hasBeenPaid": (z.boolean()).optional(), "customerInfo": (z.object({ "firstName": (z.string()).optional(), "lastName": (z.string()).optional(), "email": (z.string()).optional(), "address": (z.object({ "street": (z.string()).optional(), "city": (z.string()).optional(), "state": (z.string()).optional(), "postalCode": (z.string()).optional(), "country": (z.string()).optional() }).passthrough()).optional() }).passthrough().nullable()).optional(), "reference": (z.string().nullable()).optional() }).passthrough()).optional() }).passthrough()), "pagination": z.object({ "total": z.number(), "limit": z.number(), "offset": z.number(), "hasMore": z.boolean() }).passthrough() }).passthrough();
+export const PaymentV2Controller_searchPayments_v2_200 = z.object({ "payments": z.array(z.object({ "id": z.string(), "amount": z.string(), "sourceNetwork": z.string(), "destinationNetwork": z.string(), "sourceTxHash": (z.string().nullable()).optional(), "destinationTxHash": (z.string().nullable()).optional(), "timestamp": z.string(), "type": z.enum(['direct', 'conversion', 'crosschain', 'recurring']), "conversionRateSource": (z.string().nullable()).optional(), "conversionRateDestination": (z.string().nullable()).optional(), "convertedAmountSource": (z.string().nullable()).optional(), "convertedAmountDestination": (z.string().nullable()).optional(), "paidAmount": (z.string().nullable()).optional(), "paidCurrency": (z.string().nullable()).optional(), "paidNetwork": (z.string().nullable()).optional(), "receivedAmount": (z.string().nullable()).optional(), "receivedCurrency": (z.string().nullable()).optional(), "receivedNetwork": (z.string().nullable()).optional(), "excessAmount": (z.string().nullable()).optional(), "excessCurrency": (z.string().nullable()).optional(), "currency": z.string(), "paymentCurrency": z.string(), "fees": (z.array(z.object({ "type": (z.enum(['gas', 'platform', 'crosschain', 'crypto-to-fiat', 'offramp', 'protocol'])).optional(), "stage": (z.enum(['sending', 'receiving', 'proxying', 'refunding'])).optional(), "provider": (z.string()).optional(), "amount": (z.string().nullable()).optional(), "amountInUSD": (z.string().nullable()).optional(), "currency": (z.string()).optional(), "receiverAddress": (z.string()).optional(), "network": (z.string()).optional(), "rateProvider": (z.string()).optional() }).passthrough()).nullable()).optional(), "recurringPaymentId": (z.string().nullable()).optional(), "rateProvider": (z.enum(['lifi', 'chainlink', 'coingecko', 'unknown'])).optional(), "request": (z.object({ "requestId": (z.string()).optional(), "paymentReference": (z.string()).optional(), "hasBeenPaid": (z.boolean()).optional(), "customerInfo": (z.object({ "firstName": (z.string()).optional(), "lastName": (z.string()).optional(), "email": (z.string()).optional(), "address": (z.object({ "street": (z.string()).optional(), "city": (z.string()).optional(), "state": (z.string()).optional(), "postalCode": (z.string()).optional(), "country": (z.string()).optional() }).passthrough()).optional() }).passthrough().nullable()).optional(), "reference": (z.string().nullable()).optional() }).passthrough()).optional() }).passthrough()), "pagination": z.object({ "total": z.number(), "limit": z.number(), "offset": z.number(), "hasMore": z.boolean() }).passthrough() }).passthrough();
 schemaRegistry.register({ key: { operationId: 'PaymentV2Controller_searchPayments_v2', kind: 'response', status: 200 }, schema: PaymentV2Controller_searchPayments_v2_200 });
 
 // GET /v2/payments -> PaymentV2Controller_searchPayments_v2 (400)
@@ -671,7 +923,7 @@ export const PayoutV2Controller_payBatchRequest_v2_Request = z.object({ "request
 schemaRegistry.register({ key: { operationId: 'PayoutV2Controller_payBatchRequest_v2', kind: 'request', variant: 'application/json' }, schema: PayoutV2Controller_payBatchRequest_v2_Request });
 
 // POST /v2/payouts/batch -> PayoutV2Controller_payBatchRequest_v2 (201)
-export const PayoutV2Controller_payBatchRequest_v2_201 = z.object({ "ERC20ApprovalTransactions": (z.array(z.object({ "data": z.string(), "to": z.string(), "value": z.number() }).passthrough())).optional(), "ERC20BatchPaymentTransaction": (z.object({ "data": z.string(), "to": z.string(), "value": z.object({ "type": z.enum(['BigNumber']), "hex": z.string() }).passthrough() }).passthrough()).optional(), "ETHBatchPaymentTransaction": (z.object({ "data": z.string(), "to": z.string(), "value": z.object({ "type": z.enum(['BigNumber']), "hex": z.string() }).passthrough() }).passthrough()).optional() }).passthrough();
+export const PayoutV2Controller_payBatchRequest_v2_201 = z.object({ "ERC20ApprovalTransactions": z.array(z.object({ "data": z.string(), "to": z.string(), "value": z.number() }).passthrough()), "batchPaymentTransaction": z.object({ "data": z.string(), "to": z.string(), "value": z.object({ "type": z.literal('BigNumber'), "hex": z.string() }).passthrough() }).passthrough(), "metadata": (z.object({ "hasEnoughBalance": z.boolean(), "hasEnoughGas": z.union([z.boolean(), z.unknown()]), "canMakePayment": z.union([z.boolean(), z.unknown()]), "insufficientTokens": (z.array(z.object({ "tokenAddress": z.string(), "tokenSymbol": (z.string()).optional(), "paymentCurrencyId": (z.string()).optional(), "required": z.string(), "available": z.string() }).passthrough())).optional() }).passthrough()).optional(), "requests": z.array(z.object({ "requestId": z.string(), "paymentReference": z.string(), "payee": z.string().nullable(), "amount": z.string().nullable(), "invoiceCurrency": z.string().nullable(), "paymentCurrency": z.string().nullable() }).passthrough()) }).passthrough();
 schemaRegistry.register({ key: { operationId: 'PayoutV2Controller_payBatchRequest_v2', kind: 'response', status: 201 }, schema: PayoutV2Controller_payBatchRequest_v2_201 });
 
 // POST /v2/payouts/batch -> PayoutV2Controller_payBatchRequest_v2 (400)
@@ -734,46 +986,362 @@ schemaRegistry.register({ key: { operationId: 'PayoutV2Controller_updateRecurrin
 export const PayoutV2Controller_updateRecurringPayment_v2_429 = ErrorEnvelopeSchema;
 schemaRegistry.register({ key: { operationId: 'PayoutV2Controller_updateRecurringPayment_v2', kind: 'response', status: 429 }, schema: PayoutV2Controller_updateRecurringPayment_v2_429 });
 
-// GET /v2/secure-payments -> SecurePaymentController_findSecurePayment_v2 (200)
-export const SecurePaymentController_findSecurePayment_v2_200 = z.object({ "token": z.string(), "securePaymentUrl": z.string(), "status": z.enum(['pending', 'completed', 'expired', 'invalidated']), "paymentType": z.enum(['single', 'batch']), "createdAt": z.string().nullable(), "expiresAt": z.string() }).passthrough();
-schemaRegistry.register({ key: { operationId: 'SecurePaymentController_findSecurePayment_v2', kind: 'response', status: 200 }, schema: SecurePaymentController_findSecurePayment_v2_200 });
+// GET /v2/dashboard/requests/export -> RequestExportController_exportRequests_v2 (200)
+export const RequestExportController_exportRequests_v2_200 = z.unknown();
+schemaRegistry.register({ key: { operationId: 'RequestExportController_exportRequests_v2', kind: 'response', status: 200 }, schema: RequestExportController_exportRequests_v2_200 });
 
-// GET /v2/secure-payments -> SecurePaymentController_findSecurePayment_v2 (404)
-export const SecurePaymentController_findSecurePayment_v2_404 = ErrorEnvelopeSchema;
-schemaRegistry.register({ key: { operationId: 'SecurePaymentController_findSecurePayment_v2', kind: 'response', status: 404 }, schema: SecurePaymentController_findSecurePayment_v2_404 });
+// GET /v2/dashboard/requests/export -> RequestExportController_exportRequests_v2 (429)
+export const RequestExportController_exportRequests_v2_429 = ErrorEnvelopeSchema;
+schemaRegistry.register({ key: { operationId: 'RequestExportController_exportRequests_v2', kind: 'response', status: 429 }, schema: RequestExportController_exportRequests_v2_429 });
 
-// GET /v2/secure-payments -> SecurePaymentController_findSecurePayment_v2 (429)
-export const SecurePaymentController_findSecurePayment_v2_429 = ErrorEnvelopeSchema;
-schemaRegistry.register({ key: { operationId: 'SecurePaymentController_findSecurePayment_v2', kind: 'response', status: 429 }, schema: SecurePaymentController_findSecurePayment_v2_429 });
+// POST /v2/journey -> JourneyController_createJourney_v2 request (application/json)
+export const JourneyController_createJourney_v2_Request = z.object({ "requestId": (z.string()).optional() }).passthrough();
+schemaRegistry.register({ key: { operationId: 'JourneyController_createJourney_v2', kind: 'request', variant: 'application/json' }, schema: JourneyController_createJourney_v2_Request });
 
-// POST /v2/secure-payments -> SecurePaymentController_createSecurePayment_v2 request (application/json)
-export const SecurePaymentController_createSecurePayment_v2_Request = z.object({ "requests": z.array(z.object({ "destinationId": z.string(), "amount": z.string() }).passthrough()), "feePercentage": (z.string()).optional(), "feeAddress": (z.string()).optional() }).passthrough();
-schemaRegistry.register({ key: { operationId: 'SecurePaymentController_createSecurePayment_v2', kind: 'request', variant: 'application/json' }, schema: SecurePaymentController_createSecurePayment_v2_Request });
+// POST /v2/journey -> JourneyController_createJourney_v2 (201)
+export const JourneyController_createJourney_v2_201 = z.unknown();
+schemaRegistry.register({ key: { operationId: 'JourneyController_createJourney_v2', kind: 'response', status: 201 }, schema: JourneyController_createJourney_v2_201 });
 
-// POST /v2/secure-payments -> SecurePaymentController_createSecurePayment_v2 (201)
-export const SecurePaymentController_createSecurePayment_v2_201 = z.object({ "requestIds": z.array(z.string()), "securePaymentUrl": z.string(), "token": z.string() }).passthrough();
-schemaRegistry.register({ key: { operationId: 'SecurePaymentController_createSecurePayment_v2', kind: 'response', status: 201 }, schema: SecurePaymentController_createSecurePayment_v2_201 });
+// POST /v2/journey -> JourneyController_createJourney_v2 (401)
+export const JourneyController_createJourney_v2_401 = ErrorEnvelopeSchema;
+schemaRegistry.register({ key: { operationId: 'JourneyController_createJourney_v2', kind: 'response', status: 401 }, schema: JourneyController_createJourney_v2_401 });
 
-// POST /v2/secure-payments -> SecurePaymentController_createSecurePayment_v2 (429)
-export const SecurePaymentController_createSecurePayment_v2_429 = ErrorEnvelopeSchema;
-schemaRegistry.register({ key: { operationId: 'SecurePaymentController_createSecurePayment_v2', kind: 'response', status: 429 }, schema: SecurePaymentController_createSecurePayment_v2_429 });
+// POST /v2/journey -> JourneyController_createJourney_v2 (429)
+export const JourneyController_createJourney_v2_429 = ErrorEnvelopeSchema;
+schemaRegistry.register({ key: { operationId: 'JourneyController_createJourney_v2', kind: 'response', status: 429 }, schema: JourneyController_createJourney_v2_429 });
 
-// GET /v2/secure-payments/{token} -> SecurePaymentController_getSecurePaymentByToken_v2 (200)
-export const SecurePaymentController_getSecurePaymentByToken_v2_200 = z.object({ "paymentType": z.enum(['single']), "payee": z.string(), "network": z.string(), "amount": z.string(), "paymentCurrency": z.string(), "isNativeCurrency": z.boolean(), "status": z.enum(['pending', 'completed', 'expired', 'invalidated']), "destination": z.object({ "destinationId": z.string(), "payeeAddress": z.string(), "tokenAddress": z.string(), "walletAddress": z.string(), "network": z.string() }).passthrough(), "transactions": z.array(z.unknown()), "metadata": (z.object({ "stepsRequired": z.number(), "needsApproval": z.boolean(), "approvalTransactionIndex": (z.number()).optional(), "paymentTransactionIndex": z.number(), "hasEnoughBalance": (z.boolean()).optional(), "hasEnoughGas": (z.boolean()).optional(), "platformFee": (z.object({ "percentage": z.string(), "address": z.string() }).passthrough()).optional() }).passthrough()).optional() }).passthrough();
-schemaRegistry.register({ key: { operationId: 'SecurePaymentController_getSecurePaymentByToken_v2', kind: 'response', status: 200 }, schema: SecurePaymentController_getSecurePaymentByToken_v2_200 });
+// POST /v2/journey/{queryId} -> JourneyController_createJourneyEvent_v2 request (application/json)
+export const JourneyController_createJourneyEvent_v2_Request = z.object({ "status": z.string(), "amount": z.string(), "processedAt": z.string(), "currency": (z.string()).optional(), "txReference": (z.string()).optional(), "rawPayload": (z.unknown()).optional(), "nextProcessorId": (z.string()).optional() }).passthrough();
+schemaRegistry.register({ key: { operationId: 'JourneyController_createJourneyEvent_v2', kind: 'request', variant: 'application/json' }, schema: JourneyController_createJourneyEvent_v2_Request });
 
-// GET /v2/secure-payments/{token} -> SecurePaymentController_getSecurePaymentByToken_v2 (403)
-export const SecurePaymentController_getSecurePaymentByToken_v2_403 = ErrorEnvelopeSchema;
-schemaRegistry.register({ key: { operationId: 'SecurePaymentController_getSecurePaymentByToken_v2', kind: 'response', status: 403 }, schema: SecurePaymentController_getSecurePaymentByToken_v2_403 });
+// POST /v2/journey/{queryId} -> JourneyController_createJourneyEvent_v2 (201)
+export const JourneyController_createJourneyEvent_v2_201 = z.unknown();
+schemaRegistry.register({ key: { operationId: 'JourneyController_createJourneyEvent_v2', kind: 'response', status: 201 }, schema: JourneyController_createJourneyEvent_v2_201 });
 
-// GET /v2/secure-payments/{token} -> SecurePaymentController_getSecurePaymentByToken_v2 (404)
-export const SecurePaymentController_getSecurePaymentByToken_v2_404 = ErrorEnvelopeSchema;
-schemaRegistry.register({ key: { operationId: 'SecurePaymentController_getSecurePaymentByToken_v2', kind: 'response', status: 404 }, schema: SecurePaymentController_getSecurePaymentByToken_v2_404 });
+// POST /v2/journey/{queryId} -> JourneyController_createJourneyEvent_v2 (401)
+export const JourneyController_createJourneyEvent_v2_401 = ErrorEnvelopeSchema;
+schemaRegistry.register({ key: { operationId: 'JourneyController_createJourneyEvent_v2', kind: 'response', status: 401 }, schema: JourneyController_createJourneyEvent_v2_401 });
 
-// GET /v2/secure-payments/{token} -> SecurePaymentController_getSecurePaymentByToken_v2 (409)
-export const SecurePaymentController_getSecurePaymentByToken_v2_409 = ErrorEnvelopeSchema;
-schemaRegistry.register({ key: { operationId: 'SecurePaymentController_getSecurePaymentByToken_v2', kind: 'response', status: 409 }, schema: SecurePaymentController_getSecurePaymentByToken_v2_409 });
+// POST /v2/journey/{queryId} -> JourneyController_createJourneyEvent_v2 (429)
+export const JourneyController_createJourneyEvent_v2_429 = ErrorEnvelopeSchema;
+schemaRegistry.register({ key: { operationId: 'JourneyController_createJourneyEvent_v2', kind: 'response', status: 429 }, schema: JourneyController_createJourneyEvent_v2_429 });
 
-// GET /v2/secure-payments/{token} -> SecurePaymentController_getSecurePaymentByToken_v2 (429)
-export const SecurePaymentController_getSecurePaymentByToken_v2_429 = ErrorEnvelopeSchema;
-schemaRegistry.register({ key: { operationId: 'SecurePaymentController_getSecurePaymentByToken_v2', kind: 'response', status: 429 }, schema: SecurePaymentController_getSecurePaymentByToken_v2_429 });
+// GET /v2/journey/{journeyId} -> JourneyController_getJourney_v2 (200)
+export const JourneyController_getJourney_v2_200 = z.unknown();
+schemaRegistry.register({ key: { operationId: 'JourneyController_getJourney_v2', kind: 'response', status: 200 }, schema: JourneyController_getJourney_v2_200 });
+
+// GET /v2/journey/{journeyId} -> JourneyController_getJourney_v2 (401)
+export const JourneyController_getJourney_v2_401 = ErrorEnvelopeSchema;
+schemaRegistry.register({ key: { operationId: 'JourneyController_getJourney_v2', kind: 'response', status: 401 }, schema: JourneyController_getJourney_v2_401 });
+
+// GET /v2/journey/{journeyId} -> JourneyController_getJourney_v2 (429)
+export const JourneyController_getJourney_v2_429 = ErrorEnvelopeSchema;
+schemaRegistry.register({ key: { operationId: 'JourneyController_getJourney_v2', kind: 'response', status: 429 }, schema: JourneyController_getJourney_v2_429 });
+
+// GET /v2/transaction-history -> TransactionHistoryController_getHistory_v2 (200)
+export const TransactionHistoryController_getHistory_v2_200 = z.object({ "type": z.enum(['incoming', 'outgoing']), "timestamp": z.string(), "from": (z.string()).optional(), "to": (z.string()).optional(), "amountReceived": (z.string()).optional(), "amountPaid": (z.string()).optional(), "paymentCurrency": (z.string()).optional(), "receivingCurrency": (z.string()).optional(), "paymentChain": (z.string()).optional(), "receivingChain": (z.string()).optional(), "sourceTxHash": z.string(), "destinationTxHash": z.string() }).passthrough();
+schemaRegistry.register({ key: { operationId: 'TransactionHistoryController_getHistory_v2', kind: 'response', status: 200 }, schema: TransactionHistoryController_getHistory_v2_200 });
+
+// GET /v2/transaction-history -> TransactionHistoryController_getHistory_v2 (429)
+export const TransactionHistoryController_getHistory_v2_429 = ErrorEnvelopeSchema;
+schemaRegistry.register({ key: { operationId: 'TransactionHistoryController_getHistory_v2', kind: 'response', status: 429 }, schema: TransactionHistoryController_getHistory_v2_429 });
+
+// POST /v2/commerce-payments/authorize/calldata -> CommercePaymentsController_generateAuthorizeCalldata_v2 request (application/json)
+export const CommercePaymentsController_generateAuthorizeCalldata_v2_Request = z.object({ "merchantId": z.string(), "merchantAddress": z.string(), "buyerAddress": (z.string()).optional(), "amount": z.string(), "paymentCurrency": z.string(), "maxAmount": (z.string()).optional(), "preApprovalExpiry": (z.number()).optional(), "authorizationExpiry": (z.number()).optional() }).passthrough();
+schemaRegistry.register({ key: { operationId: 'CommercePaymentsController_generateAuthorizeCalldata_v2', kind: 'request', variant: 'application/json' }, schema: CommercePaymentsController_generateAuthorizeCalldata_v2_Request });
+
+// POST /v2/commerce-payments/authorize/calldata -> CommercePaymentsController_generateAuthorizeCalldata_v2 (201)
+export const CommercePaymentsController_generateAuthorizeCalldata_v2_201 = z.object({ "to": z.string(), "data": z.string(), "value": z.string(), "description": z.string() }).passthrough();
+schemaRegistry.register({ key: { operationId: 'CommercePaymentsController_generateAuthorizeCalldata_v2', kind: 'response', status: 201 }, schema: CommercePaymentsController_generateAuthorizeCalldata_v2_201 });
+
+// POST /v2/commerce-payments/authorize/calldata -> CommercePaymentsController_generateAuthorizeCalldata_v2 (400)
+export const CommercePaymentsController_generateAuthorizeCalldata_v2_400 = ErrorEnvelopeSchema;
+schemaRegistry.register({ key: { operationId: 'CommercePaymentsController_generateAuthorizeCalldata_v2', kind: 'response', status: 400 }, schema: CommercePaymentsController_generateAuthorizeCalldata_v2_400 });
+
+// POST /v2/commerce-payments/authorize/calldata -> CommercePaymentsController_generateAuthorizeCalldata_v2 (429)
+export const CommercePaymentsController_generateAuthorizeCalldata_v2_429 = ErrorEnvelopeSchema;
+schemaRegistry.register({ key: { operationId: 'CommercePaymentsController_generateAuthorizeCalldata_v2', kind: 'response', status: 429 }, schema: CommercePaymentsController_generateAuthorizeCalldata_v2_429 });
+
+// GET /v2/commerce-payments/{requestId}/status -> CommercePaymentsController_getPaymentStatus_v2 (200)
+export const CommercePaymentsController_getPaymentStatus_v2_200 = z.object({ "type": z.enum(['AUTHORIZED', 'CAPTURED', 'VOIDED', 'REFUNDED', 'EXPIRED', 'RECLAIMED', 'FAILED']), "timestamp": z.string(), "transactionHash": (z.string()).optional(), "blockNumber": (z.string()).optional() }).passthrough();
+schemaRegistry.register({ key: { operationId: 'CommercePaymentsController_getPaymentStatus_v2', kind: 'response', status: 200 }, schema: CommercePaymentsController_getPaymentStatus_v2_200 });
+
+// GET /v2/commerce-payments/{requestId}/status -> CommercePaymentsController_getPaymentStatus_v2 (404)
+export const CommercePaymentsController_getPaymentStatus_v2_404 = ErrorEnvelopeSchema;
+schemaRegistry.register({ key: { operationId: 'CommercePaymentsController_getPaymentStatus_v2', kind: 'response', status: 404 }, schema: CommercePaymentsController_getPaymentStatus_v2_404 });
+
+// GET /v2/commerce-payments/{requestId}/status -> CommercePaymentsController_getPaymentStatus_v2 (429)
+export const CommercePaymentsController_getPaymentStatus_v2_429 = ErrorEnvelopeSchema;
+schemaRegistry.register({ key: { operationId: 'CommercePaymentsController_getPaymentStatus_v2', kind: 'response', status: 429 }, schema: CommercePaymentsController_getPaymentStatus_v2_429 });
+
+// POST /v2/commerce-payments/{requestId}/authorize -> CommercePaymentsController_authorizePayment_v2 (200)
+export const CommercePaymentsController_authorizePayment_v2_200 = z.object({ "requestId": z.string(), "status": z.enum(['PENDING', 'AUTHORIZING', 'AUTHORIZED', 'CAPTURING', 'PAID', 'VOIDING', 'VOIDED', 'REFUNDING', 'REFUNDED', 'PARTIALLY_REFUNDED', 'EXPIRED', 'RECLAIMED', 'FAILED']), "transactionHash": z.string(), "amount": z.string() }).passthrough();
+schemaRegistry.register({ key: { operationId: 'CommercePaymentsController_authorizePayment_v2', kind: 'response', status: 200 }, schema: CommercePaymentsController_authorizePayment_v2_200 });
+
+// POST /v2/commerce-payments/{requestId}/authorize -> CommercePaymentsController_authorizePayment_v2 (400)
+export const CommercePaymentsController_authorizePayment_v2_400 = ErrorEnvelopeSchema;
+schemaRegistry.register({ key: { operationId: 'CommercePaymentsController_authorizePayment_v2', kind: 'response', status: 400 }, schema: CommercePaymentsController_authorizePayment_v2_400 });
+
+// POST /v2/commerce-payments/{requestId}/authorize -> CommercePaymentsController_authorizePayment_v2 (404)
+export const CommercePaymentsController_authorizePayment_v2_404 = ErrorEnvelopeSchema;
+schemaRegistry.register({ key: { operationId: 'CommercePaymentsController_authorizePayment_v2', kind: 'response', status: 404 }, schema: CommercePaymentsController_authorizePayment_v2_404 });
+
+// POST /v2/commerce-payments/{requestId}/authorize -> CommercePaymentsController_authorizePayment_v2 (429)
+export const CommercePaymentsController_authorizePayment_v2_429 = ErrorEnvelopeSchema;
+schemaRegistry.register({ key: { operationId: 'CommercePaymentsController_authorizePayment_v2', kind: 'response', status: 429 }, schema: CommercePaymentsController_authorizePayment_v2_429 });
+
+// POST /v2/commerce-payments/{requestId}/capture/calldata -> CommercePaymentsController_generateCaptureCalldata_v2 request (application/json)
+export const CommercePaymentsController_generateCaptureCalldata_v2_Request = z.object({ "captureAmount": z.string(), "feeBps": (z.number()).optional(), "feeReceiver": (z.string()).optional() }).passthrough();
+schemaRegistry.register({ key: { operationId: 'CommercePaymentsController_generateCaptureCalldata_v2', kind: 'request', variant: 'application/json' }, schema: CommercePaymentsController_generateCaptureCalldata_v2_Request });
+
+// POST /v2/commerce-payments/{requestId}/capture/calldata -> CommercePaymentsController_generateCaptureCalldata_v2 (200)
+export const CommercePaymentsController_generateCaptureCalldata_v2_200 = z.object({ "requestId": z.string(), "calldata": z.string(), "to": z.string(), "value": z.string(), "operator": z.string() }).passthrough();
+schemaRegistry.register({ key: { operationId: 'CommercePaymentsController_generateCaptureCalldata_v2', kind: 'response', status: 200 }, schema: CommercePaymentsController_generateCaptureCalldata_v2_200 });
+
+// POST /v2/commerce-payments/{requestId}/capture/calldata -> CommercePaymentsController_generateCaptureCalldata_v2 (400)
+export const CommercePaymentsController_generateCaptureCalldata_v2_400 = ErrorEnvelopeSchema;
+schemaRegistry.register({ key: { operationId: 'CommercePaymentsController_generateCaptureCalldata_v2', kind: 'response', status: 400 }, schema: CommercePaymentsController_generateCaptureCalldata_v2_400 });
+
+// POST /v2/commerce-payments/{requestId}/capture/calldata -> CommercePaymentsController_generateCaptureCalldata_v2 (404)
+export const CommercePaymentsController_generateCaptureCalldata_v2_404 = ErrorEnvelopeSchema;
+schemaRegistry.register({ key: { operationId: 'CommercePaymentsController_generateCaptureCalldata_v2', kind: 'response', status: 404 }, schema: CommercePaymentsController_generateCaptureCalldata_v2_404 });
+
+// POST /v2/commerce-payments/{requestId}/capture/calldata -> CommercePaymentsController_generateCaptureCalldata_v2 (429)
+export const CommercePaymentsController_generateCaptureCalldata_v2_429 = ErrorEnvelopeSchema;
+schemaRegistry.register({ key: { operationId: 'CommercePaymentsController_generateCaptureCalldata_v2', kind: 'response', status: 429 }, schema: CommercePaymentsController_generateCaptureCalldata_v2_429 });
+
+// POST /v2/commerce-payments/{requestId}/void/calldata -> CommercePaymentsController_generateVoidCalldata_v2 (200)
+export const CommercePaymentsController_generateVoidCalldata_v2_200 = z.object({ "requestId": z.string(), "calldata": z.string(), "to": z.string(), "value": z.string(), "operator": z.string() }).passthrough();
+schemaRegistry.register({ key: { operationId: 'CommercePaymentsController_generateVoidCalldata_v2', kind: 'response', status: 200 }, schema: CommercePaymentsController_generateVoidCalldata_v2_200 });
+
+// POST /v2/commerce-payments/{requestId}/void/calldata -> CommercePaymentsController_generateVoidCalldata_v2 (400)
+export const CommercePaymentsController_generateVoidCalldata_v2_400 = ErrorEnvelopeSchema;
+schemaRegistry.register({ key: { operationId: 'CommercePaymentsController_generateVoidCalldata_v2', kind: 'response', status: 400 }, schema: CommercePaymentsController_generateVoidCalldata_v2_400 });
+
+// POST /v2/commerce-payments/{requestId}/void/calldata -> CommercePaymentsController_generateVoidCalldata_v2 (404)
+export const CommercePaymentsController_generateVoidCalldata_v2_404 = ErrorEnvelopeSchema;
+schemaRegistry.register({ key: { operationId: 'CommercePaymentsController_generateVoidCalldata_v2', kind: 'response', status: 404 }, schema: CommercePaymentsController_generateVoidCalldata_v2_404 });
+
+// POST /v2/commerce-payments/{requestId}/void/calldata -> CommercePaymentsController_generateVoidCalldata_v2 (429)
+export const CommercePaymentsController_generateVoidCalldata_v2_429 = ErrorEnvelopeSchema;
+schemaRegistry.register({ key: { operationId: 'CommercePaymentsController_generateVoidCalldata_v2', kind: 'response', status: 429 }, schema: CommercePaymentsController_generateVoidCalldata_v2_429 });
+
+// POST /v2/commerce-payments/{requestId}/capture -> CommercePaymentsController_capturePayment_v2 request (application/json)
+export const CommercePaymentsController_capturePayment_v2_Request = z.object({ "captureAmount": z.string(), "feeBps": (z.number()).optional(), "feeReceiver": (z.string()).optional() }).passthrough();
+schemaRegistry.register({ key: { operationId: 'CommercePaymentsController_capturePayment_v2', kind: 'request', variant: 'application/json' }, schema: CommercePaymentsController_capturePayment_v2_Request });
+
+// POST /v2/commerce-payments/{requestId}/capture -> CommercePaymentsController_capturePayment_v2 (200)
+export const CommercePaymentsController_capturePayment_v2_200 = z.object({ "requestId": z.string(), "status": z.enum(['PENDING', 'AUTHORIZING', 'AUTHORIZED', 'CAPTURING', 'PAID', 'VOIDING', 'VOIDED', 'REFUNDING', 'REFUNDED', 'PARTIALLY_REFUNDED', 'EXPIRED', 'RECLAIMED', 'FAILED']), "transactionHash": z.string(), "captureAmount": z.string() }).passthrough();
+schemaRegistry.register({ key: { operationId: 'CommercePaymentsController_capturePayment_v2', kind: 'response', status: 200 }, schema: CommercePaymentsController_capturePayment_v2_200 });
+
+// POST /v2/commerce-payments/{requestId}/capture -> CommercePaymentsController_capturePayment_v2 (400)
+export const CommercePaymentsController_capturePayment_v2_400 = ErrorEnvelopeSchema;
+schemaRegistry.register({ key: { operationId: 'CommercePaymentsController_capturePayment_v2', kind: 'response', status: 400 }, schema: CommercePaymentsController_capturePayment_v2_400 });
+
+// POST /v2/commerce-payments/{requestId}/capture -> CommercePaymentsController_capturePayment_v2 (404)
+export const CommercePaymentsController_capturePayment_v2_404 = ErrorEnvelopeSchema;
+schemaRegistry.register({ key: { operationId: 'CommercePaymentsController_capturePayment_v2', kind: 'response', status: 404 }, schema: CommercePaymentsController_capturePayment_v2_404 });
+
+// POST /v2/commerce-payments/{requestId}/capture -> CommercePaymentsController_capturePayment_v2 (429)
+export const CommercePaymentsController_capturePayment_v2_429 = ErrorEnvelopeSchema;
+schemaRegistry.register({ key: { operationId: 'CommercePaymentsController_capturePayment_v2', kind: 'response', status: 429 }, schema: CommercePaymentsController_capturePayment_v2_429 });
+
+// POST /v2/commerce-payments/{requestId}/void -> CommercePaymentsController_voidPayment_v2 request (application/json)
+export const CommercePaymentsController_voidPayment_v2_Request = z.object({ "reason": (z.string()).optional() }).passthrough();
+schemaRegistry.register({ key: { operationId: 'CommercePaymentsController_voidPayment_v2', kind: 'request', variant: 'application/json' }, schema: CommercePaymentsController_voidPayment_v2_Request });
+
+// POST /v2/commerce-payments/{requestId}/void -> CommercePaymentsController_voidPayment_v2 (200)
+export const CommercePaymentsController_voidPayment_v2_200 = z.object({ "requestId": z.string(), "status": z.enum(['PENDING', 'AUTHORIZING', 'AUTHORIZED', 'CAPTURING', 'PAID', 'VOIDING', 'VOIDED', 'REFUNDING', 'REFUNDED', 'PARTIALLY_REFUNDED', 'EXPIRED', 'RECLAIMED', 'FAILED']), "transactionHash": z.string(), "voidedAmount": z.string() }).passthrough();
+schemaRegistry.register({ key: { operationId: 'CommercePaymentsController_voidPayment_v2', kind: 'response', status: 200 }, schema: CommercePaymentsController_voidPayment_v2_200 });
+
+// POST /v2/commerce-payments/{requestId}/void -> CommercePaymentsController_voidPayment_v2 (400)
+export const CommercePaymentsController_voidPayment_v2_400 = ErrorEnvelopeSchema;
+schemaRegistry.register({ key: { operationId: 'CommercePaymentsController_voidPayment_v2', kind: 'response', status: 400 }, schema: CommercePaymentsController_voidPayment_v2_400 });
+
+// POST /v2/commerce-payments/{requestId}/void -> CommercePaymentsController_voidPayment_v2 (404)
+export const CommercePaymentsController_voidPayment_v2_404 = ErrorEnvelopeSchema;
+schemaRegistry.register({ key: { operationId: 'CommercePaymentsController_voidPayment_v2', kind: 'response', status: 404 }, schema: CommercePaymentsController_voidPayment_v2_404 });
+
+// POST /v2/commerce-payments/{requestId}/void -> CommercePaymentsController_voidPayment_v2 (429)
+export const CommercePaymentsController_voidPayment_v2_429 = ErrorEnvelopeSchema;
+schemaRegistry.register({ key: { operationId: 'CommercePaymentsController_voidPayment_v2', kind: 'response', status: 429 }, schema: CommercePaymentsController_voidPayment_v2_429 });
+
+// POST /v2/orchestrators -> OrchestratorController_createOrchestrator_v2 request (application/json)
+export const OrchestratorController_createOrchestrator_v2_Request = z.unknown();
+schemaRegistry.register({ key: { operationId: 'OrchestratorController_createOrchestrator_v2', kind: 'request', variant: 'application/json' }, schema: OrchestratorController_createOrchestrator_v2_Request });
+
+// POST /v2/orchestrators -> OrchestratorController_createOrchestrator_v2 (201)
+export const OrchestratorController_createOrchestrator_v2_201 = z.unknown();
+schemaRegistry.register({ key: { operationId: 'OrchestratorController_createOrchestrator_v2', kind: 'response', status: 201 }, schema: OrchestratorController_createOrchestrator_v2_201 });
+
+// POST /v2/orchestrators -> OrchestratorController_createOrchestrator_v2 (429)
+export const OrchestratorController_createOrchestrator_v2_429 = ErrorEnvelopeSchema;
+schemaRegistry.register({ key: { operationId: 'OrchestratorController_createOrchestrator_v2', kind: 'response', status: 429 }, schema: OrchestratorController_createOrchestrator_v2_429 });
+
+// GET /v2/orchestrators/client-ids -> OrchestratorController_listLinkedClientIds_v2 (200)
+export const OrchestratorController_listLinkedClientIds_v2_200 = z.unknown();
+schemaRegistry.register({ key: { operationId: 'OrchestratorController_listLinkedClientIds_v2', kind: 'response', status: 200 }, schema: OrchestratorController_listLinkedClientIds_v2_200 });
+
+// GET /v2/orchestrators/client-ids -> OrchestratorController_listLinkedClientIds_v2 (429)
+export const OrchestratorController_listLinkedClientIds_v2_429 = ErrorEnvelopeSchema;
+schemaRegistry.register({ key: { operationId: 'OrchestratorController_listLinkedClientIds_v2', kind: 'response', status: 429 }, schema: OrchestratorController_listLinkedClientIds_v2_429 });
+
+// POST /v2/orchestrators/client-ids -> OrchestratorController_linkClientId_v2 request (application/json)
+export const OrchestratorController_linkClientId_v2_Request = z.unknown();
+schemaRegistry.register({ key: { operationId: 'OrchestratorController_linkClientId_v2', kind: 'request', variant: 'application/json' }, schema: OrchestratorController_linkClientId_v2_Request });
+
+// POST /v2/orchestrators/client-ids -> OrchestratorController_linkClientId_v2 (201)
+export const OrchestratorController_linkClientId_v2_201 = z.unknown();
+schemaRegistry.register({ key: { operationId: 'OrchestratorController_linkClientId_v2', kind: 'response', status: 201 }, schema: OrchestratorController_linkClientId_v2_201 });
+
+// POST /v2/orchestrators/client-ids -> OrchestratorController_linkClientId_v2 (429)
+export const OrchestratorController_linkClientId_v2_429 = ErrorEnvelopeSchema;
+schemaRegistry.register({ key: { operationId: 'OrchestratorController_linkClientId_v2', kind: 'response', status: 429 }, schema: OrchestratorController_linkClientId_v2_429 });
+
+// POST /v2/orchestrators/client-id-link-intents -> OrchestratorController_createLinkIntent_v2 request (application/json)
+export const OrchestratorController_createLinkIntent_v2_Request = z.unknown();
+schemaRegistry.register({ key: { operationId: 'OrchestratorController_createLinkIntent_v2', kind: 'request', variant: 'application/json' }, schema: OrchestratorController_createLinkIntent_v2_Request });
+
+// POST /v2/orchestrators/client-id-link-intents -> OrchestratorController_createLinkIntent_v2 (201)
+export const OrchestratorController_createLinkIntent_v2_201 = z.unknown();
+schemaRegistry.register({ key: { operationId: 'OrchestratorController_createLinkIntent_v2', kind: 'response', status: 201 }, schema: OrchestratorController_createLinkIntent_v2_201 });
+
+// POST /v2/orchestrators/client-id-link-intents -> OrchestratorController_createLinkIntent_v2 (429)
+export const OrchestratorController_createLinkIntent_v2_429 = ErrorEnvelopeSchema;
+schemaRegistry.register({ key: { operationId: 'OrchestratorController_createLinkIntent_v2', kind: 'response', status: 429 }, schema: OrchestratorController_createLinkIntent_v2_429 });
+
+// DELETE /v2/orchestrators/client-ids/{clientId} -> OrchestratorController_unlinkClientId_v2 (200)
+export const OrchestratorController_unlinkClientId_v2_200 = z.unknown();
+schemaRegistry.register({ key: { operationId: 'OrchestratorController_unlinkClientId_v2', kind: 'response', status: 200 }, schema: OrchestratorController_unlinkClientId_v2_200 });
+
+// DELETE /v2/orchestrators/client-ids/{clientId} -> OrchestratorController_unlinkClientId_v2 (429)
+export const OrchestratorController_unlinkClientId_v2_429 = ErrorEnvelopeSchema;
+schemaRegistry.register({ key: { operationId: 'OrchestratorController_unlinkClientId_v2', kind: 'response', status: 429 }, schema: OrchestratorController_unlinkClientId_v2_429 });
+
+// GET /v2/orchestrators/fee-configs -> OrchestratorController_listFeeConfigs_v2 (200)
+export const OrchestratorController_listFeeConfigs_v2_200 = z.unknown();
+schemaRegistry.register({ key: { operationId: 'OrchestratorController_listFeeConfigs_v2', kind: 'response', status: 200 }, schema: OrchestratorController_listFeeConfigs_v2_200 });
+
+// GET /v2/orchestrators/fee-configs -> OrchestratorController_listFeeConfigs_v2 (429)
+export const OrchestratorController_listFeeConfigs_v2_429 = ErrorEnvelopeSchema;
+schemaRegistry.register({ key: { operationId: 'OrchestratorController_listFeeConfigs_v2', kind: 'response', status: 429 }, schema: OrchestratorController_listFeeConfigs_v2_429 });
+
+// POST /v2/orchestrators/fee-configs -> OrchestratorController_createFeeConfig_v2 request (application/json)
+export const OrchestratorController_createFeeConfig_v2_Request = z.string();
+schemaRegistry.register({ key: { operationId: 'OrchestratorController_createFeeConfig_v2', kind: 'request', variant: 'application/json' }, schema: OrchestratorController_createFeeConfig_v2_Request });
+
+// POST /v2/orchestrators/fee-configs -> OrchestratorController_createFeeConfig_v2 (201)
+export const OrchestratorController_createFeeConfig_v2_201 = z.unknown();
+schemaRegistry.register({ key: { operationId: 'OrchestratorController_createFeeConfig_v2', kind: 'response', status: 201 }, schema: OrchestratorController_createFeeConfig_v2_201 });
+
+// POST /v2/orchestrators/fee-configs -> OrchestratorController_createFeeConfig_v2 (429)
+export const OrchestratorController_createFeeConfig_v2_429 = ErrorEnvelopeSchema;
+schemaRegistry.register({ key: { operationId: 'OrchestratorController_createFeeConfig_v2', kind: 'response', status: 429 }, schema: OrchestratorController_createFeeConfig_v2_429 });
+
+// PATCH /v2/orchestrators/fee-configs/{id} -> OrchestratorController_updateFeeConfig_v2 request (application/json)
+export const OrchestratorController_updateFeeConfig_v2_Request = z.unknown();
+schemaRegistry.register({ key: { operationId: 'OrchestratorController_updateFeeConfig_v2', kind: 'request', variant: 'application/json' }, schema: OrchestratorController_updateFeeConfig_v2_Request });
+
+// PATCH /v2/orchestrators/fee-configs/{id} -> OrchestratorController_updateFeeConfig_v2 (200)
+export const OrchestratorController_updateFeeConfig_v2_200 = z.unknown();
+schemaRegistry.register({ key: { operationId: 'OrchestratorController_updateFeeConfig_v2', kind: 'response', status: 200 }, schema: OrchestratorController_updateFeeConfig_v2_200 });
+
+// PATCH /v2/orchestrators/fee-configs/{id} -> OrchestratorController_updateFeeConfig_v2 (429)
+export const OrchestratorController_updateFeeConfig_v2_429 = ErrorEnvelopeSchema;
+schemaRegistry.register({ key: { operationId: 'OrchestratorController_updateFeeConfig_v2', kind: 'response', status: 429 }, schema: OrchestratorController_updateFeeConfig_v2_429 });
+
+// DELETE /v2/orchestrators/fee-configs/{id} -> OrchestratorController_disableFeeConfig_v2 (200)
+export const OrchestratorController_disableFeeConfig_v2_200 = z.unknown();
+schemaRegistry.register({ key: { operationId: 'OrchestratorController_disableFeeConfig_v2', kind: 'response', status: 200 }, schema: OrchestratorController_disableFeeConfig_v2_200 });
+
+// DELETE /v2/orchestrators/fee-configs/{id} -> OrchestratorController_disableFeeConfig_v2 (429)
+export const OrchestratorController_disableFeeConfig_v2_429 = ErrorEnvelopeSchema;
+schemaRegistry.register({ key: { operationId: 'OrchestratorController_disableFeeConfig_v2', kind: 'response', status: 429 }, schema: OrchestratorController_disableFeeConfig_v2_429 });
+
+// GET /v2/orchestrators/branding -> OrchestratorController_getBranding_v2 (200)
+export const OrchestratorController_getBranding_v2_200 = z.unknown();
+schemaRegistry.register({ key: { operationId: 'OrchestratorController_getBranding_v2', kind: 'response', status: 200 }, schema: OrchestratorController_getBranding_v2_200 });
+
+// GET /v2/orchestrators/branding -> OrchestratorController_getBranding_v2 (429)
+export const OrchestratorController_getBranding_v2_429 = ErrorEnvelopeSchema;
+schemaRegistry.register({ key: { operationId: 'OrchestratorController_getBranding_v2', kind: 'response', status: 429 }, schema: OrchestratorController_getBranding_v2_429 });
+
+// POST /v2/orchestrators/branding -> OrchestratorController_createBranding_v2 request (application/json)
+export const OrchestratorController_createBranding_v2_Request = z.string();
+schemaRegistry.register({ key: { operationId: 'OrchestratorController_createBranding_v2', kind: 'request', variant: 'application/json' }, schema: OrchestratorController_createBranding_v2_Request });
+
+// POST /v2/orchestrators/branding -> OrchestratorController_createBranding_v2 (201)
+export const OrchestratorController_createBranding_v2_201 = z.unknown();
+schemaRegistry.register({ key: { operationId: 'OrchestratorController_createBranding_v2', kind: 'response', status: 201 }, schema: OrchestratorController_createBranding_v2_201 });
+
+// POST /v2/orchestrators/branding -> OrchestratorController_createBranding_v2 (429)
+export const OrchestratorController_createBranding_v2_429 = ErrorEnvelopeSchema;
+schemaRegistry.register({ key: { operationId: 'OrchestratorController_createBranding_v2', kind: 'response', status: 429 }, schema: OrchestratorController_createBranding_v2_429 });
+
+// PATCH /v2/orchestrators/branding -> OrchestratorController_updateBranding_v2 request (application/json)
+export const OrchestratorController_updateBranding_v2_Request = z.unknown();
+schemaRegistry.register({ key: { operationId: 'OrchestratorController_updateBranding_v2', kind: 'request', variant: 'application/json' }, schema: OrchestratorController_updateBranding_v2_Request });
+
+// PATCH /v2/orchestrators/branding -> OrchestratorController_updateBranding_v2 (200)
+export const OrchestratorController_updateBranding_v2_200 = z.unknown();
+schemaRegistry.register({ key: { operationId: 'OrchestratorController_updateBranding_v2', kind: 'response', status: 200 }, schema: OrchestratorController_updateBranding_v2_200 });
+
+// PATCH /v2/orchestrators/branding -> OrchestratorController_updateBranding_v2 (429)
+export const OrchestratorController_updateBranding_v2_429 = ErrorEnvelopeSchema;
+schemaRegistry.register({ key: { operationId: 'OrchestratorController_updateBranding_v2', kind: 'response', status: 429 }, schema: OrchestratorController_updateBranding_v2_429 });
+
+// DELETE /v2/orchestrators/branding -> OrchestratorController_removeBranding_v2 (200)
+export const OrchestratorController_removeBranding_v2_200 = z.unknown();
+schemaRegistry.register({ key: { operationId: 'OrchestratorController_removeBranding_v2', kind: 'response', status: 200 }, schema: OrchestratorController_removeBranding_v2_200 });
+
+// DELETE /v2/orchestrators/branding -> OrchestratorController_removeBranding_v2 (429)
+export const OrchestratorController_removeBranding_v2_429 = ErrorEnvelopeSchema;
+schemaRegistry.register({ key: { operationId: 'OrchestratorController_removeBranding_v2', kind: 'response', status: 429 }, schema: OrchestratorController_removeBranding_v2_429 });
+
+// GET /v2/orchestrators/webhooks -> OrchestratorController_listWebhooks_v2 (200)
+export const OrchestratorController_listWebhooks_v2_200 = z.unknown();
+schemaRegistry.register({ key: { operationId: 'OrchestratorController_listWebhooks_v2', kind: 'response', status: 200 }, schema: OrchestratorController_listWebhooks_v2_200 });
+
+// GET /v2/orchestrators/webhooks -> OrchestratorController_listWebhooks_v2 (429)
+export const OrchestratorController_listWebhooks_v2_429 = ErrorEnvelopeSchema;
+schemaRegistry.register({ key: { operationId: 'OrchestratorController_listWebhooks_v2', kind: 'response', status: 429 }, schema: OrchestratorController_listWebhooks_v2_429 });
+
+// POST /v2/orchestrators/webhooks -> OrchestratorController_createWebhook_v2 request (application/json)
+export const OrchestratorController_createWebhook_v2_Request = z.unknown();
+schemaRegistry.register({ key: { operationId: 'OrchestratorController_createWebhook_v2', kind: 'request', variant: 'application/json' }, schema: OrchestratorController_createWebhook_v2_Request });
+
+// POST /v2/orchestrators/webhooks -> OrchestratorController_createWebhook_v2 (201)
+export const OrchestratorController_createWebhook_v2_201 = z.unknown();
+schemaRegistry.register({ key: { operationId: 'OrchestratorController_createWebhook_v2', kind: 'response', status: 201 }, schema: OrchestratorController_createWebhook_v2_201 });
+
+// POST /v2/orchestrators/webhooks -> OrchestratorController_createWebhook_v2 (429)
+export const OrchestratorController_createWebhook_v2_429 = ErrorEnvelopeSchema;
+schemaRegistry.register({ key: { operationId: 'OrchestratorController_createWebhook_v2', kind: 'response', status: 429 }, schema: OrchestratorController_createWebhook_v2_429 });
+
+// PATCH /v2/orchestrators/webhooks/{id} -> OrchestratorController_activateWebhook_v2 (200)
+export const OrchestratorController_activateWebhook_v2_200 = z.unknown();
+schemaRegistry.register({ key: { operationId: 'OrchestratorController_activateWebhook_v2', kind: 'response', status: 200 }, schema: OrchestratorController_activateWebhook_v2_200 });
+
+// PATCH /v2/orchestrators/webhooks/{id} -> OrchestratorController_activateWebhook_v2 (429)
+export const OrchestratorController_activateWebhook_v2_429 = ErrorEnvelopeSchema;
+schemaRegistry.register({ key: { operationId: 'OrchestratorController_activateWebhook_v2', kind: 'response', status: 429 }, schema: OrchestratorController_activateWebhook_v2_429 });
+
+// DELETE /v2/orchestrators/webhooks/{id} -> OrchestratorController_deactivateWebhook_v2 (200)
+export const OrchestratorController_deactivateWebhook_v2_200 = z.unknown();
+schemaRegistry.register({ key: { operationId: 'OrchestratorController_deactivateWebhook_v2', kind: 'response', status: 200 }, schema: OrchestratorController_deactivateWebhook_v2_200 });
+
+// DELETE /v2/orchestrators/webhooks/{id} -> OrchestratorController_deactivateWebhook_v2 (429)
+export const OrchestratorController_deactivateWebhook_v2_429 = ErrorEnvelopeSchema;
+schemaRegistry.register({ key: { operationId: 'OrchestratorController_deactivateWebhook_v2', kind: 'response', status: 429 }, schema: OrchestratorController_deactivateWebhook_v2_429 });
+
+// POST /v2/orchestrators/webhooks/test -> OrchestratorController_testWebhook_v2 request (application/json)
+export const OrchestratorController_testWebhook_v2_Request = z.unknown();
+schemaRegistry.register({ key: { operationId: 'OrchestratorController_testWebhook_v2', kind: 'request', variant: 'application/json' }, schema: OrchestratorController_testWebhook_v2_Request });
+
+// POST /v2/orchestrators/webhooks/test -> OrchestratorController_testWebhook_v2 (200)
+export const OrchestratorController_testWebhook_v2_200 = z.unknown();
+schemaRegistry.register({ key: { operationId: 'OrchestratorController_testWebhook_v2', kind: 'response', status: 200 }, schema: OrchestratorController_testWebhook_v2_200 });
+
+// POST /v2/orchestrators/webhooks/test -> OrchestratorController_testWebhook_v2 (429)
+export const OrchestratorController_testWebhook_v2_429 = ErrorEnvelopeSchema;
+schemaRegistry.register({ key: { operationId: 'OrchestratorController_testWebhook_v2', kind: 'response', status: 429 }, schema: OrchestratorController_testWebhook_v2_429 });

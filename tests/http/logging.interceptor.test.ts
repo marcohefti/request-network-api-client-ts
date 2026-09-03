@@ -72,4 +72,20 @@ describe("Logging interceptor", () => {
     );
     expect(logger).not.toHaveBeenCalledWith(EVENT_RESPONSE, expect.anything());
   });
+
+  it("redacts secure-payment bearer tokens in lifecycle logs", async () => {
+    const logger = vi.fn();
+    const client = createHttpClient({
+      baseUrl: BASE_URL,
+      adapter: { send: () => Promise.resolve({ status: 200, ok: true, headers: {}, data: {} }) },
+      logger,
+      logLevel: "info",
+      retry: { config: { maxAttempts: 1 } },
+    });
+
+    await client.get("/v2/secure-payments/bearer-token/pay");
+    const calls = JSON.stringify(logger.mock.calls);
+    expect(calls).toContain("<redacted>");
+    expect(calls).not.toContain("bearer-token");
+  });
 });

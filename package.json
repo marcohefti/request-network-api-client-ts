@@ -1,6 +1,6 @@
 {
   "name": "@marcohefti/request-network-api-client",
-  "version": "0.6.2",
+  "version": "0.7.0",
   "private": false,
   "description": "Request Network API client for Node and Browser.",
   "publishConfig": {
@@ -27,7 +27,7 @@
     "web3"
   ],
   "scripts": {
-    "build": "tsup",
+    "build": "node scripts/clean-dist.mjs && tsup",
     "build:watch": "tsup --watch",
     "dev": "pnpm run build:watch",
     "dev:webhook": "tsx examples/webhooks/local-listener.ts",
@@ -47,7 +47,8 @@
     "patch:openapi": "node scripts/patch-openapi.mjs",
     "generate:types": "node scripts/generate-types.mjs",
     "generate:zod": "node scripts/generate-zod.mjs",
-    "prepare:spec": "pnpm run fetch:openapi && pnpm run patch:openapi && pnpm run generate:types && pnpm run generate:zod"
+    "generate:operations": "node scripts/generate-operations.mjs",
+    "prepare:spec": "pnpm run generate:types && pnpm run generate:zod && pnpm run generate:operations"
   },
   "main": "./dist/cjs/index.js",
   "module": "./dist/esm/index.js",
@@ -109,6 +110,16 @@
       "import": "./dist/esm/domains/secure-payments/index.js",
       "require": "./dist/cjs/domains/secure-payments/index.js"
     },
+    "./orchestrators": {
+      "types": "./dist/esm/domains/orchestrators/index.d.mts",
+      "import": "./dist/esm/domains/orchestrators/index.js",
+      "require": "./dist/cjs/domains/orchestrators/index.js"
+    },
+    "./operations": {
+      "types": "./dist/esm/domains/operations/index.d.mts",
+      "import": "./dist/esm/domains/operations/index.js",
+      "require": "./dist/cjs/domains/operations/index.js"
+    },
     "./v1/payer": {
       "types": "./dist/esm/domains/payer/v1/index.d.mts",
       "import": "./dist/esm/domains/payer/v1/index.js",
@@ -146,7 +157,7 @@
     "./src/validation/overrides/**"
   ],
   "devDependencies": {
-    "@marcohefti/request-network-api-contracts": "^0.6.2",
+    "@marcohefti/request-network-api-contracts": "0.7.0",
     "@eslint/js": "^9.38.0",
     "@types/express": "^4.17.25",
     "@types/express-serve-static-core": "^4.19.7",

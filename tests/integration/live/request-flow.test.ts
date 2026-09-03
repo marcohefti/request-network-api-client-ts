@@ -72,7 +72,6 @@ if (!env) {
       let client: RequestClient;
       let scenario: LiveScenario;
       let createdRequestId: string | undefined;
-      let paymentIntentId: string | undefined;
       let paymentReference: string | undefined;
       const reference = `live-${Date.now().toString(36)}`;
 
@@ -95,7 +94,6 @@ if (!env) {
         if (createdRequestId) {
           emitSuiteNotice("info", "request created", {
             requestId: createdRequestId,
-            paymentIntentId,
             paymentReference,
             reference,
             amount: AMOUNT,
@@ -150,20 +148,11 @@ if (!env) {
             amount: AMOUNT,
           });
 
-          if (calldata.kind === "paymentIntent") {
-            expect(typeof calldata.paymentIntentId).toBe("string");
-            paymentIntentId = calldata.paymentIntentId;
-            emitSuiteNotice("info", "payment intent prepared", {
-              requestId: createdRequestId,
-              paymentIntentId,
-            });
-          } else {
-            expect(calldata.kind).toBe("calldata");
-            expect(Array.isArray(calldata.transactions)).toBe(true);
-            emitSuiteNotice("warn", "payment calldata returned raw transactions", {
-              requestId: createdRequestId,
-            });
-          }
+          expect(calldata.kind).toBe("calldata");
+          expect(Array.isArray(calldata.transactions)).toBe(true);
+          emitSuiteNotice("warn", "payment calldata returned raw transactions", {
+            requestId: createdRequestId,
+          });
 
           const paymentSearch = await client.payments.search({ requestId: createdRequestId });
           expect(Array.isArray(paymentSearch.payments)).toBe(true);

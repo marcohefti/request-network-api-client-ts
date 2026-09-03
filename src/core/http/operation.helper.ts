@@ -10,6 +10,7 @@ export interface RequestJsonParams {
   method: HttpMethod;
   path: string;
   query?: Query;
+  headers?: Record<string, string>;
   body?: unknown;
   schemaKey: SchemaKey;
   requestSchemaKey?: SchemaKey;
@@ -27,6 +28,7 @@ export async function requestJson<T>(http: HttpClient, params: RequestJsonParams
     method,
     path,
     query,
+    headers,
     body,
     schemaKey,
     requestSchemaKey,
@@ -65,6 +67,7 @@ export async function requestJson<T>(http: HttpClient, params: RequestJsonParams
     method,
     path,
     query,
+    headers,
     body: requestBody,
     querySerializer,
     signal,
@@ -86,6 +89,7 @@ export interface RequestVoidParams {
   method: HttpMethod;
   path: string;
   query?: Query;
+  headers?: Record<string, string>;
   body?: unknown;
   querySerializer?: RequestOptions["querySerializer"];
   signal?: RequestOptions["signal"];
@@ -96,7 +100,7 @@ export interface RequestVoidParams {
 }
 
 export async function requestVoid(http: HttpClient, params: RequestVoidParams): Promise<void> {
-  const { operationId, method, path, query, body, querySerializer, signal, timeoutMs, requestSchemaKey, validation, meta } = params;
+  const { operationId, method, path, query, headers, body, querySerializer, signal, timeoutMs, requestSchemaKey, validation, meta } = params;
 
   const runtimeValidation = mergeRuntimeValidation(http.getRuntimeValidationConfig(), validation);
 
@@ -125,6 +129,7 @@ export async function requestVoid(http: HttpClient, params: RequestVoidParams): 
     method,
     path,
     query,
+    headers,
     body: requestBody,
     querySerializer,
     signal,

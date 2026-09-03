@@ -4,6 +4,22 @@
  */
 
 export type paths = {
+    "/v2/health": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["HealthController_check_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/currencies": {
         parameters: {
             query?: never;
@@ -236,26 +252,6 @@ export type paths = {
         patch?: never;
         trace?: never;
     };
-    "/v1/request/{paymentIntentId}/send": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Send a payment intent
-         * @description Send a payment intent
-         */
-        post: operations["RequestControllerV1_sendPaymentIntent_v1"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/v2/request": {
         parameters: {
             query?: never;
@@ -265,7 +261,7 @@ export type paths = {
         };
         /**
          * List requests
-         * @description List payment requests filtered by payee wallet address, with pagination
+         * @description List payment requests with pagination. API key and session authentication require a payee wallet address filter; client ID authentication can omit it to list requests created by that client ID
          */
         get: operations["RequestControllerV2_listRequests_v2"];
         put?: never;
@@ -313,7 +309,7 @@ export type paths = {
         };
         /**
          * Get payment calldata
-         * @description Get the calldata needed to pay a request. For same-chain payments, returns transaction calldata that can be directly executed. For crosschain payments (when chain and token parameters are provided and differ from the request's native chain), returns a payment intent that needs to be signed and processed through the crosschain bridge. For off-ramp payments, use the query parameters clientUserId and paymentDetailsId. Note: Crosschain requests with an expectedAmount less than 1 are rejected.
+         * @description Get the calldata needed to pay a request. For same-chain payments, returns transaction calldata that can be directly executed. For crosschain payments (when chain and token parameters are provided and differ from the request's native chain), returns executable transaction calldata for the route, including any required approval transaction before the LiFi transaction. For off-ramp payments, use the query parameters clientUserId and paymentDetailsId. Note: Crosschain requests with an expectedAmount less than 1 are rejected.
          */
         get: operations["RequestControllerV2_getPaymentCalldata_v2"];
         put?: never;
@@ -338,26 +334,6 @@ export type paths = {
         get: operations["RequestControllerV2_getRequestPaymentRoutes_v2"];
         put?: never;
         post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v2/request/payment-intents/{paymentIntentId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Send a payment intent
-         * @description Send a payment intent
-         */
-        post: operations["RequestControllerV2_sendPaymentIntent_v2"];
         delete?: never;
         options?: never;
         head?: never;
@@ -500,6 +476,270 @@ export type paths = {
         patch?: never;
         trace?: never;
     };
+    "/v2/secure-payments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Find secure payment by request ID
+         * @description Looks up the secure payment associated with a given request ID. Returns the payment link URL, status, and metadata. Requires a SIWE session.
+         */
+        get: operations["SecurePaymentController_findSecurePayment_v2"];
+        put?: never;
+        /**
+         * Create a secure payment entry
+         * @description Creates a secure payment entry with a token. Accepts an array of payment requests using destination IDs (composite ERC-7828 payee address + token address). The server resolves chain, wallet, and currency from each destination ID. Single item creates a single incoming payment. Multiple items preserve the legacy incoming-payment batch shape and are unrelated to multicall payout parents; create multicall payout parents only through /v2/secure-payments/multicall-payouts. All requests must resolve to the same network. Returns a secure payment URL.
+         */
+        post: operations["SecurePaymentController_createSecurePayment_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v2/secure-payments/payouts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Create a secure payment for an outgoing payout
+         * @description Creates a single-payment secure-payment link for an outgoing payout. The caller provides the raw recipient details (wallet, network, currency, amount); the API resolves or creates the wallet/network/currency destination tuple and links the payout to that tuple. Returns the same response shape as POST /v2/secure-payments/ so the resulting link loads on the secure payment page without a separate code path.
+         */
+        post: operations["SecurePaymentController_createPayoutSecurePayment_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v2/secure-payments/fees/preview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Preview the fee plan for a payment
+         * @description Calculation-only preview of the fee plan that would apply to a payment with the given amount, currency, and flow. Uses the same fee resolver as creation. Has no side effects: does not create a secure payment, payment request, or persist any snapshot.
+         */
+        post: operations["SecurePaymentController_previewFees_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v2/secure-payments/batch-payouts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Create a batch secure payment for multiple outgoing payouts
+         * @description Creates a single batch payout link from multiple existing pending single payout tokens. The individual tokens are invalidated and a new batch payment URL is returned. All payouts must target the same network.
+         */
+        post: operations["SecurePaymentController_createBatchPayoutSecurePayment_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v2/secure-payments/{token}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get secure payment data by token
+         * @description Retrieves secure payment display data and resolved destination info. The token must be valid, not expired, and the payment must be in 'pending' status.
+         */
+        get: operations["SecurePaymentController_getSecurePaymentByToken_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v2/secure-payments/{token}/pay": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get secure payment calldata by token
+         * @description Retrieves executable payment calldata for a secure payment token. When chain and token are provided, the backend prepares a crosschain payment for the selected source asset; otherwise it returns the existing same-chain or batch payment calldata.
+         */
+        get: operations["SecurePaymentController_getSecurePaymentCalldataByToken_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v2/secure-payments/{token}/tron/broadcast": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Broadcast signed TRON secure payment transaction
+         * @description Relays a locally signed TRON transaction for this secure payment through the configured CatFee Seamless Energy node. The backend rebuilds the expected secure-payment TRON transaction and only forwards the signed transaction if the payload matches.
+         */
+        post: operations["SecurePaymentController_broadcastTronTransaction_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v2/secure-payments/{token}/refresh-step-transaction": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Refresh bridge step transactionRequest
+         * @description Re-stamps the bridge deadline to 'now' by calling LI.FI /advanced/stepTransaction for a previously selected route step. Call this in parallel for all steps immediately before bundling and submitting the UserOp to avoid deadline expiry.
+         */
+        post: operations["SecurePaymentController_refreshStepTransaction_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v2/secure-payments/{token}/intent": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Record secure payment intent
+         * @description Records source-side execution metadata after the payer broadcasts a transaction. Single crosschain payments create or reuse a LiFi tracking intent. Multicall parent tokens create or reuse an audit-only execution receipt keyed by parent token and UserOperation hash; receipt rows are not consulted for settlement state.
+         */
+        post: operations["SecurePaymentController_recordIntent_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v2/secure-payments/{token}/multicall-intent": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Record multicall payment intents before submission
+         * @description Records per-child payment intents for a multicall parent token BEFORE the UserOperation is submitted, so payment classification can never lose the race against destination-chain detection. Exists separately from /:token/intent because the multicall execution receipt is keyed by UserOperation hash, which does not exist yet at this point; this endpoint writes tracking intents only and never a receipt row. Idempotent per child: the follow-up receipt POST updates these rows in place. Call again with the receipt after submission.
+         */
+        post: operations["SecurePaymentController_recordMulticallIntent_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v2/secure-payments/{token}/events": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Record secure payment page user event
+         * @description Records a payer-funnel event reported by the Secure Payment Page UI (wallet connected, payment sent to wallet, payment approved in wallet) and forwards it to the platform's registered webhooks as `secure_payment.user_event`. Accepted for completed or expired tokens; delivery is best-effort and never blocks the response.
+         */
+        post: operations["SecurePaymentController_recordUserEvent_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v2/secure-payments/multicall-payouts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Create a multicall payout link
+         * @description Creates a multicall Secure Payment Page link from selected outgoing payout secure-payment tokens. This is distinct from legacy secure-payment batch links and persists only the parent token plus ordered child references.
+         */
+        post: operations["SecurePaymentMulticallController_createMulticallPayout_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v2/secure-payments/multicall-payouts/{token}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get multicall payout state
+         * @description Retrieves the passive multicall payout details payload for Secure Payment Page rendering. It does not return quotes, calldata, wallet routes, or execution data.
+         */
+        get: operations["SecurePaymentMulticallController_getMulticallPayout_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/pay": {
         parameters: {
             query?: never;
@@ -608,7 +848,7 @@ export type paths = {
         patch: operations["PayoutV2Controller_updateRecurringPayment_v2"];
         trace?: never;
     };
-    "/v2/secure-payments": {
+    "/v2/dashboard/requests/export": {
         parameters: {
             query?: never;
             header?: never;
@@ -616,23 +856,59 @@ export type paths = {
             cookie?: never;
         };
         /**
-         * Find secure payment by request ID
-         * @description Looks up the secure payment associated with a given request ID. Returns the payment link URL, status, and metadata. Requires a SIWE session.
+         * Export dashboard payment history
+         * @description Exports the authenticated dashboard platform's complete Get Paid or Pay history as a CSV snapshot.
          */
-        get: operations["SecurePaymentController_findSecurePayment_v2"];
+        get: operations["RequestExportController_exportRequests_v2"];
         put?: never;
-        /**
-         * Create a secure payment entry
-         * @description Creates a secure payment entry with a token. Accepts an array of payment requests using destination IDs (composite ERC-7828 payee address + token address). The server resolves chain, wallet, and currency from each destination ID. Single item creates a single payment, multiple items create a batch payment. All requests must resolve to the same network. Returns a secure payment URL.
-         */
-        post: operations["SecurePaymentController_createSecurePayment_v2"];
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/v2/secure-payments/{token}": {
+    "/v2/journey": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Create a new payment journey (tracking reference)
+         * @description Creates a new journeyRef (tracking ID) to trace the full lifecycle of a payment across multiple processors. This ID should be copied into the reference/memo field of all subsequent payment hops. Optionally, link the journey to an existing payment request.
+         */
+        post: operations["JourneyController_createJourney_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v2/journey/{queryId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Report a payment event (step) for a journey
+         * @description Processors call this endpoint to report a new event (step) in a payment's journey. Each event represents a single hop (e.g., exchange, bridge, bank) and should include as much detail as possible. Events are automatically ordered by their processing time to build a full timeline. If a processor does not report, the timeline will simply show the steps that did report.
+         */
+        post: operations["JourneyController_createJourneyEvent_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v2/journey/{journeyId}": {
         parameters: {
             query?: never;
             header?: never;
@@ -640,12 +916,408 @@ export type paths = {
             cookie?: never;
         };
         /**
-         * Get secure payment data by token
-         * @description Retrieves secure payment data including calldata for payment execution and resolved destination info. The token must be valid, not expired, and the payment must be in 'pending' status.
+         * Get the full timeline for a payment journey
+         * @description Returns the journey and all reported events (steps) for a given journeyRef (tracking ID), sorted by processing time. This provides a transparent, end-to-end timeline of the payment's path across all reporting processors.
          */
-        get: operations["SecurePaymentController_getSecurePaymentByToken_v2"];
+        get: operations["JourneyController_getJourney_v2"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v2/transaction-history": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get wallet transaction history
+         * @description Returns a merged, timestamp-sorted history of incoming token transfers and outgoing Request Network payments for a wallet. Requires a valid `x-client-id` with secure payment page access. EVM addresses are scoped to Base USDC; TRON addresses are scoped to Tron USDT.
+         */
+        get: operations["TransactionHistoryController_getHistory_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v2/commerce-payments/authorize/calldata": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Generate authorization calldata
+         * @description Generate calldata for a payer to authorize a payment through the commerce escrow. Creates a Request Network request and returns escrow authorization calldata. Requires API key authentication.
+         */
+        post: operations["CommercePaymentsController_generateAuthorizeCalldata_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v2/commerce-payments/{requestId}/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get payment status
+         * @description Get the current status and details of a commerce payment. Can be called with either API key or client ID authentication.
+         */
+        get: operations["CommercePaymentsController_getPaymentStatus_v2"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v2/commerce-payments/{requestId}/authorize": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Authorize payment
+         * @description Authorize a payment using the operator's smart account. This executes the authorization transaction after the buyer has pre-approved. Can be called with either API key or client ID authentication.
+         */
+        post: operations["CommercePaymentsController_authorizePayment_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v2/commerce-payments/{requestId}/capture/calldata": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Generate capture calldata
+         * @description Generate calldata for capturing an authorized payment. Returns the transaction calldata that can be used to execute the capture operation. Can be called with either API key or client ID authentication.
+         */
+        post: operations["CommercePaymentsController_generateCaptureCalldata_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v2/commerce-payments/{requestId}/void/calldata": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Generate void calldata
+         * @description Generate calldata for voiding an authorized payment. Returns the transaction calldata that can be used to execute the void operation. Can be called with either API key or client ID authentication.
+         */
+        post: operations["CommercePaymentsController_generateVoidCalldata_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v2/commerce-payments/{requestId}/capture": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Capture authorized payment
+         * @description Capture funds from an authorized payment (operator only operation). Can be called with either API key or client ID authentication.
+         */
+        post: operations["CommercePaymentsController_capturePayment_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v2/commerce-payments/{requestId}/void": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Void authorized payment
+         * @description Void an authorized payment and return funds to payer (operator only operation). Can be called with either API key or client ID authentication.
+         */
+        post: operations["CommercePaymentsController_voidPayment_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v2/orchestrators": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Create an orchestrator for the calling platform
+         * @description Self-serve orchestrator onboarding. Creates an orchestrator owned by the platform behind the session, its first `orc_*` key, and Request Network's default protocol fee configurations in a single transaction.
+         *
+         *     ⚠️ **Save `rawKey` before you close this response.** It is returned exactly once, at creation, and is never recoverable — Request Network stores only a hash of it. Every other orchestrator endpoint authenticates with the `x-orchestrator-key` header, so losing `rawKey` means losing all access to this orchestrator: you cannot manage its fee configurations, branding, webhooks, or clientId links, and there is no reset or resend. The only recovery is to create a **new** orchestrator and reconfigure it from scratch.
+         *
+         *     A platform may own more than one orchestrator; names are not required to be unique.
+         */
+        post: operations["OrchestratorController_createOrchestrator_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v2/orchestrators/client-ids": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List clientIds linked to the calling orchestrator
+         * @description Lists all clientIds currently linked to the orchestrator identified by the `x-orchestrator-key` header. Supports pagination via `page` and `limit` query parameters.
+         */
+        get: operations["OrchestratorController_listLinkedClientIds_v2"];
+        put?: never;
+        /**
+         * Link a clientId to the calling orchestrator
+         * @description Links the supplied clientId to the orchestrator identified by the `x-orchestrator-key` header.
+         */
+        post: operations["OrchestratorController_linkClientId_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v2/orchestrators/client-id-link-intents": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Create a clientId link intent
+         * @description Creates a clientId link intent for the orchestrator identified by the `x-orchestrator-key` header. Returns an onboarding `url` carrying a single-use access token; the orchestrator hands this URL to the recipient, who redeems it to create and link a clientId under `clientIdName`.
+         */
+        post: operations["OrchestratorController_createLinkIntent_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v2/orchestrators/client-ids/{clientId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Unlink a clientId from the calling orchestrator
+         * @description Revokes the active link between the supplied clientId and the orchestrator identified by the `x-orchestrator-key` header. The clientId must currently be linked to THIS orchestrator.
+         */
+        delete: operations["OrchestratorController_unlinkClientId_v2"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v2/orchestrators/fee-configs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List orchestrator fee configurations
+         * @description Lists the calling orchestrator's fee configurations. Pass `clientId` to list the per-clientId overrides for a linked clientId instead. Only `orchestrator_fee` configurations are returned.
+         */
+        get: operations["OrchestratorController_listFeeConfigs_v2"];
+        put?: never;
+        /**
+         * Create an orchestrator fee configuration
+         * @description Creates an orchestrator fee configuration for the calling orchestrator. The fee type is always `orchestrator_fee` and cannot be set by the caller. Provide `clientId` to create a per-clientId override (the clientId must be linked to the calling orchestrator) instead of the orchestrator-level default.
+         */
+        post: operations["OrchestratorController_createFeeConfig_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v2/orchestrators/fee-configs/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Disable an orchestrator fee configuration
+         * @description Soft-disables an orchestrator fee configuration (sets its status to `disabled`). Pass `clientId` to target a per-clientId override.
+         */
+        delete: operations["OrchestratorController_disableFeeConfig_v2"];
+        options?: never;
+        head?: never;
+        /**
+         * Update an orchestrator fee configuration
+         * @description Updates mutable fields of an orchestrator fee configuration. `flow` and the fee type are immutable and cannot be changed. Provide `clientId` to target a per-clientId override.
+         */
+        patch: operations["OrchestratorController_updateFeeConfig_v2"];
+        trace?: never;
+    };
+    "/v2/orchestrators/branding": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get effective branding for the calling orchestrator
+         * @description Resolves the effective branding for the orchestrator identified by the `x-orchestrator-key` header. Pass `clientId` to resolve the per-clientId override first, falling back to the orchestrator-level branding. Returns `null` when no branding is configured.
+         */
+        get: operations["OrchestratorController_getBranding_v2"];
+        put?: never;
+        /**
+         * Create branding for the calling orchestrator
+         * @description Creates branding for the orchestrator identified by the `x-orchestrator-key` header, used on the secure payment and onboarding pages. Provide `clientId` to create a per-clientId override (the clientId must be linked to the calling orchestrator) instead of the orchestrator-level branding. There is one branding row per parent, so creating again for the same parent fails with 409 — use PATCH to update.
+         */
+        post: operations["OrchestratorController_createBranding_v2"];
+        /**
+         * Remove branding for the calling orchestrator
+         * @description Removes branding for the orchestrator identified by the `x-orchestrator-key` header. Pass `clientId` to target a per-clientId override. Idempotent: `removed` is `false` when no branding existed.
+         */
+        delete: operations["OrchestratorController_removeBranding_v2"];
+        options?: never;
+        head?: never;
+        /**
+         * Update branding for the calling orchestrator
+         * @description Updates branding for the orchestrator identified by the `x-orchestrator-key` header. Set-only: a provided field is validated and written; an omitted field is left untouched (there is no way to clear a field back to null). At least one branding field is required. Provide `clientId` to target a per-clientId override.
+         */
+        patch: operations["OrchestratorController_updateBranding_v2"];
+        trace?: never;
+    };
+    "/v2/orchestrators/webhooks": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List the calling orchestrator's webhooks
+         * @description Lists all webhooks registered by the orchestrator identified by the `x-orchestrator-key` header, including inactive ones. The signing secret is never returned here.
+         */
+        get: operations["OrchestratorController_listWebhooks_v2"];
+        put?: never;
+        /**
+         * Register a webhook for the calling orchestrator
+         * @description Registers a webhook URL that receives orchestrator events (e.g. `client_id.linked`). The response includes an HMAC signing secret that is returned **only here** — store it now, it cannot be retrieved later. Registering a duplicate URL for the same orchestrator is rejected.
+         */
+        post: operations["OrchestratorController_createWebhook_v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v2/orchestrators/webhooks/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Deactivate a webhook
+         * @description Soft-deactivates a webhook (sets `isActive` to false) so it stops receiving events. There is no URL update or hard delete — to change a URL, deactivate and register a new webhook.
+         */
+        delete: operations["OrchestratorController_deactivateWebhook_v2"];
+        options?: never;
+        head?: never;
+        /**
+         * Reactivate a webhook
+         * @description Reactivates a previously deactivated webhook so it resumes receiving events. The existing URL and signing secret are preserved; the secret is not returned.
+         */
+        patch: operations["OrchestratorController_activateWebhook_v2"];
+        trace?: never;
+    };
+    "/v2/orchestrators/webhooks/test": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Send a test event to the calling orchestrator's webhooks
+         * @description Delivers a mock `eventType` payload to the orchestrator's active webhooks, flagged with the `x-request-network-test` header so receivers can distinguish it from real traffic. Returns how many deliveries succeeded and failed.
+         */
+        post: operations["OrchestratorController_testWebhook_v2"];
         delete?: never;
         options?: never;
         head?: never;
@@ -664,6 +1336,23 @@ export type components = {
 };
 export type $defs = Record<string, never>;
 export interface operations {
+    HealthController_check_v2: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     CurrenciesV1Controller_getNetworkTokens_v1: {
         parameters: {
             query?: {
@@ -1318,10 +2007,17 @@ export interface operations {
                          * @example 01e273ecc29d4b526df3a0f1f05ffc59372af8752c2b678096e49ac270416a7cdb
                          */
                         requestId?: string;
+                        /** @description Original requested amount in invoice currency */
+                        requestAmount?: string | null;
                         /** @description Whether the request is listening for a payment */
                         isListening?: boolean;
-                        /** @description The transaction hash of the payment */
-                        txHash?: string | null;
+                        /** @description Payments made to this request. Use each payment's sourceTxHash and destinationTxHash as the source of truth for transaction hashes. */
+                        payments?: {
+                            sourceTxHash?: string | null;
+                            destinationTxHash?: string | null;
+                            detectionSource?: string | null;
+                            note?: string | null;
+                        }[];
                     };
                 };
             };
@@ -1452,25 +2148,41 @@ export interface operations {
                             hasEnoughGas: boolean;
                         };
                     } | {
-                        /** @description Unique identifier for the payment intent */
-                        paymentIntentId: string;
-                        /** @description EIP-712 typed data for payment intent signature */
-                        paymentIntent: string;
-                        /** @description EIP-712 typed data for token approval permit (for EIP-2612 compliant tokens) */
-                        approvalPermitPayload?: string | null;
-                        /** @description Transaction calldata for token approval (for non-EIP-2612 tokens) */
-                        approvalCalldata?: {
-                            /** @description Token contract address */
-                            to?: string;
-                            /** @description Approval transaction calldata */
-                            data?: string;
-                            /** @description Transaction value (usually '0x0') */
-                            value?: string;
-                        } | null;
+                        /** @description Array of transactions to execute for the selected route */
+                        transactions: {
+                            /** @description Transaction calldata */
+                            data: string;
+                            /** @description Target contract address */
+                            to: string;
+                            /** @description Transaction value */
+                            value: string | {
+                                /** @enum {string} */
+                                type?: "BigNumber";
+                                hex?: string;
+                            };
+                            /** @enum {string|null} */
+                            chainType?: "evm" | "tron" | null;
+                        }[];
                         /** @description Metadata about the crosschain payment */
                         metadata: {
-                            /** @description Whether the token supports EIP-2612 permits */
-                            supportsEIP2612: boolean;
+                            /** @description Number of transactions required */
+                            stepsRequired: number;
+                            /** @description Whether token approval is needed */
+                            needsApproval: boolean;
+                            /** @description Index of the approval transaction if needed */
+                            approvalTransactionIndex?: number | null;
+                            /** @description Index of the executable crosschain transaction */
+                            paymentTransactionIndex: number;
+                            /** @description Whether payer has sufficient token balance */
+                            hasEnoughBalance: boolean;
+                            /** @enum {string} */
+                            routeType: "crosschain" | "samechain";
+                            /** @description Route quote expiry. Legacy single-payment routes may return a Unix timestamp; multicall cross-chain routes return an ISO date-time string. */
+                            quoteExpiresAt?: number | string;
+                            /** @description Unix seconds — hard on-chain execution window for Safe + LiFi routes (advisory only). */
+                            executionDeadline?: number;
+                            /** @description Per-leg deadline breakdown used to compute executionDeadline. */
+                            executionDeadlineBreakdown?: Record<string, never>;
                         };
                     };
                 };
@@ -1613,72 +2325,13 @@ export interface operations {
             };
         };
     };
-    RequestControllerV1_sendPaymentIntent_v1: {
-        parameters: {
-            query?: never;
-            header: {
-                /** @description API key for authentication */
-                "x-api-key": string;
-            };
-            path: {
-                /** @description The payment intent ID */
-                paymentIntentId: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": {
-                    /** @description The signed payment intent data. */
-                    signedPaymentIntent: {
-                        /** @description The signature of the permit2 approval for token transfer */
-                        signature: string;
-                        /** @description The unique nonce for this permit2 transaction */
-                        nonce: string;
-                        /** @description The Unix timestamp when this permit2 approval expires */
-                        deadline: string;
-                    };
-                    /** @description The EIP2612 gasless token approval data that allows Permit2 to access user tokens */
-                    signedApprovalPermit?: {
-                        /** @description The signature for the EIP2612 gasless token approval */
-                        signature: string;
-                        /** @description The unique nonce for the EIP2612 permit */
-                        nonce: string;
-                        /** @description The Unix timestamp when this EIP2612 permit expires */
-                        deadline: string;
-                    };
-                };
-            };
-        };
-        responses: {
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Payment intent data not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Too Many Requests */
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
     RequestControllerV2_listRequests_v2: {
         parameters: {
-            query: {
-                /** @description Payee wallet address to filter requests by */
-                walletAddress: string;
+            query?: {
+                /** @description Optional payee wallet address filter. When omitted, results are returned for the authenticated identity scope. */
+                walletAddress?: string;
+                /** @description When set, limit results to requests linked to a secure payment of the given flow. 'incoming' = payins (someone pays this wallet), 'outgoing' = payouts (this wallet is being paid to). Requests not linked to any secure payment are excluded when this filter is set. */
+                securePaymentFlow?: "incoming" | "outgoing";
                 /** @description Number of results per page (max 100) */
                 limit?: string;
                 /** @description Pagination offset */
@@ -1720,6 +2373,8 @@ export interface operations {
                             hasBeenPaid?: boolean;
                             /** @description Current status of the request */
                             status?: string | null;
+                            /** @description Current status of the linked secure payment, when the request belongs to a secure payment */
+                            securePaymentStatus?: string | null;
                             /** @description Merchant reference */
                             reference?: string | null;
                             /**
@@ -1733,6 +2388,8 @@ export interface operations {
                             payee?: string | null;
                             /** @description Payer wallet address */
                             payer?: string | null;
+                            /** @description identifier (ULID) of the API clientId used to create the request */
+                            clientId?: string | null;
                         }[];
                         /** @description Pagination metadata */
                         pagination: {
@@ -1915,8 +2572,6 @@ export interface operations {
                         payee?: string | null;
                         /** @description Whether the system is actively listening for payments on this request */
                         isListening?: boolean;
-                        /** @description Transaction hash of the payment, null if not yet paid */
-                        txHash?: string | null;
                         /** @description Recurrence configuration for recurring requests */
                         recurrence?: Record<string, never>;
                         /** @description Original request ID for recurring requests */
@@ -1927,34 +2582,77 @@ export interface operations {
                         isCryptoToFiatAvailable?: boolean;
                         /** @description Payment reference of the original request for recurring payments */
                         originalRequestPaymentReference?: string;
-                        /** @description Array of payments made to this request */
-                        payments?: Record<string, never>[];
+                        /** @description Array of payments made to this request. Use each payment's sourceTxHash and destinationTxHash as the source of truth for transaction hashes. */
+                        payments?: {
+                            /** @description Unique identifier of the payment */
+                            id?: string;
+                            /** @description Payment amount as a human-readable decimal string */
+                            amount?: string;
+                            /** @description Network where the payment originated */
+                            sourceNetwork?: string;
+                            /** @description Network where the payment was received */
+                            destinationNetwork?: string;
+                            /** @description Transaction hash on the source network */
+                            sourceTxHash?: string | null;
+                            /** @description Transaction hash on the destination network */
+                            destinationTxHash?: string | null;
+                            /** @description Resolved payer wallet address. For plain direct same-chain payments this is the on-chain transaction sender; for recurring and intent-based flows (Secure Payment Page, LiFi, Safe, ERC-4337, multicall) it is the resolved payer wallet. Null when the payer cannot be determined (e.g. a contract-mediated payment with no recorded payer, or a payment recorded before this field was captured). */
+                            payerAddress?: string | null;
+                            /** @description Connected EOA wallet behind the payer smart account when reported by the Secure Payment Page. Null when not applicable or not captured. */
+                            payerEoaAddress?: string | null;
+                            /**
+                             * Format: date-time
+                             * @description When the payment was recorded
+                             */
+                            timestamp?: string;
+                            /** @description Payment type */
+                            type?: string;
+                            /** @description Conversion rate used on the source side */
+                            conversionRateSource?: string | null;
+                            /** @description Conversion rate used on the destination side */
+                            conversionRateDestination?: string | null;
+                            /** @description USD value of the source-side payment amount */
+                            convertedAmountSource?: string | null;
+                            /** @description USD value of the destination-side received amount */
+                            convertedAmountDestination?: string | null;
+                            /** @description Amount paid by the payer in source currency */
+                            paidAmount?: string | null;
+                            /** @description Currency paid by the payer */
+                            paidCurrency?: string | null;
+                            /** @description Network where the payer paid */
+                            paidNetwork?: string | null;
+                            /** @description Raw amount received by the payment route */
+                            receivedAmount?: string | null;
+                            /** @description Currency received by the payment route */
+                            receivedCurrency?: string | null;
+                            /** @description Network where route delivered funds */
+                            receivedNetwork?: string | null;
+                            /** @description Route-delivered amount above the amount applied to the request */
+                            excessAmount?: string | null;
+                            /** @description Currency of the excess amount */
+                            excessCurrency?: string | null;
+                            /** @description Invoice currency symbol */
+                            currency?: string;
+                            /** @description Payment currency symbol */
+                            paymentCurrency?: string;
+                            /**
+                             * @description How this payment was confirmed
+                             * @enum {string|null}
+                             */
+                            detectionSource?: "lifi" | "request-network" | null;
+                            /** @description Additional context for fallback or non-standard settlement cases */
+                            note?: string | null;
+                        }[];
                         /** @description Whether recurrence has been stopped for this request */
                         isRecurrenceStopped?: boolean;
-                        /** @description Customer information for merchant receipt tracking */
-                        customerInfo?: {
-                            /** @description Customer's first name */
-                            firstName?: string;
-                            /** @description Customer's last name */
-                            lastName?: string;
-                            /** @description Customer's email address */
-                            email?: string;
-                            /** @description Customer's address */
-                            address?: {
-                                /** @description Street address */
-                                street?: string;
-                                /** @description City */
-                                city?: string;
-                                /** @description State or province */
-                                state?: string;
-                                /** @description Postal or ZIP code */
-                                postalCode?: string;
-                                /** @description Country code (ISO 3166-1 alpha-2) */
-                                country?: string;
-                            };
-                        } | null;
                         /** @description Merchant reference for receipt tracking and identification */
                         reference?: string | null;
+                        /** @description Original requested amount in invoice currency */
+                        requestAmount?: string | null;
+                        /** @description Invoice currency symbol for the requested amount */
+                        invoiceCurrency?: string | null;
+                        /** @description Configured payment currency symbol for the request */
+                        paymentCurrency?: string | null;
                         /** @description Request amount in USD (actual if paid, current market rate if unpaid) */
                         amountInUsd?: string | null;
                         /** @description Conversion rate. Available for: unpaid requests and fully paid requests with single payment. Null for: partially paid requests and fully paid requests with multiple payments. */
@@ -1996,6 +2694,8 @@ export interface operations {
                             /** @description Fee currency */
                             currency?: string;
                         }[] | null;
+                        /** @description Transaction hash of the payment, null if not yet paid */
+                        txHash?: string | null;
                     };
                 };
             };
@@ -2135,25 +2835,41 @@ export interface operations {
                             hasEnoughGas: boolean;
                         };
                     } | {
-                        /** @description Unique identifier for the payment intent */
-                        paymentIntentId: string;
-                        /** @description EIP-712 typed data for payment intent signature */
-                        paymentIntent: string;
-                        /** @description EIP-712 typed data for token approval permit (for EIP-2612 compliant tokens) */
-                        approvalPermitPayload?: string | null;
-                        /** @description Transaction calldata for token approval (for non-EIP-2612 tokens) */
-                        approvalCalldata?: {
-                            /** @description Token contract address */
-                            to?: string;
-                            /** @description Approval transaction calldata */
-                            data?: string;
-                            /** @description Transaction value (usually '0x0') */
-                            value?: string;
-                        } | null;
+                        /** @description Array of transactions to execute for the selected route */
+                        transactions: {
+                            /** @description Transaction calldata */
+                            data: string;
+                            /** @description Target contract address */
+                            to: string;
+                            /** @description Transaction value */
+                            value: string | {
+                                /** @enum {string} */
+                                type?: "BigNumber";
+                                hex?: string;
+                            };
+                            /** @enum {string|null} */
+                            chainType?: "evm" | "tron" | null;
+                        }[];
                         /** @description Metadata about the crosschain payment */
                         metadata: {
-                            /** @description Whether the token supports EIP-2612 permits */
-                            supportsEIP2612: boolean;
+                            /** @description Number of transactions required */
+                            stepsRequired: number;
+                            /** @description Whether token approval is needed */
+                            needsApproval: boolean;
+                            /** @description Index of the approval transaction if needed */
+                            approvalTransactionIndex?: number | null;
+                            /** @description Index of the executable crosschain transaction */
+                            paymentTransactionIndex: number;
+                            /** @description Whether payer has sufficient token balance */
+                            hasEnoughBalance: boolean;
+                            /** @enum {string} */
+                            routeType: "crosschain" | "samechain";
+                            /** @description Route quote expiry. Legacy single-payment routes may return a Unix timestamp; multicall cross-chain routes return an ISO date-time string. */
+                            quoteExpiresAt?: number | string;
+                            /** @description Unix seconds — hard on-chain execution window for Safe + LiFi routes (advisory only). */
+                            executionDeadline?: number;
+                            /** @description Per-leg deadline breakdown used to compute executionDeadline. */
+                            executionDeadlineBreakdown?: Record<string, never>;
                         };
                     };
                 };
@@ -2271,71 +2987,6 @@ export interface operations {
                 content?: never;
             };
             /** @description Request not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Too Many Requests */
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    RequestControllerV2_sendPaymentIntent_v2: {
-        parameters: {
-            query?: never;
-            header?: {
-                /** @description API key for authentication (optional if using Client ID) */
-                "x-api-key"?: string;
-                /** @description Client ID for frontend authentication (optional if using API key) */
-                "x-client-id"?: string;
-                /** @description Origin header (required for Client ID auth, automatically set by browser) */
-                Origin?: string;
-            };
-            path: {
-                /** @description The payment intent ID */
-                paymentIntentId: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": {
-                    /** @description The signed payment intent data. */
-                    signedPaymentIntent: {
-                        /** @description The signature of the permit2 approval for token transfer */
-                        signature: string;
-                        /** @description The unique nonce for this permit2 transaction */
-                        nonce: string;
-                        /** @description The Unix timestamp when this permit2 approval expires */
-                        deadline: string;
-                    };
-                    /** @description The EIP2612 gasless token approval data that allows Permit2 to access user tokens */
-                    signedApprovalPermit?: {
-                        /** @description The signature for the EIP2612 gasless token approval */
-                        signature: string;
-                        /** @description The unique nonce for the EIP2612 permit */
-                        nonce: string;
-                        /** @description The Unix timestamp when this EIP2612 permit expires */
-                        deadline: string;
-                    };
-                };
-            };
-        };
-        responses: {
-            /** @description Payment intent sent successfully */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Payment intent data not found */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -3373,6 +4024,1438 @@ export interface operations {
             };
         };
     };
+    SecurePaymentController_findSecurePayment_v2: {
+        parameters: {
+            query: {
+                /** @description Request ID to look up the associated secure payment */
+                requestId: string;
+            };
+            header: {
+                /** @description Bearer token for session authentication (or use session_token cookie) */
+                Authorization: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Secure payment found */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        token: string;
+                        /** Format: uri */
+                        securePaymentUrl: string;
+                        /** @enum {string} */
+                        status: "pending" | "completed" | "expired" | "invalidated";
+                        /** @enum {string} */
+                        paymentType: "single" | "batch";
+                        /** Format: date-time */
+                        createdAt?: string | null;
+                        /** Format: date-time */
+                        expiresAt: string;
+                        /** @description Fee plan snapshot persisted at secure payment creation. Immutable, so it reflects the fees that applied to the payment whether it is still pending or already completed. Null when no snapshot was stored — e.g. non-stablecoin currency, or a batch that spans multiple currencies (not yet supported). */
+                        feePlan?: {
+                            /** @enum {number} */
+                            version: 1;
+                            /** @enum {string} */
+                            flow: "get_paid" | "pay";
+                            /** @enum {string} */
+                            defaultFeeBearer: "payer" | "payee";
+                            grossAmountUsd: string;
+                            netRecipientAmountUsd: string;
+                            payerTotalAmountUsd: string;
+                            totalFeesUsd: string;
+                            payeeBorneFeesUsd: string;
+                            payerBorneFeesUsd: string;
+                            fees: {
+                                type: string;
+                                label: string;
+                                /** @enum {string} */
+                                feeBearer: "payer" | "payee";
+                                /** @enum {string} */
+                                feeBearerSource: "fee_config" | "payment_default_override" | "flow_default" | "forced_fee_policy";
+                                percentageBps: number;
+                                capUsd: string | null;
+                                fixedAmountUsd?: string | null;
+                                calculatedAmountUsd: string;
+                                destinationResolver: string;
+                                destinationRef: {
+                                    evmAddress?: string;
+                                    tronAddress?: string;
+                                };
+                                configSource: string;
+                            }[];
+                        } | null;
+                    } & {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description No secure payment found for this request ID */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Too Many Requests */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    SecurePaymentController_createSecurePayment_v2: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description API key for authentication (optional if using Client ID, session, or orchestrator key) */
+                "x-api-key"?: string;
+                /** @description Client ID for frontend authentication (required when paired with orchestrator key) */
+                "x-client-id"?: string;
+                /** @description Orchestrator key for authentication (must be paired with Client ID) */
+                "x-orchestrator-key"?: string;
+                /** @description Origin header (required for Client ID / orchestrator auth, automatically set by browser) */
+                Origin?: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @description Array of payment requests. Single item = single incoming payment. Multiple items preserve the legacy incoming-payment batch shape and are unrelated to multicall payout parents. */
+                    requests: {
+                        /** @description Destination ID in composite format: ERC-7828 payee address + token address, separated by ':' (e.g., '0x742d...bEb0@eip155:11155111#80B12379:0x370D...623C'). Optional when the client ID has a configured payee destination. */
+                        destinationId?: string;
+                        /** @description The payable amount, in human readable format */
+                        amount: string;
+                    }[];
+                    /** @description DEPRECATED. Legacy fee percentage; ignored. Fees are now resolved server-side from the fee plan snapshot. */
+                    feePercentage?: string;
+                    /** @description DEPRECATED. Legacy fee recipient; ignored. Fees are now resolved server-side from the fee plan snapshot. */
+                    feeAddress?: string;
+                    /** @description Merchant reference for receipt tracking and identification */
+                    reference?: string;
+                    /** @description Payer identifier for tracking who is making the payment */
+                    payerIdentifier?: string;
+                    /** @description URL the payer is redirected to after a successful payment */
+                    redirectUrl?: string;
+                    /** @description Optional label describing the redirect destination */
+                    redirectLabel?: string;
+                    /** @description Optional per-payment access policy override. If omitted, the payment inherits the destination access policy. */
+                    accessPolicy?: {
+                        /** @enum {string} */
+                        mode?: "inherit" | "off" | "kyt_all_wallets";
+                        /** @enum {string|null} */
+                        screeningProvider?: "hypernative" | "merklescience" | null;
+                        hideUntilApproved?: boolean;
+                        hidePayeeAddress?: boolean;
+                        allowedPayerAddresses?: string[];
+                    };
+                };
+            };
+        };
+        responses: {
+            /** @description Secure payment entry created successfully */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        requestIds: string[];
+                        /** Format: uri */
+                        securePaymentUrl: string;
+                        token: string;
+                        /** @description Resolved fee plan snapshot. Null when fees don't apply — e.g. non-stablecoin currency, or a batch that spans multiple currencies (not yet supported). */
+                        feePlan?: {
+                            /** @enum {number} */
+                            version: 1;
+                            /** @enum {string} */
+                            flow: "get_paid" | "pay";
+                            /** @enum {string} */
+                            defaultFeeBearer: "payer" | "payee";
+                            grossAmountUsd: string;
+                            netRecipientAmountUsd: string;
+                            payerTotalAmountUsd: string;
+                            totalFeesUsd: string;
+                            payeeBorneFeesUsd: string;
+                            payerBorneFeesUsd: string;
+                            fees: {
+                                type: string;
+                                label: string;
+                                /** @enum {string} */
+                                feeBearer: "payer" | "payee";
+                                /** @enum {string} */
+                                feeBearerSource: "fee_config" | "payment_default_override" | "flow_default" | "forced_fee_policy";
+                                percentageBps: number;
+                                capUsd: string | null;
+                                fixedAmountUsd?: string | null;
+                                calculatedAmountUsd: string;
+                                destinationResolver: string;
+                                destinationRef: {
+                                    evmAddress?: string;
+                                    tronAddress?: string;
+                                };
+                                configSource: string;
+                            }[];
+                        } | null;
+                    } & {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Too Many Requests */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    SecurePaymentController_createPayoutSecurePayment_v2: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description API key for authentication (optional if using Client ID, session, or orchestrator key) */
+                "x-api-key"?: string;
+                /** @description Client ID for frontend authentication (required when paired with orchestrator key) */
+                "x-client-id"?: string;
+                /** @description Orchestrator key for authentication (must be paired with Client ID) */
+                "x-orchestrator-key"?: string;
+                /** @description Origin header (required for Client ID / orchestrator auth, automatically set by browser) */
+                Origin?: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @description Recipient wallet address (EVM 0x... or TRON T...) */
+                    recipient: string;
+                    /** @description Wallet address that created the payout link. This is not necessarily the wallet that will execute the payment. */
+                    creatorWalletAddress: string;
+                    /** @description Blockchain network the payout targets (e.g., 'mainnet', 'sepolia', 'tron') */
+                    network: string;
+                    /** @description Currency ID in the '<symbol>-<network>' format (e.g., 'USDC-mainnet', 'FAU-sepolia') */
+                    currency: string;
+                    /** @description The payout amount, in human readable format */
+                    amount: string;
+                    /** @description Merchant reference for receipt tracking and identification */
+                    reference?: string;
+                    /** @description Recipient identifier for tracking outgoing payout recipients */
+                    recipientIdentifier?: string;
+                    /** @description DEPRECATED. Legacy fee percentage; ignored. Fees are now resolved server-side from the fee plan snapshot. */
+                    feePercentage?: string;
+                    /** @description DEPRECATED. Legacy fee recipient; ignored. Fees are now resolved server-side from the fee plan snapshot. */
+                    feeAddress?: string;
+                    /** @description URL the payer is redirected to after a successful payment */
+                    redirectUrl?: string;
+                    /** @description Optional label describing the redirect destination */
+                    redirectLabel?: string;
+                    /** @description Optional per-payment access policy override. */
+                    accessPolicy?: {
+                        /** @enum {string} */
+                        mode?: "inherit" | "off" | "kyt_all_wallets";
+                        /** @enum {string|null} */
+                        screeningProvider?: "hypernative" | "merklescience" | null;
+                        hideUntilApproved?: boolean;
+                        hidePayeeAddress?: boolean;
+                        allowedPayerAddresses?: string[];
+                    };
+                };
+            };
+        };
+        responses: {
+            /** @description Payout secure payment created successfully */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        requestIds: string[];
+                        /** Format: uri */
+                        securePaymentUrl: string;
+                        token: string;
+                        /** @description Resolved fee plan snapshot. Null when fees don't apply — e.g. non-stablecoin currency, or a batch that spans multiple currencies (not yet supported). */
+                        feePlan?: {
+                            /** @enum {number} */
+                            version: 1;
+                            /** @enum {string} */
+                            flow: "get_paid" | "pay";
+                            /** @enum {string} */
+                            defaultFeeBearer: "payer" | "payee";
+                            grossAmountUsd: string;
+                            netRecipientAmountUsd: string;
+                            payerTotalAmountUsd: string;
+                            totalFeesUsd: string;
+                            payeeBorneFeesUsd: string;
+                            payerBorneFeesUsd: string;
+                            fees: {
+                                type: string;
+                                label: string;
+                                /** @enum {string} */
+                                feeBearer: "payer" | "payee";
+                                /** @enum {string} */
+                                feeBearerSource: "fee_config" | "payment_default_override" | "flow_default" | "forced_fee_policy";
+                                percentageBps: number;
+                                capUsd: string | null;
+                                fixedAmountUsd?: string | null;
+                                calculatedAmountUsd: string;
+                                destinationResolver: string;
+                                destinationRef: {
+                                    evmAddress?: string;
+                                    tronAddress?: string;
+                                };
+                                configSource: string;
+                            }[];
+                        } | null;
+                    } & {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Invalid payout request (e.g., unsupported network or currency) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Platform is not allowed to create payouts */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Too Many Requests */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    SecurePaymentController_previewFees_v2: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description API key for authentication (optional if using Client ID, session, or orchestrator key) */
+                "x-api-key"?: string;
+                /** @description Client ID for frontend authentication (required when paired with orchestrator key) */
+                "x-client-id"?: string;
+                /** @description Orchestrator key for authentication (must be paired with Client ID) */
+                "x-orchestrator-key"?: string;
+                /** @description Origin header (required for Client ID / orchestrator auth, automatically set by browser) */
+                Origin?: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @description Base/displayed amount in human-readable units, as a decimal string (e.g. "12.5"). */
+                    amount: string;
+                    /** @description Currency symbol or currency ID (e.g. 'USDC' or 'USDC-mainnet'). Must resolve to a supported stablecoin. */
+                    currency: string;
+                    /**
+                     * @description `get_paid` for incoming payments (recipient creates link), `pay` for outgoing payments (payer initiates).
+                     * @enum {string}
+                     */
+                    flow: "get_paid" | "pay";
+                    /**
+                     * @description Payment-level override of the flow default. Per-fee config bearer still wins.
+                     * @enum {string}
+                     */
+                    defaultFeeBearer?: "payer" | "payee";
+                };
+            };
+        };
+        responses: {
+            /** @description Fee plan preview */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {number} */
+                        version: 1;
+                        /** @enum {string} */
+                        flow: "get_paid" | "pay";
+                        /** @enum {string} */
+                        defaultFeeBearer: "payer" | "payee";
+                        grossAmountUsd: string;
+                        netRecipientAmountUsd: string;
+                        payerTotalAmountUsd: string;
+                        totalFeesUsd: string;
+                        payeeBorneFeesUsd: string;
+                        payerBorneFeesUsd: string;
+                        fees: {
+                            type: string;
+                            label: string;
+                            /** @enum {string} */
+                            feeBearer: "payer" | "payee";
+                            /** @enum {string} */
+                            feeBearerSource: "fee_config" | "payment_default_override" | "flow_default" | "forced_fee_policy";
+                            percentageBps: number;
+                            capUsd: string | null;
+                            fixedAmountUsd?: string | null;
+                            calculatedAmountUsd: string;
+                            destinationResolver: string;
+                            destinationRef: {
+                                evmAddress?: string;
+                                tronAddress?: string;
+                            };
+                            configSource: string;
+                        }[];
+                    };
+                };
+            };
+            /** @description Unsupported currency or invalid combination */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Too Many Requests */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    SecurePaymentController_createBatchPayoutSecurePayment_v2: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description API key for authentication (optional if using Client ID, session, or orchestrator key) */
+                "x-api-key"?: string;
+                /** @description Client ID for frontend authentication (required when paired with orchestrator key) */
+                "x-client-id"?: string;
+                /** @description Orchestrator key for authentication (must be paired with Client ID) */
+                "x-orchestrator-key"?: string;
+                /** @description Origin header (required for Client ID / orchestrator auth, automatically set by browser) */
+                Origin?: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @description Tokens of existing pending single payout secure payments to combine into one batch payment link */
+                    tokens: string[];
+                    /** @description URL the payer is redirected to after a successful payment */
+                    redirectUrl?: string;
+                    /** @description Optional label describing the redirect destination */
+                    redirectLabel?: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Batch payout secure payment created successfully */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        requestIds: string[];
+                        /** Format: uri */
+                        securePaymentUrl: string;
+                        token: string;
+                        /** @description Resolved fee plan snapshot. Null when fees don't apply — e.g. non-stablecoin currency, or a batch that spans multiple currencies (not yet supported). */
+                        feePlan?: {
+                            /** @enum {number} */
+                            version: 1;
+                            /** @enum {string} */
+                            flow: "get_paid" | "pay";
+                            /** @enum {string} */
+                            defaultFeeBearer: "payer" | "payee";
+                            grossAmountUsd: string;
+                            netRecipientAmountUsd: string;
+                            payerTotalAmountUsd: string;
+                            totalFeesUsd: string;
+                            payeeBorneFeesUsd: string;
+                            payerBorneFeesUsd: string;
+                            fees: {
+                                type: string;
+                                label: string;
+                                /** @enum {string} */
+                                feeBearer: "payer" | "payee";
+                                /** @enum {string} */
+                                feeBearerSource: "fee_config" | "payment_default_override" | "flow_default" | "forced_fee_policy";
+                                percentageBps: number;
+                                capUsd: string | null;
+                                fixedAmountUsd?: string | null;
+                                calculatedAmountUsd: string;
+                                destinationResolver: string;
+                                destinationRef: {
+                                    evmAddress?: string;
+                                    tronAddress?: string;
+                                };
+                                configSource: string;
+                            }[];
+                        } | null;
+                    } & {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Invalid request (e.g., tokens on different networks, non-pending tokens, less than 2 tokens) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Platform is not allowed to create payouts */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Too Many Requests */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    SecurePaymentController_getSecurePaymentByToken_v2: {
+        parameters: {
+            query?: {
+                /** @description The source token of the crosschain payment */
+                token?: "USDC" | "USDT" | "EURC" | "USDT0";
+                /** @description The wallet address of the payer (optional, used to check existing approvals) */
+                wallet?: string;
+                /** @description The source chain of the crosschain payment */
+                chain?: "BASE" | "OPTIMISM" | "ARBITRUM" | "ETHEREUM" | "POLYGON" | "BNB";
+                /** @description The EOA wallet address that holds the funds. When provided, balance checks and LiFi quotes use this address while the wallet param is used for calldata building (smart account flow). */
+                eoaWallet?: string;
+                /** @description When true, prepares calldata for a Gnosis Safe multisig payer (wallet must be the Safe address). Mutually exclusive with eoaWallet. */
+                isSafe?: string;
+            };
+            header: {
+                /** @description Client ID for frontend authentication */
+                "x-client-id": string;
+                /** @description Origin header (automatically set by browser) */
+                Origin: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Secure payment data retrieved successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        paymentType: "single" | "batch";
+                        payee?: string;
+                        payees?: string[];
+                        network: string;
+                        amount?: string;
+                        amounts?: string[];
+                        paymentCurrency?: string;
+                        paymentCurrencies?: string[];
+                        isNativeCurrency?: boolean | boolean[];
+                        /** @enum {string} */
+                        status: "pending" | "completed" | "expired" | "invalidated";
+                        destination?: {
+                            [key: string]: unknown;
+                        };
+                        destinations?: {
+                            [key: string]: unknown;
+                        }[];
+                        reference?: string | null;
+                        paymentOptions?: {
+                            [key: string]: unknown;
+                        };
+                        /** @description Fee plan snapshot captured at creation time. Null when fees don't apply (non-stablecoin currency, payment created before fee plan rollout, etc.). */
+                        feePlan?: {
+                            /** @enum {number} */
+                            version: 1;
+                            /** @enum {string} */
+                            flow: "get_paid" | "pay";
+                            /** @enum {string} */
+                            defaultFeeBearer: "payer" | "payee";
+                            grossAmountUsd: string;
+                            netRecipientAmountUsd: string;
+                            payerTotalAmountUsd: string;
+                            totalFeesUsd: string;
+                            payeeBorneFeesUsd: string;
+                            payerBorneFeesUsd: string;
+                            fees: {
+                                type: string;
+                                label: string;
+                                /** @enum {string} */
+                                feeBearer: "payer" | "payee";
+                                /** @enum {string} */
+                                feeBearerSource: "fee_config" | "payment_default_override" | "flow_default" | "forced_fee_policy";
+                                percentageBps: number;
+                                capUsd: string | null;
+                                fixedAmountUsd?: string | null;
+                                calculatedAmountUsd: string;
+                                destinationResolver: string;
+                                destinationRef: {
+                                    evmAddress?: string;
+                                    tronAddress?: string;
+                                };
+                                configSource: string;
+                            }[];
+                        } | null;
+                    } & {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+            /** @description Secure payment token expired or invalid status */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Secure payment not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Secure payment has already been completed */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Secure payment is in progress */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Too Many Requests */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    SecurePaymentController_getSecurePaymentCalldataByToken_v2: {
+        parameters: {
+            query?: {
+                /** @description The source token of the crosschain payment */
+                token?: "USDC" | "USDT" | "EURC" | "USDT0";
+                /** @description The wallet address of the payer (optional, used to check existing approvals) */
+                wallet?: string;
+                /** @description The source chain of the crosschain payment */
+                chain?: "BASE" | "OPTIMISM" | "ARBITRUM" | "ETHEREUM" | "POLYGON" | "BNB";
+                /** @description The EOA wallet address that holds the funds. When provided, balance checks and LiFi quotes use this address while the wallet param is used for calldata building (smart account flow). */
+                eoaWallet?: string;
+                /** @description When true, prepares calldata for a Gnosis Safe multisig payer (wallet must be the Safe address). Mutually exclusive with eoaWallet. */
+                isSafe?: string;
+            };
+            header: {
+                /** @description Client ID for frontend authentication */
+                "x-client-id": string;
+                /** @description Origin header (automatically set by browser) */
+                Origin: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Secure payment calldata retrieved successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        paymentType: "single";
+                        /** @description Flat ordered list of calls the smart account must execute atomically. Main-payment transactions come first; fee-payment transactions follow. */
+                        transactions: unknown[];
+                        eoaApprovalTransactions?: unknown[];
+                        /** @description Fee bundle summary for this payment. Null when no fee plan applies. */
+                        feeBundle: {
+                            /** @description ID of the secure_payment_bundle row. Null when fees are described by the plan snapshot but no on-chain bundle was created (e.g. no payer wallet supplied yet). */
+                            bundleId: string | null;
+                            /** @enum {string|null} */
+                            defaultFeeBearer: "payer" | "payee" | null;
+                            amountSummary: {
+                                grossAmount: string;
+                                netRecipientAmount: string;
+                                totalFees: string;
+                                payeeBorneFees: string;
+                                payerBorneFees: string;
+                                payerTotal: string;
+                            } | null;
+                            /** @description One entry per fee leg appended to transactions[]. Order matches the order of fee transactions inside transactions[]. */
+                            fees: {
+                                requestId: string;
+                                feeComponentId: string | null;
+                                feeType: string | null;
+                                feeLabel: string | null;
+                                /** @enum {string|null} */
+                                feeBearer: "payer" | "payee" | null;
+                                amount: string;
+                                paymentCurrencyId: string;
+                                network: string;
+                                chainId: string;
+                                recipient: string;
+                                /** @description Request Network payment reference (bytes8 hex) of this fee leg. Distinct from the merchant `reference` on the parent payment. */
+                                paymentReference: string | null;
+                            }[];
+                        } | null;
+                        metadata: {
+                            stepsRequired: number;
+                            needsApproval: boolean;
+                            transactionSponsorshipFeeUsd?: string | null;
+                            approvalTransactionIndex?: number;
+                            approvalTransactionsCount?: number;
+                            paymentTransactionIndex: number;
+                            hasEnoughBalance?: boolean;
+                            hasEnoughGas?: boolean;
+                            hasEnoughAllowance?: boolean;
+                            platformFee?: {
+                                percentage: string;
+                                address: string;
+                            };
+                            protocolFee?: {
+                                percentage: string;
+                                address: string;
+                            };
+                            eoaApprovalRequired?: boolean;
+                            eoaApproval?: {
+                                owner: string;
+                                spender: string;
+                                tokenAddress: string;
+                                currency: string;
+                                amount: string;
+                                /** @enum {string} */
+                                approvalType: "unlimited";
+                            };
+                            balance?: string;
+                            allowance?: string;
+                            requiredAmount?: string;
+                            nativeBalance?: string;
+                            estimatedNetworkFee?: string;
+                            estimatedNetworkFeeUsd?: string;
+                            estimatedApprovalNetworkFee?: string;
+                            estimatedApprovalNetworkFeeUsd?: string;
+                            estimatedPaymentNetworkFee?: string;
+                            estimatedPaymentNetworkFeeUsd?: string;
+                            approvalFeeLimit?: string;
+                            paymentFeeLimit?: string;
+                            sourceAmount?: string;
+                            /** @enum {string} */
+                            routeType?: "crosschain" | "samechain";
+                            /** Format: date-time */
+                            quoteFetchedAt?: string;
+                            /** @description Route quote expiry. Legacy single-payment routes may return a Unix timestamp; multicall cross-chain routes return an ISO date-time string. */
+                            quoteExpiresAt?: number | string;
+                            /** @description Unix seconds — hard on-chain execution window for Safe + LiFi routes (min of bridge and swap deadlines). Advisory only. */
+                            executionDeadline?: number;
+                            /** @description Per-leg deadline breakdown for Safe + LiFi execution window computation. */
+                            executionDeadlineBreakdown?: {
+                                bridge?: {
+                                    deadline: number;
+                                    /** @enum {string} */
+                                    source: "decoded" | "fallback";
+                                };
+                                swap?: {
+                                    deadline: number;
+                                    tool?: string;
+                                    /** @enum {string} */
+                                    source: "decoded" | "fallback";
+                                };
+                            };
+                            /** @description Unix seconds — hard on-chain Safe execution window for the selected route. */
+                            safePaymentDeadline?: number;
+                            rawStep?: {
+                                [key: string]: unknown;
+                            };
+                            costBreakdown?: {
+                                approvalFee?: {
+                                    required: boolean;
+                                    currency: string;
+                                    amountNative: string;
+                                    amountUsd?: string;
+                                    hasEnoughBalance: boolean;
+                                };
+                                paymentGasFee?: {
+                                    required: boolean;
+                                    currency: string;
+                                    amountNative: string;
+                                    amountUsd?: string;
+                                    hasEnoughBalance: boolean;
+                                };
+                                totalGasFee?: {
+                                    required: boolean;
+                                    currency: string;
+                                    amountNative: string;
+                                    amountUsd?: string;
+                                    hasEnoughBalance: boolean;
+                                };
+                                bridgeFee?: {
+                                    required: boolean;
+                                    currency: string;
+                                    amount: string;
+                                    amountUsd?: string;
+                                    hasEnoughBalance: boolean;
+                                };
+                                fundingStatus: {
+                                    hasEnoughPaymentToken: boolean;
+                                    hasEnoughApprovalGas: boolean;
+                                    hasEnoughOverall: boolean;
+                                };
+                                totals?: {
+                                    paymentAmount: string;
+                                    paymentCurrency: string;
+                                    sourceAmount: string;
+                                };
+                            };
+                        };
+                        /** @description Request Network payment reference (bytes8 hex). Distinct from `reference`, the merchant label. */
+                        paymentReference: string | null;
+                        /**
+                         * @description Payment flow captured at creation: incoming (get_paid) or outgoing (pay).
+                         * @enum {string}
+                         */
+                        flow: "incoming" | "outgoing";
+                    };
+                };
+            };
+            /** @description Invalid secure payment calldata request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Secure payment token expired or invalid status */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Secure payment not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Secure payment has already been completed */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Secure payment is in progress */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Too Many Requests */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    SecurePaymentController_broadcastTronTransaction_v2: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description Client ID for frontend authentication */
+                "x-client-id": string;
+                /** @description Origin header (automatically set by browser) */
+                Origin: string;
+            };
+            path: {
+                token: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    raw_data_hex: string;
+                    signature: string[];
+                    txID?: string;
+                    raw_data: {
+                        contract: unknown[];
+                        fee_limit?: number;
+                    };
+                };
+            };
+        };
+        responses: {
+            /** @description TRON transaction broadcast response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        result?: boolean;
+                        txid?: string;
+                        code?: string;
+                        message?: string;
+                    };
+                };
+            };
+            /** @description Invalid or mismatched TRON transaction */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Unauthorized or secure payment not payable */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Secure payment not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Too Many Requests */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description CatFee broadcast failed */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    SecurePaymentController_refreshStepTransaction_v2: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description Client ID for frontend authentication */
+                "x-client-id": string;
+                /** @description Origin header (automatically set by browser) */
+                Origin: string;
+            };
+            path: {
+                token: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": string;
+            };
+        };
+        responses: {
+            /** @description Fresh transactionRequest returned */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Route no longer available or invalid step */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Unauthorized */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Too Many Requests */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    SecurePaymentController_recordIntent_v2: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description Client ID for frontend authentication */
+                "x-client-id": string;
+                /** @description Origin header (automatically set by browser) */
+                Origin: string;
+            };
+            path: {
+                token: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    txHash?: string;
+                    safeTxHash?: string;
+                    /** @enum {string} */
+                    chain: "BASE" | "OPTIMISM" | "ARBITRUM" | "ETHEREUM" | "POLYGON" | "BNB";
+                    /** @enum {string} */
+                    token: "USDC" | "USDT" | "EURC" | "USDT0";
+                    /** @enum {string} */
+                    executionKind?: "evm_same_chain" | "evm_cross_chain";
+                    /** @description Unix seconds — hard on-chain execution deadline for the Safe + LiFi route. Only valid alongside safeTxHash; used to stop monitoring once crossed. */
+                    safePaymentDeadline?: number;
+                    payerAddress?: string;
+                    payerEoaAddress?: string;
+                    /** @enum {string} */
+                    sourceNetwork?: "mainnet" | "optimism" | "bsc" | "xdai" | "fuse" | "matic" | "fantom" | "zksynceratestnet" | "zksyncera" | "core" | "moonbeam" | "mantle" | "mantle-testnet" | "tombchain" | "base" | "arbitrum-one" | "avalanche" | "base-sepolia" | "sepolia" | "tron" | "nile";
+                    sourceToken?: string;
+                    sourceAmount?: string;
+                    /** @enum {string} */
+                    routeKind?: "same_chain" | "same_chain_conversion" | "crosschain";
+                    /** @enum {string|null} */
+                    bridgeTool?: "across" | "stargate" | null;
+                };
+            };
+        };
+        responses: {
+            /** @description Intent recorded successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @description Tracking intent ID created or reused */
+                        intentId: string;
+                        /** @description Payment reference associated with the tracked request */
+                        paymentReference: string;
+                        /** @description Recorded source-chain transaction hash */
+                        txHash?: string;
+                        /** @description Recorded Safe transaction hash pending on-chain execution */
+                        safeTxHash?: string;
+                        /** @description Recorded Unix-seconds execution deadline for the Safe + LiFi route, when provided */
+                        safePaymentDeadline?: number;
+                        /** @description Whether the tracking intent is being monitored for status */
+                        isListening: boolean;
+                        payerAddress?: string;
+                    };
+                };
+            };
+            /** @description Invalid or unsupported crosschain execution payload */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Secure payment token expired or invalid status */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Secure payment not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Secure payment has already been completed */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Too Many Requests */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    SecurePaymentController_recordMulticallIntent_v2: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description Client ID for frontend authentication */
+                "x-client-id": string;
+                /** @description Origin header (automatically set by browser) */
+                Origin: string;
+            };
+            path: {
+                token: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description Source chain the multicall UserOperation is about to be submitted on
+                     * @enum {string}
+                     */
+                    chain: "BASE" | "OPTIMISM" | "ARBITRUM" | "ETHEREUM" | "POLYGON" | "BNB";
+                    /** @description Smart account that will submit the multicall UserOperation */
+                    smartAccountAddress?: string;
+                    /** @description Connected EOA behind the submitting smart account */
+                    payerEoaAddress?: string;
+                    transactionIndices: {
+                        /** @description Zero-based child position in the multicall parent */
+                        childPosition: number;
+                        /** @description Zero-based local transaction index in the submitted batch */
+                        transactionIndex: number;
+                        /** @description Per-child route tool from the multicall pay payload. Across bridge legs require LiFi status tracking; direct legs use normal payment detection. */
+                        routeTool?: string | null;
+                        sourceToken?: string;
+                        sourceAmount?: string;
+                        /** @enum {string} */
+                        routeKind?: "same_chain" | "same_chain_conversion" | "crosschain";
+                        /** @enum {string|null} */
+                        bridgeTool?: "across" | "stargate" | null;
+                    }[];
+                };
+            };
+        };
+        responses: {
+            /** @description Multicall payment intents recorded */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @description Number of child payment intents recorded (inserted or updated) */
+                        recorded: number;
+                    };
+                };
+            };
+            /** @description Invalid child positions for this multicall payout */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Client ID is not authorized to access secure payment endpoints */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Multicall payout not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Too Many Requests */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    SecurePaymentController_recordUserEvent_v2: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description Client ID for frontend authentication */
+                "x-client-id": string;
+                /** @description Origin header (automatically set by browser) */
+                Origin: string;
+            };
+            path: {
+                token: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description Payer-funnel event reported by the Secure Payment Page UI.
+                     * @enum {string}
+                     */
+                    userEvent: "wallet_connected" | "payment_sent_to_wallet" | "payment_approved_in_wallet";
+                    /**
+                     * Format: date-time
+                     * @description Client-reported ISO timestamp for when the event occurred.
+                     */
+                    occurredAt?: string;
+                    /** @description Optional client telemetry attached to the event. Keys are capped at 128 characters, up to 64 keys. */
+                    properties?: {
+                        [key: string]: string | number | boolean | string[] | null;
+                    };
+                };
+            };
+        };
+        responses: {
+            /** @description Event accepted */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /**
+                         * @description Acknowledges the event was accepted.
+                         * @enum {boolean}
+                         */
+                        received: true;
+                    };
+                };
+            };
+            /** @description Invalid event payload */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Client ID is not authorized to access secure payment endpoints */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Secure payment not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Too Many Requests */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    SecurePaymentMulticallController_createMulticallPayout_v2: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description API key for authentication (optional if using Client ID, session, or orchestrator key) */
+                "x-api-key"?: string;
+                /** @description Client ID for frontend authentication (required when paired with orchestrator key) */
+                "x-client-id"?: string;
+                /** @description Orchestrator key for authentication (must be paired with Client ID) */
+                "x-orchestrator-key"?: string;
+                /** @description Origin header (required for Client ID / orchestrator auth, automatically set by browser) */
+                Origin?: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @description Ordered child secure-payment tokens selected for multicall payout */
+                    childTokens: string[];
+                    /**
+                     * @description Execution kind chosen at creation time. When omitted, stored as null — the SPP derives evm_same_chain or evm_cross_chain from the payer's source selection at payment time.
+                     * @enum {string}
+                     */
+                    requestedExecutionKind?: "evm_same_chain" | "evm_cross_chain" | "tron_batch";
+                };
+            };
+        };
+        responses: {
+            /** @description Multicall payout link created successfully */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        type: "multicall";
+                        /** @description Multicall payout token */
+                        token: string;
+                        /**
+                         * Format: uri
+                         * @description Secure Payment Page multicall URL returned on creation
+                         */
+                        securePaymentUrl?: string;
+                        /** @enum {string} */
+                        status: "pending" | "expired";
+                        /** Format: date-time */
+                        expiresAt: string;
+                        /** Format: date-time */
+                        createdAt: string;
+                        items: {
+                            /** @description Child secure-payment token */
+                            securePaymentToken: string;
+                            /** @description Request Network request ID for the child payout */
+                            requestId: string;
+                            /** @description 0-indexed child order */
+                            position: number;
+                            /** @enum {string} */
+                            eligibility?: "eligible" | "stale";
+                            /** @enum {string} */
+                            staleReason?: "secure_payment_expired" | "secure_payment_not_pending" | "already_paid" | "request_processing" | "not_payable_child";
+                        }[];
+                    };
+                };
+            };
+            /** @description Invalid multicall payout selection, including stale or ineligible child payout links */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Too Many Requests */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    SecurePaymentMulticallController_getMulticallPayout_v2: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description Bearer token for session authentication (or use session_token cookie) */
+                Authorization: string;
+            };
+            path: {
+                /** @description Multicall payout token returned by the create endpoint */
+                token: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Multicall payout state retrieved successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {number} */
+                        version: 1;
+                        /** @enum {string} */
+                        flow: "get_paid" | "pay";
+                        /** @enum {string} */
+                        defaultFeeBearer: "payer" | "payee";
+                        grossAmountUsd: string;
+                        netRecipientAmountUsd: string;
+                        payerTotalAmountUsd: string;
+                        totalFeesUsd: string;
+                        payeeBorneFeesUsd: string;
+                        payerBorneFeesUsd: string;
+                        fees: {
+                            type: string;
+                            label: string;
+                            /** @enum {string} */
+                            feeBearer: "payer" | "payee";
+                            /** @enum {string} */
+                            feeBearerSource: "fee_config" | "payment_default_override" | "flow_default" | "forced_fee_policy";
+                            percentageBps: number;
+                            capUsd: string | null;
+                            fixedAmountUsd?: string | null;
+                            calculatedAmountUsd: string;
+                            destinationResolver: string;
+                            destinationRef: {
+                                evmAddress?: string;
+                                tronAddress?: string;
+                            };
+                            configSource: string;
+                        }[];
+                    } | null;
+                };
+            };
+            /** @description Multicall payout not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Too Many Requests */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     PayV1Controller_payRequest_v1: {
         parameters: {
             query?: never;
@@ -3510,6 +5593,22 @@ export interface operations {
                             convertedAmountSource?: string | null;
                             /** @description Converted amount in destination currency */
                             convertedAmountDestination?: string | null;
+                            /** @description Amount paid by the payer in source currency */
+                            paidAmount?: string | null;
+                            /** @description Currency paid by the payer */
+                            paidCurrency?: string | null;
+                            /** @description Network where the payer paid */
+                            paidNetwork?: string | null;
+                            /** @description Raw amount received by the payment route */
+                            receivedAmount?: string | null;
+                            /** @description Currency received by the payment route */
+                            receivedCurrency?: string | null;
+                            /** @description Network where route delivered funds */
+                            receivedNetwork?: string | null;
+                            /** @description Route-delivered amount above the amount applied to the request */
+                            excessAmount?: string | null;
+                            /** @description Currency of the excess amount */
+                            excessCurrency?: string | null;
                             /** @description Invoice currency symbol */
                             currency: string;
                             /** @description Payment currency symbol */
@@ -3797,7 +5896,7 @@ export interface operations {
                 content: {
                     "application/json": {
                         /** @description Array of ERC20 approval transactions needed before the batch payment. Only present when token approval is required. */
-                        ERC20ApprovalTransactions?: {
+                        ERC20ApprovalTransactions: {
                             /** @description Transaction calldata for the ERC20 approval */
                             data: string;
                             /** @description Target ERC20 token contract address for approval */
@@ -3805,9 +5904,9 @@ export interface operations {
                             /** @description Always 0 for ERC20 approvals */
                             value: number;
                         }[];
-                        /** @description The batch payment transaction for ERC20 tokens. Only present when the batch contains ERC20 payments. */
-                        ERC20BatchPaymentTransaction?: {
-                            /** @description Transaction calldata for the ERC20 batch payment */
+                        /** @description The batch payment transaction that executes all requests in the batch. */
+                        batchPaymentTransaction: {
+                            /** @description Transaction calldata for the batch payment */
                             data: string;
                             /** @description Target batch payment contract address */
                             to: string;
@@ -3818,19 +5917,40 @@ export interface operations {
                                 hex: string;
                             };
                         };
-                        /** @description The batch payment transaction for native ETH. Only present when the batch contains ETH payments. */
-                        ETHBatchPaymentTransaction?: {
-                            /** @description Transaction calldata for the ETH batch payment */
-                            data: string;
-                            /** @description Target batch payment contract address */
-                            to: string;
-                            value: {
-                                /** @enum {string} */
-                                type: "BigNumber";
-                                /** @description Payment amount in EVM-compatible format, encoded in hex. Contains the ETH value to send */
-                                hex: string;
-                            };
+                        /** @description Optional preflight metadata. Present when payer is provided. */
+                        metadata?: {
+                            /** @description Whether payer has enough payment-token/native balance for the whole batch */
+                            hasEnoughBalance: boolean;
+                            /** @description Whether payer has enough native gas token. Null when gas cannot be reliably estimated */
+                            hasEnoughGas: boolean | null;
+                            /** @description Combined readiness across balance and gas checks. Null when gas cannot be reliably estimated for the batch and final readiness remains undetermined by the runtime response */
+                            canMakePayment: boolean | null;
+                            /** @description Token-level insufficiency details when token balances are not enough */
+                            insufficientTokens?: {
+                                tokenAddress: string;
+                                tokenSymbol?: string;
+                                paymentCurrencyId?: string;
+                                /** @description Required token amount for the batch, expressed in the token's smallest unit */
+                                required: string;
+                                /** @description Available token amount in the payer wallet, expressed in the token's smallest unit */
+                                available: string;
+                            }[];
                         };
+                        /** @description Array of created request identifiers, one per recipient in the batch. Use these to correlate payment.confirmed webhooks back to each batch item. */
+                        requests: {
+                            /** @description Unique Request Network identifier for this recipient's request */
+                            requestId: string;
+                            /** @description Payment reference used on-chain for payment detection */
+                            paymentReference: string;
+                            /** @description The payee address for the request */
+                            payee: string | null;
+                            /** @description The request amount in human-readable format */
+                            amount: string | null;
+                            /** @description The invoice currency for the request */
+                            invoiceCurrency: string | null;
+                            /** @description The payment currency for the request */
+                            paymentCurrency: string | null;
+                        }[];
                     };
                 };
             };
@@ -4021,11 +6141,11 @@ export interface operations {
             };
         };
     };
-    SecurePaymentController_findSecurePayment_v2: {
+    RequestExportController_exportRequests_v2: {
         parameters: {
             query: {
-                /** @description Request ID to look up the associated secure payment */
-                requestId: string;
+                /** @description Dashboard payment direction: incoming exports Get Paid; outgoing exports Pay */
+                flow: "incoming" | "outgoing";
             };
             header: {
                 /** @description Bearer token for session authentication (or use session_token cookie) */
@@ -4036,45 +6156,8 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Secure payment found */
+            /** @description CSV export generated successfully */
             200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @description Secure payment token */
-                        token: string;
-                        /**
-                         * Format: uri
-                         * @description URL to the secure payment page
-                         */
-                        securePaymentUrl: string;
-                        /**
-                         * @description Current status of the secure payment
-                         * @enum {string}
-                         */
-                        status: "pending" | "completed" | "expired" | "invalidated";
-                        /**
-                         * @description Type of payment: single or batch
-                         * @enum {string}
-                         */
-                        paymentType: "single" | "batch";
-                        /**
-                         * Format: date-time
-                         * @description When the secure payment was created
-                         */
-                        createdAt: string | null;
-                        /**
-                         * Format: date-time
-                         * @description When the secure payment token expires
-                         */
-                        expiresAt: string;
-                    };
-                };
-            };
-            /** @description No secure payment found for this request ID */
-            404: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -4089,13 +6172,210 @@ export interface operations {
             };
         };
     };
-    SecurePaymentController_createSecurePayment_v2: {
+    JourneyController_createJourney_v2: {
         parameters: {
             query?: never;
-            header?: {
-                /** @description API key for authentication (optional if using Client ID or session) */
+            header: {
+                /** @description API key for authentication */
+                "x-api-key": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @description The request ID of the request linked to the journey */
+                    requestId?: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Journey created successfully. Returns the unique journeyRef (tracking ID). */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Too Many Requests */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    JourneyController_createJourneyEvent_v2: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description API key for authentication */
+                "x-api-key": string;
+            };
+            path: {
+                /** @description Either a journeyId (e.g., '01JOURNEYULID1234567890ABCDEF') or a txReference from an existing event in the journey (e.g., '0xabc123def456...'). The system will automatically determine which type is provided and locate the appropriate journey. */
+                queryId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @description The status of the journey event */
+                    status: string;
+                    /** @description The amount of the journey event */
+                    amount: string;
+                    /** @description The date and time the journey event was processed, has to be in UTC format and end with 'Z' example `2025-07-23T14:23:00Z` */
+                    processedAt: string;
+                    /** @description The currency of the journey event */
+                    currency?: string;
+                    /** @description The transaction reference of the journey event */
+                    txReference?: string;
+                    /** @description The raw payload of the journey event */
+                    rawPayload?: unknown;
+                    /** @description The ID of the next processor in the journey */
+                    nextProcessorId?: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Journey event created successfully. Returns the event details. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Too Many Requests */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    JourneyController_getJourney_v2: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description API key for authentication */
+                "x-api-key": string;
+            };
+            path: {
+                journeyId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Journey and its events retrieved successfully. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Too Many Requests */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    TransactionHistoryController_getHistory_v2: {
+        parameters: {
+            query: {
+                /** @description Wallet address. EVM addresses return Base USDC history; TRON addresses return Tron USDT history. */
+                address: string;
+                /** @description Number of results per page (max 100) */
+                limit?: string;
+                /** @description Pagination offset */
+                offset?: string;
+            };
+            header: {
+                /** @description Client ID for frontend authentication */
+                "x-client-id": string;
+                /** @description Origin header (automatically set by browser) */
+                Origin: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Paginated transaction history */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        type: "incoming" | "outgoing";
+                        /** Format: date-time */
+                        timestamp: string;
+                        from?: string;
+                        to?: string;
+                        amountReceived?: string;
+                        amountPaid?: string;
+                        paymentCurrency?: string;
+                        receivingCurrency?: string;
+                        paymentChain?: string;
+                        receivingChain?: string;
+                        sourceTxHash: string;
+                        destinationTxHash: string;
+                    };
+                };
+            };
+            /** @description Too Many Requests */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    CommercePaymentsController_generateAuthorizeCalldata_v2: {
+        parameters: {
+            query?: never;
+            header: {
+                origin: string;
+                /** @description API key for authentication (optional if using Client ID) */
                 "x-api-key"?: string;
-                /** @description Client ID for frontend authentication (optional if using API key or session) */
+                /** @description Client ID for frontend authentication (optional if using API key) */
                 "x-client-id"?: string;
                 /** @description Origin header (required for Client ID auth, automatically set by browser) */
                 Origin?: string;
@@ -4106,38 +6386,481 @@ export interface operations {
         requestBody: {
             content: {
                 "application/json": {
-                    /** @description Array of payment requests. Single item = single payment, multiple items = batch payment. All requests must resolve to the same network. */
-                    requests: {
-                        /** @description Destination ID in composite format: ERC-7828 payee address + token address, separated by ':' (e.g., '0x742d...bEb0@eip155:11155111#80B12379:0x370D...623C') */
-                        destinationId: string;
-                        /** @description The payable amount, in human readable format */
-                        amount: string;
-                    }[];
-                    /** @description Fee percentage to apply at payment time (e.g., '2.5' for 2.5%) */
-                    feePercentage?: string;
-                    /** @description Address to receive the fee (Ethereum 0x... or TRON T...) */
-                    feeAddress?: string;
+                    /** @description The merchant identifier */
+                    merchantId: string;
+                    /** @description The merchant identifier (typically wallet address) */
+                    merchantAddress: string;
+                    /** @description The buyer wallet address */
+                    buyerAddress?: string;
+                    /** @description The payment amount in token's smallest unit */
+                    amount: string;
+                    /** @description Payment currency with network (e.g., 'USDC-base-sepolia', 'ETH-mainnet') */
+                    paymentCurrency: string;
+                    /** @description The maximum amount authorized (defaults to amount if not specified) */
+                    maxAmount?: string;
+                    /** @description Unix timestamp for pre-approval expiry */
+                    preApprovalExpiry?: number;
+                    /** @description Unix timestamp for authorization expiry */
+                    authorizationExpiry?: number;
                 };
             };
         };
         responses: {
-            /** @description Secure payment entry created successfully */
+            /** @description Authorization calldata generated successfully */
             201: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
                     "application/json": {
-                        /** @description Array of request IDs created for this secure payment */
-                        requestIds: string[];
-                        /**
-                         * Format: uri
-                         * @description URL to the secure payment page
-                         */
-                        securePaymentUrl: string;
-                        /** @description Secure payment token */
-                        token: string;
+                        /** @description Contract address to call */
+                        to: string;
+                        /** @description Encoded function calldata */
+                        data: string;
+                        /** @description ETH value to send (usually '0') */
+                        value: string;
+                        /** @description Human-readable description of this call */
+                        description: string;
                     };
+                };
+            };
+            /** @description Invalid request parameters */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Too Many Requests */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    CommercePaymentsController_getPaymentStatus_v2: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description API key for authentication (optional if using Client ID) */
+                "x-api-key"?: string;
+                /** @description Client ID for frontend authentication (optional if using API key) */
+                "x-client-id"?: string;
+                /** @description Origin header (required for Client ID auth, automatically set by browser) */
+                Origin?: string;
+            };
+            path: {
+                /** @description The request ID returned from authorize */
+                requestId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Payment status retrieved successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /**
+                         * @description Event type
+                         * @enum {string}
+                         */
+                        type: "AUTHORIZED" | "CAPTURED" | "VOIDED" | "REFUNDED" | "EXPIRED" | "RECLAIMED" | "FAILED";
+                        /** @description ISO 8601 timestamp */
+                        timestamp: string;
+                        /** @description Transaction hash */
+                        transactionHash?: string;
+                        /** @description Block number */
+                        blockNumber?: string;
+                    };
+                };
+            };
+            /** @description Payment not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Too Many Requests */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    CommercePaymentsController_authorizePayment_v2: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description API key for authentication (optional if using Client ID) */
+                "x-api-key"?: string;
+                /** @description Client ID for frontend authentication (optional if using API key) */
+                "x-client-id"?: string;
+                /** @description Origin header (required for Client ID auth, automatically set by browser) */
+                Origin?: string;
+            };
+            path: {
+                /** @description The request ID returned from authorize/calldata */
+                requestId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Authorization initiated successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @description Unique request identifier */
+                        requestId: string;
+                        /**
+                         * @description Updated payment status
+                         * @enum {string}
+                         */
+                        status: "PENDING" | "AUTHORIZING" | "AUTHORIZED" | "CAPTURING" | "PAID" | "VOIDING" | "VOIDED" | "REFUNDING" | "REFUNDED" | "PARTIALLY_REFUNDED" | "EXPIRED" | "RECLAIMED" | "FAILED";
+                        /** @description Transaction hash */
+                        transactionHash: string;
+                        /** @description Amount being authorized */
+                        amount: string;
+                    };
+                };
+            };
+            /** @description Invalid authorization request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Payment not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Too Many Requests */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    CommercePaymentsController_generateCaptureCalldata_v2: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description API key for authentication (optional if using Client ID) */
+                "x-api-key"?: string;
+                /** @description Client ID for frontend authentication (optional if using API key) */
+                "x-client-id"?: string;
+                /** @description Origin header (required for Client ID auth, automatically set by browser) */
+                Origin?: string;
+            };
+            path: {
+                /** @description The request ID returned from authorize */
+                requestId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @description The amount to capture from the authorized payment */
+                    captureAmount: string;
+                    /** @description Fee in basis points (0-10000, where 100 = 1%) */
+                    feeBps?: number;
+                    /** @description Address to receive the fee (required if feeBps > 0) */
+                    feeReceiver?: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Capture calldata generated successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @description Unique request identifier */
+                        requestId: string;
+                        /** @description Encoded transaction calldata */
+                        calldata: string;
+                        /** @description The contract address to send the transaction to */
+                        to: string;
+                        /** @description The value to send with the transaction (0) */
+                        value: string;
+                        /** @description The operator address that will execute this transaction */
+                        operator: string;
+                    };
+                };
+            };
+            /** @description Invalid capture request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Payment not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Too Many Requests */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    CommercePaymentsController_generateVoidCalldata_v2: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description API key for authentication (optional if using Client ID) */
+                "x-api-key"?: string;
+                /** @description Client ID for frontend authentication (optional if using API key) */
+                "x-client-id"?: string;
+                /** @description Origin header (required for Client ID auth, automatically set by browser) */
+                Origin?: string;
+            };
+            path: {
+                /** @description The request ID returned from authorize */
+                requestId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Void calldata generated successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @description Unique request identifier */
+                        requestId: string;
+                        /** @description Encoded transaction calldata */
+                        calldata: string;
+                        /** @description The contract address to send the transaction to */
+                        to: string;
+                        /** @description The value to send with the transaction (0) */
+                        value: string;
+                        /** @description The operator address that will execute this transaction */
+                        operator: string;
+                    };
+                };
+            };
+            /** @description Invalid void request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Payment not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Too Many Requests */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    CommercePaymentsController_capturePayment_v2: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description API key for authentication (optional if using Client ID) */
+                "x-api-key"?: string;
+                /** @description Client ID for frontend authentication (optional if using API key) */
+                "x-client-id"?: string;
+                /** @description Origin header (required for Client ID auth, automatically set by browser) */
+                Origin?: string;
+            };
+            path: {
+                /** @description The request ID returned from authorize */
+                requestId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @description The amount to capture from the authorized payment */
+                    captureAmount: string;
+                    /** @description Fee in basis points (0-10000, where 100 = 1%) */
+                    feeBps?: number;
+                    /** @description Address to receive the fee (required if feeBps > 0) */
+                    feeReceiver?: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Capture initiated successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @description Unique request identifier */
+                        requestId: string;
+                        /**
+                         * @description Updated payment status
+                         * @enum {string}
+                         */
+                        status: "PENDING" | "AUTHORIZING" | "AUTHORIZED" | "CAPTURING" | "PAID" | "VOIDING" | "VOIDED" | "REFUNDING" | "REFUNDED" | "PARTIALLY_REFUNDED" | "EXPIRED" | "RECLAIMED" | "FAILED";
+                        /** @description Transaction hash */
+                        transactionHash: string;
+                        /** @description Amount being captured */
+                        captureAmount: string;
+                    };
+                };
+            };
+            /** @description Invalid capture request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Payment not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Too Many Requests */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    CommercePaymentsController_voidPayment_v2: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description API key for authentication (optional if using Client ID) */
+                "x-api-key"?: string;
+                /** @description Client ID for frontend authentication (optional if using API key) */
+                "x-client-id"?: string;
+                /** @description Origin header (required for Client ID auth, automatically set by browser) */
+                Origin?: string;
+            };
+            path: {
+                /** @description The request ID returned from authorize */
+                requestId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @description Optional reason for voiding the payment */
+                    reason?: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Void initiated successfully */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @description Unique request identifier */
+                        requestId: string;
+                        /**
+                         * @description Updated payment status
+                         * @enum {string}
+                         */
+                        status: "PENDING" | "AUTHORIZING" | "AUTHORIZED" | "CAPTURING" | "PAID" | "VOIDING" | "VOIDED" | "REFUNDING" | "REFUNDED" | "PARTIALLY_REFUNDED" | "EXPIRED" | "RECLAIMED" | "FAILED";
+                        /** @description Transaction hash */
+                        transactionHash: string;
+                        /** @description Amount voided */
+                        voidedAmount: string;
+                    };
+                };
+            };
+            /** @description Invalid void request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Payment not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Too Many Requests */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    OrchestratorController_createOrchestrator_v2: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description Bearer token for session authentication (or use session_token cookie) */
+                Authorization: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": unknown;
+            };
+        };
+        responses: {
+            /** @description The created orchestrator and its one-time raw orchestrator key. `rawKey` is shown here and never again — persist it now or lose access to this orchestrator permanently. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
                 };
             };
             /** @description Too Many Requests */
@@ -4149,101 +6872,562 @@ export interface operations {
             };
         };
     };
-    SecurePaymentController_getSecurePaymentByToken_v2: {
+    OrchestratorController_listLinkedClientIds_v2: {
         parameters: {
             query?: {
-                /** @description The wallet address of the payer (optional, used to check existing approvals) */
-                wallet?: string;
+                page?: number;
+                limit?: number;
             };
-            header?: {
-                /** @description API key for authentication (optional if using Client ID) */
-                "x-api-key"?: string;
-                /** @description Client ID for frontend authentication (optional if using API key) */
-                "x-client-id"?: string;
-                /** @description Origin header (required for Client ID auth, automatically set by browser) */
-                Origin?: string;
+            header: {
+                /** @description Orchestrator key for authentication */
+                "x-orchestrator-key": string;
             };
-            path: {
-                token: string;
-            };
+            path?: never;
             cookie?: never;
         };
         requestBody?: never;
         responses: {
-            /** @description Secure payment data retrieved successfully */
+            /** @description Paginated list of active clientId links. */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": {
-                        /**
-                         * @description Type of payment: single or batch
-                         * @enum {string}
-                         */
-                        paymentType: "single";
-                        /** @description Payee wallet address */
-                        payee: string;
-                        /** @description Blockchain network */
-                        network: string;
-                        /** @description Payment amount */
-                        amount: string;
-                        /** @description Payment currency ID */
-                        paymentCurrency: string;
-                        /** @description Whether the payment currency is the native currency (e.g., ETH) */
-                        isNativeCurrency: boolean;
-                        /**
-                         * @description Current status of the secure payment
-                         * @enum {string}
-                         */
-                        status: "pending" | "completed" | "expired" | "invalidated";
-                        /** @description Resolved destination for this payment */
-                        destination: {
-                            /** @description Composite destination ID: ERC-7828 payee address + token address (e.g., '0x742d...bEb0@eip155:11155111#80B12379:0x370D...623C') */
-                            destinationId: string;
-                            /** @description Payee address in ERC-7828 human-readable format */
-                            payeeAddress: string;
-                            /** @description ERC20 token contract address */
-                            tokenAddress: string;
-                            /** @description Raw wallet address */
-                            walletAddress: string;
-                            /** @description Blockchain network name */
-                            network: string;
-                        };
-                        /** @description Array of prepared transactions (includes approval and payment transactions) */
-                        transactions: unknown[];
-                        /** @description Payment metadata */
-                        metadata?: {
-                            stepsRequired: number;
-                            needsApproval: boolean;
-                            approvalTransactionIndex?: number;
-                            paymentTransactionIndex: number;
-                            hasEnoughBalance?: boolean;
-                            hasEnoughGas?: boolean;
-                            platformFee?: {
-                                percentage: string;
-                                address: string;
-                            };
-                        };
-                    };
+                    "application/json": unknown;
                 };
             };
-            /** @description Secure payment token expired or invalid status */
-            403: {
+            /** @description Too Many Requests */
+            429: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content?: never;
             };
-            /** @description Secure payment not found */
-            404: {
+        };
+    };
+    OrchestratorController_linkClientId_v2: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description Orchestrator key for authentication */
+                "x-orchestrator-key": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": unknown;
+            };
+        };
+        responses: {
+            /** @description The active clientId link. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Too Many Requests */
+            429: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content?: never;
             };
-            /** @description Secure payment has already been completed */
-            409: {
+        };
+    };
+    OrchestratorController_createLinkIntent_v2: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description Orchestrator key for authentication */
+                "x-orchestrator-key": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": unknown;
+            };
+        };
+        responses: {
+            /** @description The onboarding URL and the created link intent. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Too Many Requests */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    OrchestratorController_unlinkClientId_v2: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description Orchestrator key for authentication */
+                "x-orchestrator-key": string;
+            };
+            path: {
+                /** @description Public clientId token (cli_*) to unlink. */
+                clientId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The revoked link (or a no-op when nothing was active). */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Too Many Requests */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    OrchestratorController_listFeeConfigs_v2: {
+        parameters: {
+            query?: {
+                /** @description Public clientId token (cli_*). Service resolves it to the internal ULID + platformId via validateClientId. */
+                clientId?: string;
+            };
+            header: {
+                /** @description Orchestrator key for authentication */
+                "x-orchestrator-key": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description List of orchestrator fee configurations. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Too Many Requests */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    OrchestratorController_createFeeConfig_v2: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description Orchestrator key for authentication */
+                "x-orchestrator-key": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": string;
+            };
+        };
+        responses: {
+            /** @description The created orchestrator fee configuration. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Too Many Requests */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    OrchestratorController_disableFeeConfig_v2: {
+        parameters: {
+            query?: {
+                /** @description Public clientId token (cli_*). Service resolves it to the internal ULID + platformId via validateClientId. */
+                clientId?: string;
+            };
+            header: {
+                /** @description Orchestrator key for authentication */
+                "x-orchestrator-key": string;
+            };
+            path: {
+                /** @description ID of the fee configuration / override to disable. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The disabled orchestrator fee configuration. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Too Many Requests */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    OrchestratorController_updateFeeConfig_v2: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description Orchestrator key for authentication */
+                "x-orchestrator-key": string;
+            };
+            path: {
+                /** @description ID of the fee configuration / override to update. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": unknown;
+            };
+        };
+        responses: {
+            /** @description The updated orchestrator fee configuration. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Too Many Requests */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    OrchestratorController_getBranding_v2: {
+        parameters: {
+            query?: {
+                /** @description Public clientId token (cli_*). Service resolves it to the internal ULID + platformId via validateClientId. */
+                clientId?: string;
+            };
+            header: {
+                /** @description Orchestrator key for authentication */
+                "x-orchestrator-key": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The effective branding, or null when none is configured. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Too Many Requests */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    OrchestratorController_createBranding_v2: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description Orchestrator key for authentication */
+                "x-orchestrator-key": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": string;
+            };
+        };
+        responses: {
+            /** @description The created branding. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Too Many Requests */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    OrchestratorController_removeBranding_v2: {
+        parameters: {
+            query?: {
+                /** @description Public clientId token (cli_*). Service resolves it to the internal ULID + platformId via validateClientId. */
+                clientId?: string;
+            };
+            header: {
+                /** @description Orchestrator key for authentication */
+                "x-orchestrator-key": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Whether a branding row was removed. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Too Many Requests */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    OrchestratorController_updateBranding_v2: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description Orchestrator key for authentication */
+                "x-orchestrator-key": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": unknown;
+            };
+        };
+        responses: {
+            /** @description The updated branding. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Too Many Requests */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    OrchestratorController_listWebhooks_v2: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description Orchestrator key for authentication */
+                "x-orchestrator-key": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The orchestrator's webhooks (active and inactive). */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Too Many Requests */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    OrchestratorController_createWebhook_v2: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description Orchestrator key for authentication */
+                "x-orchestrator-key": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": unknown;
+            };
+        };
+        responses: {
+            /** @description The registered webhook and its one-time HMAC signing secret. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Too Many Requests */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    OrchestratorController_deactivateWebhook_v2: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description Orchestrator key for authentication */
+                "x-orchestrator-key": string;
+            };
+            path: {
+                /** @description ID of the webhook to deactivate. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The deactivated webhook. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Too Many Requests */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    OrchestratorController_activateWebhook_v2: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description Orchestrator key for authentication */
+                "x-orchestrator-key": string;
+            };
+            path: {
+                /** @description ID of the webhook to reactivate. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The reactivated webhook. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Too Many Requests */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    OrchestratorController_testWebhook_v2: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description Orchestrator key for authentication */
+                "x-orchestrator-key": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": unknown;
+            };
+        };
+        responses: {
+            /** @description Counts of successful and failed test deliveries. */
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };

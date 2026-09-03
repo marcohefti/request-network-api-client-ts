@@ -36,7 +36,7 @@ describe("Payouts facade", () => {
       ],
     });
 
-    expect(response.ERC20BatchPaymentTransaction?.to).toBe("0xbridge");
+    expect(response.batchPaymentTransaction.to).toBe("0xbridge");
   });
 
   it("fetches recurring payout status", async () => {

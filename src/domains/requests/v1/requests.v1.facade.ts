@@ -12,7 +12,6 @@ const OP_CREATE = "RequestControllerV1_createRequest_v1" as const;
 const OP_PAYMENT_ROUTES = "RequestControllerV1_getRequestPaymentRoutes_v1" as const;
 const OP_PAYMENT_CALLDATA = "RequestControllerV1_getPaymentCalldata_v1" as const;
 const OP_REQUEST_STATUS = "RequestControllerV1_getRequestStatus_v1" as const;
-const OP_SEND_PAYMENT_INTENT = "RequestControllerV1_sendPaymentIntent_v1" as const;
 const OP_STOP_RECURRENCE = "RequestControllerV1_stopRecurrenceRequest_v1" as const;
 
 type CreateRequestBody = operations[typeof OP_CREATE]["requestBody"]["content"]["application/json"];
@@ -26,15 +25,9 @@ type RawPaymentCalldata = operations[typeof OP_PAYMENT_CALLDATA]["responses"][20
 
 type RawStatusResponse = operations[typeof OP_REQUEST_STATUS]["responses"][200]["content"]["application/json"];
 
-type PaymentIntentPayload = Extract<RawPaymentCalldata, { paymentIntentId: string }>;
 type CalldataPayload = Extract<RawPaymentCalldata, { transactions: unknown }>;
 
 const KIND_CALLDATA = "calldata" as const;
-const KIND_PAYMENT_INTENT = "paymentIntent" as const;
-
-function isPaymentIntentPayload(payload: RawPaymentCalldata): payload is PaymentIntentPayload {
-  return "paymentIntentId" in payload;
-}
 
 function isCalldataPayload(payload: RawPaymentCalldata): payload is CalldataPayload {
   return "transactions" in payload;
@@ -55,17 +48,14 @@ export type GetPaymentCalldataOptions = RequestV1OperationOptions & Partial<Paym
 
 export type RequestStatusResult = LegacyRequestStatusResult;
 
-export type SendPaymentIntentBody = operations[typeof OP_SEND_PAYMENT_INTENT]["requestBody"]["content"]["application/json"];
 
 export interface RequestsV1Api {
   create(body: CreateRequestBody, options?: RequestV1OperationOptions): Promise<CreateRequestResponse>;
   getPaymentRoutes(paymentReference: string, options: GetPaymentRoutesOptions): Promise<PaymentRoutesResponse>;
   getPaymentCalldata(paymentReference: string, options?: GetPaymentCalldataOptions): Promise<
-    | ({ kind: "calldata" } & CalldataPayload)
-    | ({ kind: "paymentIntent" } & PaymentIntentPayload)
+  { kind: "calldata" } & CalldataPayload
   >;
   getRequestStatus(paymentReference: string, options?: RequestV1OperationOptions): Promise<RequestStatusResult>;
-  sendPaymentIntent(paymentIntentId: string, body: SendPaymentIntentBody, options?: RequestV1OperationOptions): Promise<void>;
   stopRecurrence(paymentReference: string, options?: RequestV1OperationOptions): Promise<void>;
 }
 
@@ -131,12 +121,8 @@ export function createRequestsV1Api(http: HttpClient): RequestsV1Api {
       });
 
       if (isCalldataPayload(raw)) {
-        return { kind: KIND_CALLDATA, ...raw };
+        return { kind: KIND_CALLDATA, ...(raw as object) } as unknown as { kind: "calldata" } & CalldataPayload;
       }
-      if (isPaymentIntentPayload(raw)) {
-        return { kind: KIND_PAYMENT_INTENT, ...raw };
-      }
-
       throw new ValidationError("Unexpected payment calldata response", raw);
     },
 
@@ -157,20 +143,6 @@ export function createRequestsV1Api(http: HttpClient): RequestsV1Api {
       return normalizeLegacyStatusResponse(rawStatus);
     },
 
-    async sendPaymentIntent(paymentIntentId, body, options) {
-      const path = `/v1/request/${encodeURIComponent(paymentIntentId)}/send`;
-      await requestVoid(http, {
-        operationId: OP_SEND_PAYMENT_INTENT,
-        method: "POST",
-        path,
-        body,
-        requestSchemaKey: { operationId: OP_SEND_PAYMENT_INTENT, kind: "request", variant: "application/json" },
-        signal: options?.signal,
-        timeoutMs: options?.timeoutMs,
-        validation: options?.validation,
-        meta: options?.meta,
-      });
-    },
 
     async stopRecurrence(paymentReference, options) {
       const path = `/v1/request/${encodeURIComponent(paymentReference)}/stop-recurrence`;

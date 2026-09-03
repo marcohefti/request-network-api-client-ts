@@ -1,8 +1,13 @@
 import { describe, expect, it } from "vitest";
 
 import { isRequestApiError } from "../../../src/core/errors/request-api.error";
+import type { HttpAdapter, HttpRequest } from "../../../src/core/http/http.types";
 import { createRequestClient } from "../../../src/request.client";
 import { TEST_BASE_URL } from "../../utils/test-env";
+
+const SECURE_PAYMENT_URL = "https://secure.request.network/token";
+const CLIENT_ID = "client-test";
+const ORCHESTRATOR_KEY = "orc-test";
 
 describe("Secure payments facade", () => {
   const client = createRequestClient({ baseUrl: TEST_BASE_URL });
@@ -21,6 +26,35 @@ describe("Secure payments facade", () => {
     expect(response.token).toBeDefined();
     expect(response.requestIds.length).toBe(1);
     expect(response.securePaymentUrl).toContain("secure.request.network");
+  });
+
+  it("preserves paired Client-ID and orchestrator credentials on creation", async () => {
+    let captured: HttpRequest | undefined;
+    const adapter: HttpAdapter = {
+      send(request) {
+        captured = request;
+        return Promise.resolve({
+          status: 201,
+          ok: true,
+          headers: {},
+          data: { requestIds: ["req-1"], securePaymentUrl: SECURE_PAYMENT_URL, token: "token" },
+        });
+      },
+    };
+    const pairedClient = createRequestClient({
+      baseUrl: TEST_BASE_URL,
+      clientId: CLIENT_ID,
+      orchestratorKey: ORCHESTRATOR_KEY,
+      adapter,
+      runtimeValidation: false,
+    });
+
+    await pairedClient.securePayments.create({ requests: [{ amount: "10" }] });
+
+    expect(captured?.headers).toMatchObject({
+      "x-client-id": CLIENT_ID,
+      "x-orchestrator-key": ORCHESTRATOR_KEY,
+    });
   });
 
   it("finds a secure payment by request ID", async () => {

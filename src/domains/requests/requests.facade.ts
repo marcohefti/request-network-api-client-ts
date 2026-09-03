@@ -9,7 +9,6 @@ const OP_LIST = "RequestControllerV2_listRequests_v2" as const;
 const OP_PAYMENT_ROUTES = "RequestControllerV2_getRequestPaymentRoutes_v2" as const;
 const OP_PAYMENT_CALLDATA = "RequestControllerV2_getPaymentCalldata_v2" as const;
 const OP_UPDATE = "RequestControllerV2_updateRequest_v2" as const;
-const OP_SEND_PAYMENT_INTENT = "RequestControllerV2_sendPaymentIntent_v2" as const;
 const OP_REQUEST_STATUS = "RequestControllerV2_getRequestStatus_v2" as const;
 const PATH_BASE = "/v2/request" as const;
 
@@ -27,21 +26,14 @@ type PaymentCalldataQuery = NonNullable<operations[typeof OP_PAYMENT_CALLDATA]["
 type RawPaymentCalldata = operations[typeof OP_PAYMENT_CALLDATA]["responses"][200]["content"]["application/json"];
 type RequestStatusResponse = operations[typeof OP_REQUEST_STATUS]["responses"][200]["content"]["application/json"];
 
-type PaymentIntentPayload = Extract<RawPaymentCalldata, { paymentIntentId: string }>;
 type CalldataPayload = Extract<RawPaymentCalldata, { transactions: unknown }>;
 
 const KIND_CALLDATA = "calldata" as const;
-const KIND_PAYMENT_INTENT = "paymentIntent" as const;
-
-function isPaymentIntentPayload(payload: RawPaymentCalldata): payload is PaymentIntentPayload {
-  return "paymentIntentId" in payload;
-}
 
 function isCalldataPayload(payload: RawPaymentCalldata): payload is CalldataPayload {
   return "transactions" in payload;
 }
 
-type SendPaymentIntentBody = operations[typeof OP_SEND_PAYMENT_INTENT]["requestBody"]["content"]["application/json"];
 
 export interface RequestOperationOptions {
   signal?: AbortSignal;
@@ -58,9 +50,7 @@ export type GetPaymentCalldataOptions = RequestOperationOptions & Partial<Paymen
 
 export type ListRequestsOptions = RequestOperationOptions & ListRequestsQuery;
 
-export type PaymentCalldataResult =
-  | ({ kind: "calldata" } & CalldataPayload)
-  | ({ kind: "paymentIntent" } & PaymentIntentPayload);
+export type PaymentCalldataResult = { kind: "calldata" } & CalldataPayload;
 export type { RequestStatusResult };
 
 export interface RequestsApi {
@@ -70,7 +60,6 @@ export interface RequestsApi {
   getPaymentCalldata(requestId: string, options?: GetPaymentCalldataOptions): Promise<PaymentCalldataResult>;
   getRequestStatus(requestId: string, options?: RequestOperationOptions): Promise<RequestStatusResult>;
   update(requestId: string, body: UpdateRequestBody, options?: RequestOperationOptions): Promise<void>;
-  sendPaymentIntent(paymentIntentId: string, body: SendPaymentIntentBody, options?: RequestOperationOptions): Promise<void>;
 }
 
 export function createRequestsApi(http: HttpClient): RequestsApi {
@@ -174,12 +163,8 @@ export function createRequestsApi(http: HttpClient): RequestsApi {
       });
 
       if (isCalldataPayload(raw)) {
-        return { kind: KIND_CALLDATA, ...raw };
+        return { kind: KIND_CALLDATA, ...(raw as object) } as PaymentCalldataResult;
       }
-      if (isPaymentIntentPayload(raw)) {
-        return { kind: KIND_PAYMENT_INTENT, ...raw };
-      }
-
       throw new ValidationError("Unexpected payment calldata response", raw);
     },
 
@@ -198,19 +183,5 @@ export function createRequestsApi(http: HttpClient): RequestsApi {
       });
     },
 
-    async sendPaymentIntent(paymentIntentId: string, body: SendPaymentIntentBody, options?: RequestOperationOptions) {
-      const path = `${PATH_BASE}/payment-intents/${encodeURIComponent(paymentIntentId)}`;
-      await requestVoid(http, {
-        operationId: OP_SEND_PAYMENT_INTENT,
-        method: "POST",
-        path,
-        body,
-        requestSchemaKey: { operationId: OP_SEND_PAYMENT_INTENT, kind: "request", variant: "application/json" },
-        signal: options?.signal,
-        timeoutMs: options?.timeoutMs,
-        validation: options?.validation,
-        meta: options?.meta,
-      });
-    },
   };
 }

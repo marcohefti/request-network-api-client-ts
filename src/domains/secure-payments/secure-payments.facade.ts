@@ -1,6 +1,12 @@
 import type { HttpClient, RequestOptions, RuntimeValidationOption } from "../../core/http/http.types";
 import { requestJson } from "../../core/http/operation.helper";
 import type { operations } from "../../generated/openapi-types";
+import {
+  createOperationsApi,
+  type OperationArguments,
+  type OperationId,
+  type OperationResponse,
+} from "../operations";
 import { buildRequestQuery } from "../requests/request.helpers";
 
 const OP_FIND_BY_REQUEST_ID = "SecurePaymentController_findSecurePayment_v2" as const;
@@ -28,10 +34,17 @@ export interface SecurePaymentsApi {
   create(body: CreateSecurePaymentBody, options?: SecurePaymentsOperationOptions): Promise<CreateSecurePaymentResponse>;
   findByRequestId(requestId: FindSecurePaymentQuery["requestId"], options?: SecurePaymentsOperationOptions): Promise<FindSecurePaymentResponse>;
   getByToken(token: string, options?: GetSecurePaymentByTokenOptions): Promise<GetSecurePaymentByTokenResponse>;
+  /** Typed access to all current Secure Payment operations, including payouts, fee previews, intents, and transaction refresh. */
+  execute<Id extends Extract<OperationId, `SecurePayment${string}`>>(
+    operationId: Id,
+    ...args: OperationArguments<Id>
+  ): Promise<OperationResponse<Id>>;
 }
 
 export function createSecurePaymentsApi(http: HttpClient): SecurePaymentsApi {
+  const operations = createOperationsApi(http);
   return {
+    execute: (operationId, ...args) => operations.execute(operationId, ...args),
     async create(body, options) {
       return requestJson<CreateSecurePaymentResponse>(http, {
         operationId: OP_CREATE,

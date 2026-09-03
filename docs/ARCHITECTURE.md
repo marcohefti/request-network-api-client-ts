@@ -16,7 +16,7 @@ See also: [SCOPE.md](./SCOPE.md), [BEFORE-AFTER.md](./BEFORE-AFTER.md)
 
 ## 2. Supported Runtimes
 
-- **Node.js:** >=20.x (CI covers 20/22/24. Stick to the latest Active LTS for production). See the [Runtime Support & Rationale](../README.md#runtime-support--rationale) for details on the Node 20 baseline.
+- **Node.js:** >=20.x (supported releases 20/22/24 are covered in CI, with Node 25 as an experimental compatibility check; stick to the latest Active LTS for production). See the [Runtime Support & Rationale](../README.md#runtime-support--rationale) for details on the Node 20 baseline.
 - **Browser / Edge:** Modern browsers and serverless platforms via fetch-compatible adapters. The client must avoid Node-only globals in shared modules.
 
 See also - docs site: [Quick Start](/guide/quick-start)
@@ -68,6 +68,10 @@ See also - docs site: [Quick Start](/guide/quick-start)
 └── tsconfig*.json                     # TypeScript configs (build, vitest, etc.)
 
 > Contracts (OpenAPI spec, metadata, webhook fixtures) live in `@marcohefti/request-network-api-contracts` and are consumed via package imports during build/test steps.
+
+The 0.7.0 client consumes the exact published contracts package. Its generated
+operation catalog is the complete API escape hatch; focused domain facades add
+ergonomics without duplicating contract ownership.
 ```
 
 ## 4. HTTP Pipeline & Request Client
@@ -151,7 +155,7 @@ These rules will later be enforced with ESLint/depcruise once code lands. Keep f
 
 ### 6.4 Surface & Naming Conventions
 
-- **Verb rubric** - Domain facades expose predictable verbs: `create`, `list`, `findOne`, `update`, and `delete`. Read operations that return derived data use explicit prefixes (`getPaymentRoutes`, `getPaymentCalldata`, `getConversionRoutes`). Mutations that fire-and-forget external behavior (e.g., sending intents) use imperative verbs such as `sendPaymentIntent`.
+- **Verb rubric** - Domain facades expose predictable verbs: `create`, `list`, `findOne`, `update`, and `delete`. Read operations that return derived data use explicit prefixes (`getPaymentRoutes`, `getPaymentCalldata`, `getConversionRoutes`).
 - **Argument ordering** - Method signatures accept path identifiers first (derived from URL segments such as `requestId` or `clientId`), followed by the primary payload/body object, and end with an optional `options` bag for query params or per-call overrides. Avoid boolean positional flags.
 - **Identifier naming** - Mirror the REST path in parameter names (e.g., `/v2/request/{requestId}` -> `requestId: string`). Do not invent aliases unless upstream names are ambiguous. Prefer `payerId`/`clientId`/`paymentIntentId` as defined by the API.
 - **Return shapes** - `list*` methods return arrays; `findOne*` methods return a single object or `null` when the API delivers 404/204. Derived helpers return typed objects without nesting (no `{ data: ... }` wrappers). When a response is a union, include a discriminant `kind` property with literal values (`'paymentIntent'`, `'calldata'`, etc.) so consumers can `switch` reliably.
@@ -172,6 +176,8 @@ The package publishes tree‑shakeable subpaths that line up with domain facades
 | `@marcohefti/request-network-api-client/client-ids` | Client ID lifecycle management |
 | `@marcohefti/request-network-api-client/payments` | Payment search facade with pagination helpers |
 | `@marcohefti/request-network-api-client/secure-payments` | Secure payment link creation and token resolution |
+| `@marcohefti/request-network-api-client/orchestrators` | Orchestrator linking, fee, branding, and webhook operations |
+| `@marcohefti/request-network-api-client/operations` | Generated typed access to every operation in the released contract |
 | `@marcohefti/request-network-api-client/pay` | Legacy pay execution facade (mirrors `/v1/pay`) and exposes `.legacy` |
 | `@marcohefti/request-network-api-client/v1/requests` | Legacy request endpoints and status helpers |
 | `@marcohefti/request-network-api-client/v1/payer` | Legacy payer/compliance endpoints |
@@ -185,13 +191,15 @@ Each subpath re-exports its typed factory (`create<Domain>Api`) and related type
 
 | Module | Endpoints | Notes |
 | --- | --- | --- |
-| `requests` | v2: `GET /v2/request`, `POST /v2/request`, `GET /v2/request/{id}`, `GET /v2/request/{id}/pay`, `GET /v2/request/{id}/routes`, `PATCH /v2/request/{id}`, `POST /v2/request/payment-intents/{paymentIntent}`. Legacy v1: `POST /v1/request`, `GET /v1/request/{paymentReference}`, `GET /v1/request/{paymentReference}/pay`, `GET /v1/request/{paymentReference}/routes`, `POST /v1/request/{paymentIntentId}/send`, `PATCH /v1/request/{paymentReference}/stop-recurrence` | Provides discriminated unions for payment calldata and request status across versions. Legacy helpers remain available via `client.requestsV1` or `client.requests`'s shared status mappers. |
+| `requests` | v2: `GET /v2/request`, `POST /v2/request`, `GET /v2/request/{id}`, `GET /v2/request/{id}/pay`, `GET /v2/request/{id}/routes`, `PATCH /v2/request/{id}`. Legacy v1: `POST /v1/request`, `GET /v1/request/{paymentReference}`, `GET /v1/request/{paymentReference}/pay`, `GET /v1/request/{paymentReference}/routes`, `PATCH /v1/request/{paymentReference}/stop-recurrence` | Provides discriminated unions for payment calldata and request status across versions. The removed v1/v2 payment-intent submission operations are not exposed. |
 | `payouts` | `POST /v2/payouts`, `POST /v2/payouts/batch`, `GET /v2/payouts/recurring/{id}`, `POST /v2/payouts/recurring/{id}`, `PATCH /v2/payouts/recurring/{id}` | Covers single, batch, and recurring payouts, returning typed transaction metadata. |
 | `payer` | v2: `POST /v2/payer`, `GET /v2/payer/{clientUserId}`, `PATCH /v2/payer/{clientUserId}`, `POST /v2/payer/{clientUserId}/payment-details`, `GET /v2/payer/{clientUserId}/payment-details`. Legacy v1 equivalents under `/v1/payer` | Encapsulates compliance onboarding, status polling, and payment detail collection. Access legacy routes via `client.payer.legacy` or the `/v1/payer` barrel. |
 | `clientIds` | `POST /v2/client-ids`, `PUT /v2/client-ids/{id}`, `DELETE /v2/client-ids/{id}` | Used for e-commerce client provisioning. Exposes typed responses. |
 | `currencies` | v2: `GET /v2/currencies`, `GET /v2/currencies/{currencyId}/conversion-routes`. Legacy v1: `GET /v1/currencies`, `GET /v1/currencies/{currencyId}/conversion-routes` | Returns strongly typed token metadata and conversion routes. Legacy endpoints remain accessible via `client.currencies.legacy` or the `/v1/currencies` barrel. |
 | `payments` | `GET /v2/payments` | Provides typed payment search with pagination, fee breakdowns, and request metadata. |
-| `securePayments` | `POST /v2/secure-payments`, `GET /v2/secure-payments`, `GET /v2/secure-payments/{token}` | Manages secure payment link creation and token lookups. |
+| `securePayments` | Current `/v2/secure-payments/**` operations | Manages payment links, lookups, fee previews, payouts, multicalls, intents, user events, calldata refresh, and Tron broadcast. |
+| `orchestrators` | Current 18 `/v2/orchestrators/**` operations | Manages linking, fee configurations, branding, and orchestrator webhooks. |
+| `operations` | All 82 operations in contracts 0.7.0 | Generated typed fallback for current domains that do not yet warrant a hand-shaped facade. |
 | `pay` | `POST /v1/pay` | Initiates the legacy pay-without-request flow. Exposed via `client.pay.payRequest` and the `/pay` or `/v1/pay` barrels. |
 
 Each module:
@@ -280,11 +288,11 @@ Outstanding webhook schema gaps (track in issue backlog until Request publishes 
 ## 12. Testing Strategy
 
 - **Unit tests:** Use Vitest with MSW in node mode to intercept `fetch` and replay fixtures pulled from the public docs. Every client method must have success + error cases with assertions on both data and `RequestApiError` details.
-- **Integration tests:** Provide an opt-in suite that hits the Request production host (`https://api.request.network`) and, where needed, crypto-to-fiat sandbox flows (Sepolia, mock KYC). Tests only run when the shared env variables (`REQUEST_API_KEY`, `REQUEST_PAYMENT_NETWORK`, `REQUEST_PAYEE_WALLET`, `REQUEST_PAYER_WALLET`, etc.) are present. Otherwise they skip. Examples include creating requests, fetching payment routes, exercising payout endpoints, and verifying crypto-to-fiat flows. Call out in docs that contributors can point the client at proxies or partner sandboxes by setting `REQUEST_API_URL`.
+- **Integration tests:** Provide an opt-in suite that hits the Request production host (`https://api.request.network`) with low-value or testnet inputs. Request exposes no staging API host. Tests only run when the shared env variables (`REQUEST_API_KEY`, `REQUEST_PAYMENT_NETWORK`, `REQUEST_PAYEE_WALLET`, `REQUEST_PAYER_WALLET`, etc.) are present. Otherwise they skip. `REQUEST_API_URL` is reserved for local test proxies or compatible gateways, not an assumed Request staging environment.
 - **Type tests:** Add `expectTypeOf`/`tsd` style assertions to ensure generated OpenAPI types and public exports stay stable. Compile these in CI using `tsc --noEmit`.
 - **Webhook utilities:** `webhooks.testing` provides signature helpers, request/response mocks, and verification bypass toggles for unit suites.
 - **Coverage:** Target ≥80 % line/function coverage using Vitest’s V8 coverage provider. Fail CI below the threshold once real code lands.
-- **CI matrix:** Run lint/typecheck/unit tests on Node 20/22/24 so we cover the minimum supported runtime plus active/current releases. Integration tests run in a separate workflow guarded by sandbox secrets.
+- **CI matrix:** Run lint/typecheck/unit tests on Node 20/22/24 (and Node 25 while configured) so the supported runtime range remains covered. Live integration tests run separately and require explicit production-safe credentials.
 - **Base URL toggles:** Testing docs must highlight the `baseUrl` option on the client so developers can switch between production (`https://api.request.network`) or local/proxy environments (`http://127.0.0.1:8080`, custom gateways) without code changes.
   - Tests use MSW (Mock Service Worker) to intercept `fetch` and stub endpoints. A shared constant `TEST_BASE_URL` (http://localhost) anchors handlers and HTTP clients. No real server is required.
 

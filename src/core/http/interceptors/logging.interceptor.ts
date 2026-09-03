@@ -6,6 +6,12 @@ export interface LoggingOptions {
   level?: LogLevel;
 }
 
+function redactUrl(url: string): string {
+  // Secure-payment bearer tokens are path segments, and therefore must not be
+  // leaked by the otherwise useful request lifecycle logs.
+  return url.replace(/(\/secure-payments\/(?:multicall-payouts\/)?)([^/?#]+)/g, "$1<redacted>");
+}
+
 export function createLoggingInterceptor(options?: LoggingOptions): Interceptor {
   const log = options?.logger;
   const level: LogLevel = options?.level ?? "info";
@@ -25,15 +31,16 @@ export function createLoggingInterceptor(options?: LoggingOptions): Interceptor 
 
   return async (req, next) => {
     const startedAt = Date.now();
-    emit("request:start", { method: req.method, url: req.url, meta: req.meta });
+    const url = redactUrl(req.url);
+    emit("request:start", { method: req.method, url, meta: req.meta });
     try {
       const res = await next(req);
       const durationMs = Date.now() - startedAt;
-      emit("request:response", { method: req.method, url: req.url, status: res.status, ok: res.ok, durationMs, meta: req.meta });
+      emit("request:response", { method: req.method, url, status: res.status, ok: res.ok, durationMs, meta: req.meta });
       return res;
     } catch (error) {
       const durationMs = Date.now() - startedAt;
-      emit("request:error", { method: req.method, url: req.url, durationMs, error, meta: req.meta });
+      emit("request:error", { method: req.method, url, durationMs, error, meta: req.meta });
       throw error;
     }
   };

@@ -249,19 +249,13 @@ const data = await client.requests.getPaymentCalldata(invoice.requestId, {
 
 ---
 
-## 7. Send Payment Intent (Server, API Key)
+## 7. Removed Payment Intent Submission
 
-### Before (No Client)
-
-```ts
-await axios.post(`/v2/request/payment-intents/${paymentIntent}`, payload);
-```
-
-### After (With Client)
-
-```ts
-await client.requests.sendPaymentIntent(paymentIntent, payload);
-```
+The hosted API no longer publishes either payment-intent submission endpoint.
+Remove direct calls to `/v2/request/payment-intents/{paymentIntentId}` and the
+former `client.requests.sendPaymentIntent` helper. Execute the calldata returned
+by the current Request or Secure Payment flow with the shopper's wallet instead;
+the REST client deliberately does not invent a replacement transaction flow.
 
 ---
 

@@ -2,7 +2,14 @@
 
 This document provides migration guidance for breaking changes in `@marcohefti/request-network-api-client`.
 
-## Current Version: 0.5.x
+## Current Version: 0.7.x
+
+## 0.6.x to 0.7.0
+
+The client now consumes the published Request API contract 0.7.0. Remove uses
+of `requests.sendPaymentIntent` and legacy payment-intent branches: those
+operations are absent from the current API. Use generated `client.operations`
+for newly released domains and `client.orchestrators` for partner operations.
 
 While on the `0.x` release line, minor and patch releases may include breaking changes as the API surface stabilizes. This is standard practice for pre-1.0 packages following Semantic Versioning.
 
@@ -49,13 +56,13 @@ Before upgrading to a major version:
 2. **Update in a branch**: Test the upgrade in a separate git branch
 3. **Run your test suite**: Ensure all tests pass
 4. **Check TypeScript errors**: Fix any new type errors
-5. **Test in staging**: Deploy to staging environment before production
+5. **Test production safely**: Request has no staging API host; use low-value or testnet flows.
 
 ### Gradual Migration
 
 For large codebases:
 
-1. **Pin the current version**: Use exact version in package.json (`"0.5.5"` not `"^0.5.5"`)
+1. **Pin the current version**: Use an exact version in package.json (`"0.7.0"` not `"^0.7.0"`)
 2. **Create adapters**: Wrap the client in your own adapter layer
 3. **Migrate incrementally**: Update one module/domain at a time
 4. **Maintain compatibility**: Use feature flags to toggle new behavior
@@ -67,7 +74,7 @@ If you need stability:
 ```json
 {
   "dependencies": {
-    "@marcohefti/request-network-api-client": "0.5.5"
+    "@marcohefti/request-network-api-client": "0.7.0"
   }
 }
 ```
@@ -76,9 +83,12 @@ Use exact versions (no `^` or `~`) to prevent automatic updates.
 
 ## Historical Migrations
 
-### No Breaking Changes Yet
+### 0.7.0
 
-As of version 0.5.5, there have been no major breaking changes that require migration.
+Version 0.7.0 removes helpers for the two payment-intent submission operations
+deleted from the hosted API. It adds the generated all-operation facade,
+orchestrator facade and paired orchestrator/Client-ID authentication described
+above.
 
 Future breaking changes will be documented here with:
 - What changed

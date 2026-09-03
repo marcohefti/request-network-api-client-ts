@@ -1,4 +1,4 @@
-import { readFileSync, readdirSync } from "node:fs";
+import { readFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
@@ -8,7 +8,7 @@ const SPEC_PATH = require.resolve(
   "@marcohefti/request-network-api-contracts/specs/openapi/request-network-openapi.json"
 );
 const ROOT = join(__dirname, "..", "..");
-const DOMAINS_PATH = join(ROOT, "src", "domains");
+const OPERATIONS_PATH = join(ROOT, "src", "generated", "openapi-operations.ts");
 
 const EXPECTED_UNCOVERED_OPERATION_IDS: readonly string[] = [];
 
@@ -26,31 +26,12 @@ function collectOperationIdsFromSpec(): Set<string> {
   return ids;
 }
 
-function walkDomainFiles(dir: string): string[] {
-  const entries = readdirSync(dir, { withFileTypes: true });
-  const files: string[] = [];
-  for (const entry of entries) {
-    const fullPath = join(dir, entry.name);
-    if (entry.isDirectory()) {
-      files.push(...walkDomainFiles(fullPath));
-      continue;
-    }
-    files.push(fullPath);
-  }
-  return files;
-}
-
 function collectOperationIdsFromSource(): Set<string> {
   const ids = new Set<string>();
-  const files = walkDomainFiles(DOMAINS_PATH).filter((file) => file.endsWith(".ts"));
-  for (const filePath of files) {
-    const content = readFileSync(filePath, "utf8");
-    const matches = content.match(/"([A-Za-z0-9_]+Controller[^"]*)"/g);
-    if (!matches) continue;
-    for (const match of matches) {
-      const operationId = match.slice(1, -1);
-      ids.add(operationId);
-    }
+  const content = readFileSync(OPERATIONS_PATH, "utf8");
+  const matches = content.match(/"([A-Za-z0-9_]+Controller[^"]*)"(?=:\s*\{)/g) ?? [];
+  for (const match of matches) {
+    ids.add(match.slice(1, -1));
   }
   return ids;
 }
