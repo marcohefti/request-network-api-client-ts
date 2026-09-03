@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.1] - 2026-09-03
+
+### Fixed
+- Publish source-aligned declaration files instead of a declaration bundle that
+  incorrectly promoted type-only namespace exports to runtime values.
+- Ship the Express middleware's transitive declaration dependency so clean
+  TypeScript consumers resolve webhook middleware types without extra setup.
+
 ## [0.7.0] - 2026-09-03
 
 ### Changed

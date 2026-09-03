@@ -69,7 +69,7 @@ See also - docs site: [Quick Start](/guide/quick-start)
 
 > Contracts (OpenAPI spec, metadata, webhook fixtures) live in `@marcohefti/request-network-api-contracts` and are consumed via package imports during build/test steps.
 
-The 0.7.0 client consumes the exact published contracts package. Its generated
+The 0.7.1 client consumes the exact published contracts package. Its generated
 operation catalog is the complete API escape hatch; focused domain facades add
 ergonomics without duplicating contract ownership.
 ```
@@ -251,12 +251,12 @@ See also - docs site: [Quick Start](/guide/quick-start)
 ## 10. Build & Distribution
 
 - **Tooling:** `tsup` orchestrates dual outputs using `tsconfig.json`, producing:
-  - `dist/esm/index.js` + `dist/esm/index.d.mts` (ESM + declarations)
+  - `dist/esm/index.js` + `dist/esm/index.d.ts` (ESM + source-aligned declarations)
   - `dist/cjs/index.js` (CommonJS)
 - `package.json`:
   - `"main": "./dist/cjs/index.js"`
   - `"module": "./dist/esm/index.js"`
-  - `"types": "./dist/esm/index.d.mts"`
+  - `"types": "./dist/esm/index.d.ts"`
   - `"exports"` map routing `import` to ESM and `require` to CJS (subpath exports follow the same pattern as modules are implemented).
   - `"files": ["dist"]`
   - `"sideEffects": false` to enable tree‐shaking.

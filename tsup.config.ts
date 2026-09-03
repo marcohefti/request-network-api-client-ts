@@ -42,10 +42,7 @@ export default defineConfig([
     entry: entryPoints,
     format: ["esm"],
     outDir: "dist/esm",
-    dts: {
-      entry: entryPoints,
-      resolve: true,
-    },
+    dts: false,
     clean: true,
     ...shared,
   },

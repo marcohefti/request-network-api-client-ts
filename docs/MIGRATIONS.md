@@ -4,7 +4,7 @@ This document provides migration guidance for breaking changes in `@marcohefti/r
 
 ## Current Version: 0.7.x
 
-## 0.6.x to 0.7.0
+## 0.6.x to 0.7.1
 
 The client now consumes the published Request API contract 0.7.0. Remove uses
 of `requests.sendPaymentIntent` and legacy payment-intent branches: those
@@ -62,7 +62,7 @@ Before upgrading to a major version:
 
 For large codebases:
 
-1. **Pin the current version**: Use an exact version in package.json (`"0.7.0"` not `"^0.7.0"`)
+1. **Pin the current version**: Use an exact version in package.json (`"0.7.1"` not `"^0.7.1"`)
 2. **Create adapters**: Wrap the client in your own adapter layer
 3. **Migrate incrementally**: Update one module/domain at a time
 4. **Maintain compatibility**: Use feature flags to toggle new behavior
@@ -74,7 +74,7 @@ If you need stability:
 ```json
 {
   "dependencies": {
-    "@marcohefti/request-network-api-client": "0.7.0"
+    "@marcohefti/request-network-api-client": "0.7.1"
   }
 }
 ```

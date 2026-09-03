@@ -25,7 +25,7 @@ When new scripts are introduced, update `package.json`, `docs/TESTING.md`, and t
 
 ### Webhook suites & utilities
 
-The 0.7.0 parity suite verifies all 82 OpenAPI operations through the generated
+The 0.7.1 parity suite verifies all 82 OpenAPI operations through the generated
 operation catalog and all current webhook event identifiers. Unknown future
 payload fields are intentionally tolerated, while every field currently
 required by the published webhook contract remains validated. Unknown event

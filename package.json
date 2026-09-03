@@ -1,6 +1,6 @@
 {
   "name": "@marcohefti/request-network-api-client",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "private": false,
   "description": "Request Network API client for Node and Browser.",
   "publishConfig": {
@@ -27,7 +27,7 @@
     "web3"
   ],
   "scripts": {
-    "build": "node scripts/clean-dist.mjs && tsup",
+    "build": "node scripts/clean-dist.mjs && tsup && tsc --project tsconfig.build.json --outDir dist/esm",
     "build:watch": "tsup --watch",
     "dev": "pnpm run build:watch",
     "dev:webhook": "tsx examples/webhooks/local-listener.ts",
@@ -52,96 +52,96 @@
   },
   "main": "./dist/cjs/index.js",
   "module": "./dist/esm/index.js",
-  "types": "./dist/esm/index.d.mts",
+  "types": "./dist/esm/index.d.ts",
   "exports": {
     ".": {
-      "types": "./dist/esm/index.d.mts",
+      "types": "./dist/esm/index.d.ts",
       "import": "./dist/esm/index.js",
       "require": "./dist/cjs/index.js",
       "default": "./dist/esm/index.js"
     },
     "./currencies": {
-      "types": "./dist/esm/domains/currencies/index.d.mts",
+      "types": "./dist/esm/domains/currencies/index.d.ts",
       "import": "./dist/esm/domains/currencies/index.js",
       "require": "./dist/cjs/domains/currencies/index.js"
     },
     "./v1/currencies": {
-      "types": "./dist/esm/domains/currencies/v1/index.d.mts",
+      "types": "./dist/esm/domains/currencies/v1/index.d.ts",
       "import": "./dist/esm/domains/currencies/v1/index.js",
       "require": "./dist/cjs/domains/currencies/v1/index.js"
     },
     "./client-ids": {
-      "types": "./dist/esm/domains/client-ids/index.d.mts",
+      "types": "./dist/esm/domains/client-ids/index.d.ts",
       "import": "./dist/esm/domains/client-ids/index.js",
       "require": "./dist/cjs/domains/client-ids/index.js"
     },
     "./requests": {
-      "types": "./dist/esm/domains/requests/index.d.mts",
+      "types": "./dist/esm/domains/requests/index.d.ts",
       "import": "./dist/esm/domains/requests/index.js",
       "require": "./dist/cjs/domains/requests/index.js"
     },
     "./v1/requests": {
-      "types": "./dist/esm/domains/requests/v1/index.d.mts",
+      "types": "./dist/esm/domains/requests/v1/index.d.ts",
       "import": "./dist/esm/domains/requests/v1/index.js",
       "require": "./dist/cjs/domains/requests/v1/index.js"
     },
     "./payouts": {
-      "types": "./dist/esm/domains/payouts/index.d.mts",
+      "types": "./dist/esm/domains/payouts/index.d.ts",
       "import": "./dist/esm/domains/payouts/index.js",
       "require": "./dist/cjs/domains/payouts/index.js"
     },
     "./payments": {
-      "types": "./dist/esm/domains/payments/index.d.mts",
+      "types": "./dist/esm/domains/payments/index.d.ts",
       "import": "./dist/esm/domains/payments/index.js",
       "require": "./dist/cjs/domains/payments/index.js"
     },
     "./pay": {
-      "types": "./dist/esm/domains/pay/index.d.mts",
+      "types": "./dist/esm/domains/pay/index.d.ts",
       "import": "./dist/esm/domains/pay/index.js",
       "require": "./dist/cjs/domains/pay/index.js"
     },
     "./payer": {
-      "types": "./dist/esm/domains/payer/index.d.mts",
+      "types": "./dist/esm/domains/payer/index.d.ts",
       "import": "./dist/esm/domains/payer/index.js",
       "require": "./dist/cjs/domains/payer/index.js"
     },
     "./secure-payments": {
-      "types": "./dist/esm/domains/secure-payments/index.d.mts",
+      "types": "./dist/esm/domains/secure-payments/index.d.ts",
       "import": "./dist/esm/domains/secure-payments/index.js",
       "require": "./dist/cjs/domains/secure-payments/index.js"
     },
     "./orchestrators": {
-      "types": "./dist/esm/domains/orchestrators/index.d.mts",
+      "types": "./dist/esm/domains/orchestrators/index.d.ts",
       "import": "./dist/esm/domains/orchestrators/index.js",
       "require": "./dist/cjs/domains/orchestrators/index.js"
     },
     "./operations": {
-      "types": "./dist/esm/domains/operations/index.d.mts",
+      "types": "./dist/esm/domains/operations/index.d.ts",
       "import": "./dist/esm/domains/operations/index.js",
       "require": "./dist/cjs/domains/operations/index.js"
     },
     "./v1/payer": {
-      "types": "./dist/esm/domains/payer/v1/index.d.mts",
+      "types": "./dist/esm/domains/payer/v1/index.d.ts",
       "import": "./dist/esm/domains/payer/v1/index.js",
       "require": "./dist/cjs/domains/payer/v1/index.js"
     },
     "./v2/payer": {
-      "types": "./dist/esm/domains/payer/v2/index.d.mts",
+      "types": "./dist/esm/domains/payer/v2/index.d.ts",
       "import": "./dist/esm/domains/payer/v2/index.js",
       "require": "./dist/cjs/domains/payer/v2/index.js"
     },
     "./v1/pay": {
-      "types": "./dist/esm/domains/pay/v1/index.d.mts",
+      "types": "./dist/esm/domains/pay/v1/index.d.ts",
       "import": "./dist/esm/domains/pay/v1/index.js",
       "require": "./dist/cjs/domains/pay/v1/index.js"
     },
     "./errors": {
-      "types": "./dist/esm/index.d.mts",
+      "types": "./dist/esm/index.d.ts",
       "import": "./dist/esm/index.js",
       "require": "./dist/cjs/index.js"
     },
     "./http": {
-      "types": "./dist/esm/index.d.mts",
+      "types": "./dist/esm/index.d.ts",
       "import": "./dist/esm/index.js",
       "require": "./dist/cjs/index.js"
     }
@@ -150,6 +150,7 @@
     "dist"
   ],
   "dependencies": {
+    "@types/express-serve-static-core": "^4.19.7",
     "zod": "^3.23.8"
   },
   "sideEffects": [
