@@ -56,6 +56,17 @@ const webhookBaseSchema = z
 
 const paymentConfirmedSchema = webhookBaseSchema.extend({
   event: z.literal("payment.confirmed"),
+  fees: z
+    .array(
+      z
+        .object({
+          type: z.string(),
+          amount: z.string().nullable(),
+          currency: z.string(),
+        })
+        .passthrough(),
+    )
+    .optional(),
 });
 
 const paymentFailedSchema = webhookBaseSchema.extend({

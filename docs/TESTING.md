@@ -59,7 +59,7 @@ Alternatively, you can:
 
 **Required**
 
-- `REQUEST_API_KEY` - API key from the Request API Portal. The same key can exercise testnets and mainnet flows.
+- `REQUEST_API_KEY` - API key for the Request API. The same key can exercise testnets and mainnet flows.
 - `REQUEST_PAYEE_WALLET` - Wallet address that receives payouts/requests.
 - `REQUEST_PAYER_WALLET` - Wallet address used when creating payment routes/calldata.
 - `REQUEST_PAYMENT_NETWORK` - Payment network slug (e.g. `erc20-sepolia`, `erc20-mainnet`).
@@ -93,14 +93,14 @@ pnpm test -- --run tests/integration/live/webhooks-recurring.test.ts
 
 **Extra env requirements**
 
-- `REQUEST_WEBHOOK_SECRET` – Signing secret copied from the Request portal.
-- `REQUEST_WEBHOOK_PUBLIC_URL` – Public listener URL registered in the portal (named tunnels should point their CNAME here).
+- `REQUEST_WEBHOOK_SECRET` – One-time signing secret returned by the applicable webhook registration API call.
+- `REQUEST_WEBHOOK_PUBLIC_URL` – Public listener URL registered through the applicable webhook API (named tunnels should point their CNAME here).
 - `REQUEST_WEBHOOK_TUNNEL_NAME` / `REQUEST_WEBHOOK_TUNNEL_HOSTNAME` – Optional but recommended. When present the suite spawns `pnpm run tunnel:webhook` so Cloudflare routes traffic to the in-process harness. Set `REQUEST_WEBHOOK_TUNNEL_AUTO=0` to skip auto-spawn if you manage the tunnel yourself.
 
 **What happens during the run**
 
 1. A lightweight Express app wires `createWebhookMiddleware`, records verified deliveries in memory, and serves `/healthz` for readiness checks.
-2. The Cloudflare tunnel script runs against the harness port so the existing portal registration reaches the test listener.
+2. The Cloudflare tunnel script runs against the harness port so the existing webhook registration reaches the test listener.
 3. The client creates a recurring request (daily cadence) and waits for the first `request.recurring` webhook to arrive.
 4. The legacy `stopRecurrence` endpoint is invoked and the suite polls `GET /v2/request/{id}` until `isRecurrenceStopped` becomes `true`, demonstrating the recurrence pause.
 
@@ -123,11 +123,11 @@ Follow these steps whenever you need a real webhook secret or want to replay liv
    The listener binds to `http://localhost:8787/webhook` and the tunnel shells out to `pnpm dlx cloudflared tunnel --url http://localhost:8787`. Both processes stream logs and exit together.
    - Run the pieces separately with `pnpm dev:webhook` and `pnpm tunnel:webhook` when you need to restart one side.
    - Set `REQUEST_WEBHOOK_TUNNEL_HOSTNAME` to request a specific hostname (requires `cloudflared login`). Provide `REQUEST_WEBHOOK_TUNNEL_NAME` to run an existing named tunnel via `cloudflared tunnel run <name>` for a persistent URL.
-   - Missing `REQUEST_WEBHOOK_SECRET`? The listener automatically enters verification-bypass mode with a placeholder secret so you can create the webhook. Update the env and restart once you copy the real secret from the portal.
+   - Missing `REQUEST_WEBHOOK_SECRET`? The listener automatically enters verification-bypass mode with a placeholder secret so you can create the webhook. Update the env and restart once you copy the real secret returned by the registration API.
    - The scripts load environment variables via the shared env loader (using `REQUEST_API_CLIENT_ENV_FILE` or workspace defaults), so no manual `export` step is required.
 3. **Grab the public URL from the tunnel logs** (for example, `https://purple-bird.trycloudflare.com`). Copy the value (including the `/webhook` suffix) and, if you want to track it in your env file, set `REQUEST_WEBHOOK_PUBLIC_URL`.
    - To keep a stable hostname, authenticate with `cloudflared login`, create a named tunnel, and map it to a CNAME you control. Cloudflare still routes traffic through the same edge network while giving you a predictable URL.
-4. **Register the webhook:** open the Request API Portal -> Webhooks, create a webhook pointing at the Cloudflare URL, and copy the generated secret into `REQUEST_WEBHOOK_SECRET`. Restart the local listener so it re-reads the env file.
+4. **Register the webhook:** for platform/client-scoped registrations, call `POST https://auth.request.network/v1/webhook` with `x-client-id`; this client has no first-class facade for that Auth API operation. For orchestrator registrations, call `client.orchestrators.webhooks.create({ body: { url } })` with the Cloudflare URL and a client configured with `orchestratorKey`; it targets `POST https://api.request.network/v2/orchestrators/webhooks`. Copy the one-time returned secret into `REQUEST_WEBHOOK_SECRET`, then restart the local listener so it re-reads the env file. The Request Dashboard has no webhook CRUD UI.
 5. **Verify deliveries:** trigger events (e.g., pay a Sepolia request). The listener logs each delivery plus any registered dispatcher handlers. Use the same secret for automated tests or downstream services.
 
 ## Test Placement & Shared Utilities

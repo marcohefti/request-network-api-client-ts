@@ -12,6 +12,7 @@ import {
 import { webhooks } from "../../src";
 
 const PAYMENT_CONFIRMED_FIXTURE = "payment-confirmed.json";
+const PAYMENT_CONFIRMED_FEE_EXTENSION_FIXTURE = "payment-confirmed-fee-extension.json";
 const PAYMENT_CONFIRMED_EVENT = "payment.confirmed" as const;
 
 describe("webhooks.payment.confirmed", () => {
@@ -75,6 +76,55 @@ describe("webhooks.payment.confirmed", () => {
     expect(res.body).toEqual({ error: "invalid_webhook_signature", reason: "invalid_signature" });
     expect(next).not.toHaveBeenCalled();
     expect(req.webhook).toBeUndefined();
+  });
+
+  it("parses signed fee extensions while preserving additive fields", () => {
+    const payload = loadFixture(PAYMENT_CONFIRMED_FEE_EXTENSION_FIXTURE) as webhooks.events.PaymentConfirmedPayload;
+    const rawBody = serialisePayload(payload);
+    const signature = signPayload(rawBody, TEST_SECRET);
+
+    const parsed = webhooks.parseWebhookEvent({
+      rawBody,
+      headers: {
+        "x-request-network-signature": signature,
+      },
+      secret: TEST_SECRET,
+    });
+
+    expect(parsed.payload.fees).toEqual([
+      expect.objectContaining({
+        type: "network",
+        amount: null,
+        currency: "ETH",
+        syntheticExtension: { fixture: "contract-regression" },
+      }),
+    ]);
+  });
+
+  it.each([
+    ["a numeric fee type", { type: 1, amount: null, currency: "ETH" }],
+    ["a numeric fee amount", { type: "network", amount: 1, currency: "ETH" }],
+    ["a numeric fee currency", { type: "network", amount: null, currency: 1 }],
+    ["a fee item missing type", { amount: null, currency: "ETH" }],
+    ["a fee item missing amount", { type: "network", currency: "ETH" }],
+    ["a fee item missing currency", { type: "network", amount: null }],
+  ])("rejects %s", (_description, fee) => {
+    const payload = {
+      ...loadFixture(PAYMENT_CONFIRMED_FEE_EXTENSION_FIXTURE),
+      fees: [fee],
+    };
+    const rawBody = serialisePayload(payload);
+    const signature = signPayload(rawBody, TEST_SECRET);
+
+    expect(() =>
+      webhooks.parseWebhookEvent({
+        rawBody,
+        headers: {
+          "x-request-network-signature": signature,
+        },
+        secret: TEST_SECRET,
+      }),
+    ).toThrowError(/webhook event payment\.confirmed/i);
   });
 
   it("dispatches handlers in registration order", async () => {

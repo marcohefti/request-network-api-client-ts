@@ -133,7 +133,7 @@ This section shows how to configure a local webhook listener, expose it via Clou
 
 - Node.js ≥ 20.x and pnpm 10.27.0 (per repo toolchain)
 - `pnpm install`
-- An API key that can create webhooks in the Request API Portal
+- An orchestrator key for orchestrator webhook registration with the Request API
 - Cloudflare Tunnel (`cloudflared`) installed locally
   - macOS: `brew install cloudflared`
   - Other platforms: see [Cloudflare's docs](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/get-started/)
@@ -197,11 +197,32 @@ Leave the command running. Both processes stream logs and exit together when you
 
 ### 4. Register the Webhook & Capture the Secret
 
+Webhook registration has two distinct API surfaces; neither uses a Portal or
+Dashboard UI for webhook CRUD:
+
+- **Orchestrator webhooks** use the Request API endpoint
+  `POST https://api.request.network/v2/orchestrators/webhooks` with an
+  `x-orchestrator-key`. The client exposes this as
+  `client.orchestrators.webhooks.create()`.
+- **Platform/client-scoped webhooks** use the Request Auth API endpoint
+  `POST https://auth.request.network/v1/webhook` with an `x-client-id`. This
+  client does not currently expose that Auth API operation as a first-class
+  facade.
+
+For an orchestrator webhook, create the registration with the existing client
+method. The signing secret is returned only by this call, so store it
+immediately.
+
+```ts
+const registration = await client.orchestrators.webhooks.create({
+  body: { url: "https://your-public-host.example/webhook" },
+});
+```
+
 1. Copy the public URL printed by Cloudflare (append `/webhook` if the suffix is missing).
-2. Open the Request API Portal -> Webhooks -> "Create webhook".
-3. Paste the URL, select the events you need, and submit.
-4. Copy the generated signing secret into `REQUEST_WEBHOOK_SECRET` in your `.env` file.
-5. Restart `pnpm webhook:dev:all` so the listener picks up the new secret and re-enables verification.
+2. For an orchestrator webhook, call `client.orchestrators.webhooks.create({ body: { url } })` with an `orchestratorKey` configured on the client.
+3. Copy the one-time signing secret from the registration response into `REQUEST_WEBHOOK_SECRET` in your `.env` file.
+4. Restart `pnpm webhook:dev:all` so the listener picks up the new secret and re-enables verification.
 
 Optionally, set `REQUEST_WEBHOOK_PUBLIC_URL` to the same URL so tooling and logs reference it explicitly.
 

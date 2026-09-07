@@ -4,9 +4,9 @@ Use this checklist when preparing public releases of
 `@marcohefti/request-network-api-client` on npm. For now, the focus is a solid
 0.7.x public line, with additional hardening items tracked for a future 1.0.0.
 
-## 0.7.1 Release Contract
+## 0.7.3 Release Contract
 
-- Consume exactly `@marcohefti/request-network-api-contracts@0.7.0`.
+- Consume exactly `@marcohefti/request-network-api-contracts@0.7.1`.
 - Run `pnpm prepare:spec`, `pnpm tsc`, `pnpm lint`, `pnpm test`,
   `pnpm coverage:matrix`, and `pnpm build` before tagging.
 - Verify the packed archive includes ESM/CJS/types and the `operations` and
